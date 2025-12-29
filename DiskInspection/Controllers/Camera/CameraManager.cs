@@ -35,7 +35,7 @@ namespace DiskInspection.Controllers.Camera
             return _leftCam;
         }
 
-        public LincolnCamera GetBotCamera()
+        public LincolnCamera GetBotCamera() 
         {
             if (((_rightCam != null) && (_rightCam.SN != Properties.Settings.Default.LeftCamSN)) || (_rightCam == null))
             {
