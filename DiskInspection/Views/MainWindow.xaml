@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DiskInspection"
+    xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:myControl="clr-namespace:Heal.MyControl;assembly=ImageCtlWPF"
     Title="Disks Inspection"
@@ -12,16 +13,20 @@
     MinWidth="1280"
     MinHeight="800"
     Style="{StaticResource WindowStyle}"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80" />
+            <RowDefinition Height="90" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid>
-                <StackPanel x:Name="MenuTools" Orientation="Vertical">
-                    <DockPanel x:Name="dpnMenu" Margin="5,0,0,0">
+                <DockPanel x:Name="MenuTools" LastChildFill="True">
+                    <DockPanel
+                        x:Name="dpnMenu"
+                        Margin="5,0,0,0"
+                        DockPanel.Dock="Top">
                         <Menu
                             x:Name="MenuStrip"
                             DockPanel.Dock="Top"
@@ -31,8 +36,12 @@
                             <MenuItem Header="_Help" />
                         </Menu>
                     </DockPanel>
-                    <DockPanel Margin="5,0,0,0">
-                        <ToolBar Background="Transparent">
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="355" />
+                        </Grid.ColumnDefinitions>
+                        <ToolBar Grid.Column="0" Background="Transparent">
                             <ToolBar.Resources>
                                 <Style x:Key="btToolBarStyle" TargetType="Button">
                                     <Setter Property="Margin" Value="10,0,10,0" />
@@ -41,19 +50,145 @@
                             </ToolBar.Resources>
                             <Button
                                 x:Name="btnSettings"
-                                Margin="0,0,0,0"
+                                Margin="5,0,5,0"
                                 Click="btnSettings_Click"
                                 Style="{StaticResource btToolBarStyle}"
-                                ToolTip="Settings">
+                                ToolTip="General Settings">
                                 <Image
                                     Width="45"
                                     Height="45"
                                     Source="/Resources/Icons/settings.png"
                                     Style="{DynamicResource imageButton}" />
                             </Button>
+                            <Separator />
+                            <Button
+                                x:Name="btnSetupCamera"
+                                Margin="5,0,5,0"
+                                Click="btnSetupCamera_Click"
+                                Style="{StaticResource btToolBarStyle}"
+                                ToolTip="Camera Settings">
+                                <Image
+                                    Width="45"
+                                    Height="45"
+                                    Source="/Resources/Icons/camera.png"
+                                    Style="{DynamicResource imageButton}" />
+                            </Button>
+                            <Separator />
+                            <Button
+                                x:Name="btnDebug"
+                                Margin="5,0,5,0"
+                                Click="btnDebug_Click"
+                                Style="{StaticResource btToolBarStyle}"
+                                ToolTip="Offine Mode">
+                                <Image
+                                    Width="45"
+                                    Height="45"
+                                    Source="/Resources/Icons/testing.png"
+                                    Style="{DynamicResource imageButton}" />
+                            </Button>
+                            <Separator />
+                            <Button
+                                x:Name="btnStart"
+                                Margin="5,0,5,0"
+                                Click="btnStart_Click"
+                                Style="{StaticResource btToolBarStyle}"
+                                ToolTip="-Run">
+                                <Image
+                                    x:Name="imBtnStart"
+                                    Width="50"
+                                    Height="50"
+                                    Source="/Resources/Icons/start.png"
+                                    Style="{DynamicResource imageButton}" />
+                            </Button>
+                            <Separator />
+                            <Button
+                                x:Name="btnStop"
+                                Margin="5,0,5,0"
+                                Click="btnStop_Click"
+                                IsEnabled="False"
+                                Style="{StaticResource btToolBarStyle}"
+                                ToolTip="Stop">
+                                <Image
+                                    x:Name="imBtnStop"
+                                    Width="50"
+                                    Height="50"
+                                    Source="/Resources/Icons/stop.png"
+                                    Style="{DynamicResource imageButton}" />
+                            </Button>
+                            <Separator />
                         </ToolBar>
-                    </DockPanel>
-                </StackPanel>
+                        <Grid Grid.Column="1">
+                            <DockPanel Margin="5,0,5,0" LastChildFill="False">
+                                <GroupBox
+                                    Margin="5,0,5,0"
+                                    DockPanel.Dock="Right"
+                                    FontWeight="Bold"
+                                    Header="CAM1 Status">
+                                    <Border
+                                        x:Name="bdCam1Status"
+                                        Margin="2"
+                                        Background="Green"
+                                        BorderBrush="White"
+                                        BorderThickness="0.7"
+                                        CornerRadius="5">
+                                        <Label
+                                            x:Name="lbCam1Status"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Content="CONNECTED"
+                                            FontSize="12"
+                                            FontWeight="Bold"
+                                            Foreground="White" />
+                                    </Border>
+                                </GroupBox>
+                                <GroupBox
+                                    Margin="5,0,5,0"
+                                    DockPanel.Dock="Right"
+                                    FontWeight="Bold"
+                                    Header="CAM2 Status">
+                                    <Border
+                                        x:Name="bdCam2Status"
+                                        Margin="2"
+                                        Background="Green"
+                                        BorderBrush="White"
+                                        BorderThickness="0.7"
+                                        CornerRadius="5">
+                                        <Label
+                                            x:Name="lbCam2Status"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Content="CONNECTED"
+                                            FontSize="12"
+                                            FontWeight="Bold"
+                                            Foreground="White" />
+                                    </Border>
+                                </GroupBox>
+                                <GroupBox
+                                    Margin="5,0,5,0"
+                                    DockPanel.Dock="Right"
+                                    FontWeight="Bold"
+                                    Header="PLC Status">
+                                    <Border
+                                        x:Name="bdPlcStatus"
+                                        Margin="2"
+                                        Background="Green"
+                                        BorderBrush="White"
+                                        BorderThickness="0.7"
+                                        CornerRadius="5">
+                                        <Label
+                                            x:Name="lbPlcStatus"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Content="CONNECTED"
+                                            FontSize="12"
+                                            FontWeight="Bold"
+                                            Foreground="White" />
+                                    </Border>
+                                </GroupBox>
+                            </DockPanel>
+                        </Grid>
+                    </Grid>
+                </DockPanel>
             </Grid>
         </Grid>
         <Grid Grid.Row="1">
@@ -63,13 +198,103 @@
                 <ColumnDefinition Width="350" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-             
+                <GroupBox
+                    Margin="5"
+                    BorderBrush="Black"
+                    BorderThickness="1"
+                    FontWeight="Bold"
+                    Header="CAM 1">
+                    <Grid />
+                </GroupBox>
+            </Grid>
+            <Grid Grid.Column="1">
+                <GroupBox
+                    Margin="5"
+                    BorderBrush="Black"
+                    BorderThickness="1"
+                    FontWeight="Bold"
+                    Header="CAM 2">
+                    <Grid />
+                </GroupBox>
             </Grid>
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="1*" />
-                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="300" />
+                    <RowDefinition Height="250" />
+                    <RowDefinition />
                 </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <GroupBox
+                        Margin="5"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        Header="Statistics">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="22*" />
+                                <RowDefinition Height="5*" />
+                            </Grid.RowDefinitions>
+                            <lvc:PieChart
+                                Grid.Row="0"
+                                LegendLocation="Right"
+                                Series="{Binding PieSeriesCollection}" />
+                            <Grid Grid.Row="1">
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <Label
+                                        Content="OK"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="Green" />
+                                    <TextBox
+                                        Name="tbOKCount"
+                                        Width="50"
+                                        Margin="5,0,0,0"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        BorderBrush="DarkGray"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="Green"
+                                        IsReadOnly="True" />
+                                    <Label
+                                        Margin="30,0,0,0"
+                                        Content="NG"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="Red" />
+                                    <TextBox
+                                        Name="tbNGCount"
+                                        Width="50"
+                                        Margin="5,0,0,0"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        BorderBrush="DarkGray"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="Red"
+                                        IsReadOnly="True" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <GroupBox
+                        Margin="5"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        Header="Inspection Infos" />
+                </Grid>
+                <Grid Grid.Row="2">
+                    <GroupBox
+                        Margin="5"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        Header="Messages" />
+                </Grid>
             </Grid>
         </Grid>
     </Grid>
