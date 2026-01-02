@@ -17,8 +17,8 @@ namespace DiskInspection.Models
     {
         public int ID { get; set; }
         public string FilePath { get; set; }
-        public Bitmap Crop { get; set; }
-        public Bitmap Mask { get; set; }
+        public Bitmap Dectect { get; set; }
+        public Bitmap Segment { get; set; }
         public Bitmap Final { get; set; }
         public int Status { get; set; }
         public ImageDebugInfo(int id, string filePath)

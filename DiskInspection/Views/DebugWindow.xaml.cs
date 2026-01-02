@@ -56,8 +56,13 @@ namespace DiskInspection.Views
         {
             InitializeComponent();
             DataContext = this;
+            GetEnvConfig();
         }
-
+        private void GetEnvConfig()
+        {
+            var configPath = @"plugin\config\config.env";
+            var envConfig = EnvConfigUtils.ReadEnvConfig(configPath);
+        }
         private void btnLoadFolder_MouseDown(object sender, MouseButtonEventArgs e)
         {
 
@@ -108,7 +113,7 @@ namespace DiskInspection.Views
             for (var i = 0; i < imagesInfoList.Count; i++)
             {
                 var imageInfo = imagesInfoList[i];
-                // Call API
+                
 
             }
         }

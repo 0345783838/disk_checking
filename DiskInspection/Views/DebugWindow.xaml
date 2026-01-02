@@ -125,7 +125,7 @@
                                     x:Name="btnTriggerSoftware"
                                     Title="Capture"
                                     Width="150"
-                                    Height="70"
+                                    Height="75"
                                     Margin="5,5,5,5"
                                     EndColor="#112D60"
                                     IconHeight="45"

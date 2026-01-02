@@ -1,0 +1,128 @@
+﻿<Window x:Class="DiskInspection.Views.ParamsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DiskInspection.Views"
+        mc:Ignorable="d"
+        Style="{DynamicResource WindowStyle}"
+        Title="Parameters" 
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Height="570" 
+        Width="387"
+        >
+    <Grid>
+        <Grid.Resources >
+            <Style x:Key="labelName" TargetType="Label">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Width" Value="185"></Setter>
+                <Setter Property="Margin" Value="15,5,0,0"></Setter>
+                <Setter Property="VerticalAlignment" 
+                        Value="Center"></Setter>
+                <Setter Property="VerticalContentAlignment" 
+                        Value="Center"></Setter>
+            </Style>
+            <Style x:Key="textBox" TargetType="TextBox">
+                <Setter Property="Width" Value="70"></Setter>
+                <Setter Property="Height" Value="22"></Setter>
+                <Setter Property="VerticalContentAlignment" 
+                        Value="Center"></Setter>
+                <Setter Property="HorizontalContentAlignment" 
+                        Value="Right"></Setter>
+                <Setter Property="Margin" Value="0,5,0,0"></Setter>
+                <Setter Property="FontSize" Value="14"></Setter>
+            </Style>
+            <Style x:Key="stPanel" TargetType="StackPanel">
+                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                <Setter Property="Margin" Value="0,5,0,0"></Setter>
+                <Setter Property="Orientation" Value="Horizontal"></Setter>
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="153*"/>
+            <RowDefinition Height="200*"/>
+            <RowDefinition Height="201*"/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="AI Params"
+                  Grid.Row="0"
+                  BorderBrush="Gray"
+                  BorderThickness="2"
+                  Margin="5,5,5,5">
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Detect Threshold:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbDetectThreshold" Style="{StaticResource textBox}" Text="0.1" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(0.00 - 1.00)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Detect IoU:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbDetectIoU" Style="{StaticResource textBox}" Text="0.1" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(0.00 - 1.00)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Segment IoU:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbSegmentIoU" Style="{StaticResource textBox}" Text="0.9" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(0.00 - 1.00)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Caliper Params"
+                  Grid.Row="1"
+                  BorderBrush="Gray"
+                  BorderThickness="2"
+                  Margin="5,5,5,5">
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Min Edge Distance:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbMinEdgeDistance" Style="{StaticResource textBox}" Text="4" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(0 - 10)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Max Edge Distance:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbMaxEdgeDistance" Style="{StaticResource textBox}" Text="15" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(1 - 100)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Length/Width Rate:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbLengthRate" Style="{StaticResource textBox}" Text="0.95" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(0.00 - 1.00)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Caliper Thickness List:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbThicknessList" Style="{StaticResource textBox}" Text="1, 3, 5" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(eg: 1,3,5)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Disk Judgement Params"
+                 Grid.Row="2"
+                 BorderBrush="Gray"
+                 BorderThickness="2"
+                 Margin="5,5,5,5">
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Total Disks:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbTotalDisks" Style="{StaticResource textBox}" Text="4" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(0 - 100)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="2 Disk Min Distance:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbDiskMinDistance" Style="{StaticResource textBox}" Text="15" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(pixels)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="2 Disk Max Distance:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbDiskMaxDistance" Style="{StaticResource textBox}" Text="86" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="> Min (pixels)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+                <StackPanel Style="{StaticResource stPanel}" Grid.Row="0">
+                    <Label Content="Disk Min Area:" Style="{StaticResource labelName}"></Label>
+                    <TextBox x:Name="tbDiskMinArea" Style="{StaticResource textBox}" Text="150" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                    <Label Content="(pixels)" FontSize="12" Style="{StaticResource labelName}"></Label>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+    </Grid>
+</Window>
