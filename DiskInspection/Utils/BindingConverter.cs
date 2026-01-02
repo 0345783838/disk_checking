@@ -32,6 +32,23 @@ namespace DiskInspection.Utils
         {
             return value;
         }
- 
+    }
+    public class StatusConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int status)
+            {
+                if (status == 0) return "DarkGreen";
+                else if (status == 1) return "Red";
+                else if (status == 2) return "Black";
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
     }
 }

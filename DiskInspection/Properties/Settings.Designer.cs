@@ -46,5 +46,17 @@ namespace DiskInspection.Properties {
                 this["RightCamSN"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EndPointDebug {
+            get {
+                return ((string)(this["EndPointDebug"]));
+            }
+            set {
+                this["EndPointDebug"] = value;
+            }
+        }
     }
 }

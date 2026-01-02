@@ -49,7 +49,7 @@ namespace DiskInspection.Views
 
         private void UpdateSetlectionChanged()
         {
-          
+
         }
 
         public DebugWindow()
@@ -94,7 +94,58 @@ namespace DiskInspection.Views
                 }
                 SelectedImageInfo = ImagesInfoList[ImagesInfoList.Count - 1];
                 dgImageInfoPaths.ScrollIntoView(SelectedImageInfo);
+                StartCheckingThread();
             }
+        }
+
+        private void StartCheckingThread()
+        {
+            Task task = new Task(() => CheckingDisk(ImagesInfoList));
+            task.Start();
+        }
+        private void CheckingDisk(ObservableCollection<ImageDebugInfo> imagesInfoList)
+        {
+            for (var i = 0; i < imagesInfoList.Count; i++)
+            {
+                var imageInfo = imagesInfoList[i];
+                // Call API
+
+            }
+        }
+
+        private void btnTriggerSoftware_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void btnSetting_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnSaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnBack_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnNext_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnResetScale_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ccbbImageIndex_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }
