@@ -1,4 +1,6 @@
 ﻿using DiskInspection.Models;
+using Emgu.CV;
+using Emgu.CV.Structure;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
@@ -15,7 +17,7 @@ namespace DiskInspection.Controllers.APIs
         public static Properties.Settings _param = Properties.Settings.Default;
 
 
-        public static DebugImageResponse DebugImages(string url, List<string> imagePaths)
+        public static DebugImageResponse DebugImages(string url,Mat image, EnvironmentConfig envConfig)
         {
             dynamic obj = new DebugImageResponse();
             var options = new RestClientOptions(url)
@@ -24,14 +26,32 @@ namespace DiskInspection.Controllers.APIs
             };
             var client = new RestClient(options);
             var request = new RestRequest(_param.EndPointDebug, Method.Post);
-            request.AddHeader("accept", "application/json");
+            request.AlwaysMultipartFormData = true;
+
+            // Add File
+            byte[] jpegData = image.ToImage<Bgr, byte>().ToJpegData();
+            request.AddFile("image", jpegData, $"image.jpg");
 
             // Tạo payload JSON
             var payload = new
             {
-                image_paths = imagePaths
+                segment_threshold = envConfig.SegmentThreshold,
+                detect_threshold = envConfig.DetectThreshold,
+                detect_iou = envConfig.DetectIou,
+                caliper_min_edge_distance = envConfig.CaliperMaxEdgeDistance,
+                caliper_max_edge_distance = envConfig.CaliperMinEdgeDistance,
+                caliper_length_rate = envConfig.CaliperLengthRate,
+                caliper_thickness_list = envConfig.CaliperThicknessList,
+                disk_num = envConfig.DiskNumber,
+                disk_max_distance = envConfig.DiskMaxDistance,
+                disk_min_distance = envConfig.DiskMinDistance,
+                disk_min_area = envConfig.DiskMinArea
             };
-            request.AddJsonBody(payload);
+            request.AddParameter(
+                                "params_json",
+                                payload,
+                                ParameterType.GetOrPost
+);
 
             var response = client.Execute(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
@@ -56,6 +76,24 @@ namespace DiskInspection.Controllers.APIs
                 return null;
             }
         }
+        public static bool CheckAPIStatus(string url, int timeout = 1000)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndPointCheckStatus, Method.Get);
 
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

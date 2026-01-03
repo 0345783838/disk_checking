@@ -14,6 +14,7 @@
     Height="768"
     MinWidth="1366"
     MinHeight="768"
+    Icon="/Resources/Icons/testing.png"
     Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -223,6 +224,7 @@
                                 Margin="5,0,0,0"
                                 Click="btnSaveSettings_Click"
                                 DockPanel.Dock="Right"
+                                IsEnabled="{Binding CanSave}"
                                 ToolTip="Setting Parameters">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -274,7 +276,7 @@
                                         Margin="0,-2,0,0"
                                         VerticalAlignment="Center"
                                         VerticalContentAlignment="Center"
-                                        Content="Settings" />
+                                        Content="Setting" />
                                 </Grid>
                             </Button>
                         </DockPanel>

@@ -58,5 +58,29 @@ namespace DiskInspection.Properties {
                 this["EndPointDebug"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("check_service_status")]
+        public string EndPointCheckStatus {
+            get {
+                return ((string)(this["EndPointCheckStatus"]));
+            }
+            set {
+                this["EndPointCheckStatus"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://127.0.0.1:8386/ai")]
+        public string API_URL {
+            get {
+                return ((string)(this["API_URL"]));
+            }
+            set {
+                this["API_URL"] = value;
+            }
+        }
     }
 }

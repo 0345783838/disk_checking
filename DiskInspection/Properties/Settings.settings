@@ -11,5 +11,11 @@
     <Setting Name="EndPointDebug" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="EndPointCheckStatus" Type="System.String" Scope="User">
+      <Value Profile="(Default)">check_service_status</Value>
+    </Setting>
+    <Setting Name="API_URL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://127.0.0.1:8386/ai</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
