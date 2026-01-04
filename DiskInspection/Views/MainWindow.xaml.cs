@@ -69,10 +69,10 @@ namespace DiskInspection
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            new Task(new Action(() =>
-            {
-                var res = _mainController.RunServiceAsync(20000, "Loading...");
-            })).Start();
+            //new Task(new Action(() =>
+            //{
+            //    var res = _mainController.RunServiceAsync(20000, "Loading...");
+            //})).Start();
         }
 
         internal void SetLoadingService(string content)

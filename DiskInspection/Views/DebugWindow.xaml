@@ -213,6 +213,7 @@
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
                         <Label
+                            Name="lbTitile"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Content="Image Title"
@@ -344,11 +345,11 @@
                                         Padding="0,-4,0,0"
                                         HorizontalContentAlignment="Right"
                                         VerticalContentAlignment="Center"
-                                        DisplayMemberPath="ID"
                                         FontSize="26"
                                         FontWeight="Bold"
-                                        ItemsSource="{Binding ImageResultInfos}"
-                                        SelectedItem="{Binding SelectedImagePath}">
+                                        DisplayMemberPath="ID"
+                                        ItemsSource="{Binding SelectedImageInfo.Images}"
+                                        SelectedItem="{Binding SelectedImage}">
                                         <ComboBox.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <VirtualizingStackPanel />

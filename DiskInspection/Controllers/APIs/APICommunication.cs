@@ -38,8 +38,8 @@ namespace DiskInspection.Controllers.APIs
                 segment_threshold = envConfig.SegmentThreshold,
                 detect_threshold = envConfig.DetectThreshold,
                 detect_iou = envConfig.DetectIou,
-                caliper_min_edge_distance = envConfig.CaliperMaxEdgeDistance,
-                caliper_max_edge_distance = envConfig.CaliperMinEdgeDistance,
+                caliper_min_edge_distance = envConfig.CaliperMinEdgeDistance,
+                caliper_max_edge_distance = envConfig.CaliperMaxEdgeDistance,
                 caliper_length_rate = envConfig.CaliperLengthRate,
                 caliper_thickness_list = envConfig.CaliperThicknessList,
                 disk_num = envConfig.DiskNumber,
@@ -47,23 +47,21 @@ namespace DiskInspection.Controllers.APIs
                 disk_min_distance = envConfig.DiskMinDistance,
                 disk_min_area = envConfig.DiskMinArea
             };
+            string paramsJson = JsonConvert.SerializeObject(payload);
             request.AddParameter(
                                 "params_json",
-                                payload,
+                                paramsJson,
                                 ParameterType.GetOrPost
-);
+            );
 
             var response = client.Execute(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 try
                 {
-
+                    
                     obj = JsonConvert.DeserializeObject<DebugImageResponse>(response.Content);
-                    if (obj.Status)
-                        return obj;
-                    else return null;
-
+                    return obj;
                 }
                 catch (Exception ex)
                 {

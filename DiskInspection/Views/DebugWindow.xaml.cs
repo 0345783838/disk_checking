@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ZedGraph;
 
 namespace DiskInspection.Views
 {
@@ -57,11 +59,44 @@ namespace DiskInspection.Views
                 }
             }
         }
-
         private void UpdateSetlectionChanged()
         {
-
+            if (SelectedImageInfo != null && SelectedImageInfo.Images.Count > 0)
+            {
+                SelectedImage = SelectedImageInfo.Images[0];
+            }
         }
+
+
+        private ImageList _selectedImage;
+        private double _curImageScale;
+
+        public ImageList SelectedImage
+        {
+            get => _selectedImage;
+            set
+            {
+                if (_selectedImage != value)
+                {
+                    _selectedImage = value;
+                    OnPropertyChanged();
+                    UpdateImageSetlectionChanged();
+                    OnPropertyChanged(nameof(IsBackEnable));
+                    OnPropertyChanged(nameof(IsNextEnable));
+                }
+            }
+        }
+
+        private void UpdateImageSetlectionChanged()
+        {
+            if (SelectedImage == null)
+                return;
+            lbTitile.Content = SelectedImage.Title;
+            UpdateMapImage(SelectedImage.Image);
+        }
+
+        public bool IsBackEnable => (SelectedImageInfo !=null && SelectedImageInfo.Images.IndexOf(SelectedImage) > 0);
+        public bool IsNextEnable => (SelectedImageInfo != null && SelectedImageInfo.Images.IndexOf(SelectedImage) < SelectedImageInfo.Images.Count - 1);
 
         public DebugWindow()
         {
@@ -131,6 +166,7 @@ namespace DiskInspection.Views
                     error.ShowDialog();
                     return;
                 }
+                ImagesInfoList.Clear();
                 foreach (var path in fileName)
                 {
                     if (ImagesInfoList.Select(obj => obj.FilePath).ToList().Contains(path))
@@ -161,8 +197,16 @@ namespace DiskInspection.Views
             {
                 var imageInfo = imagesInfoList[i];
                 Mat image = CvInvoke.Imread(imageInfo.FilePath);
-                APICommunication.DebugImages(_param.API_URL, image, _envConfig);
+                var res = APICommunication.DebugImages(_param.API_URL, image, _envConfig);
 
+                var dctectImg = Converter.Base64ToBitmap(res.DetectImg);
+                var segmentImg = Converter.Base64ToBitmap(res.SegmentImg);
+                var finalImg = Converter.Base64ToBitmap(res.FinalImg);
+                imageInfo.Images.Add(new ImageList(0, "Original Image", image.Bitmap));
+                imageInfo.Images.Add(new ImageList(1, "Detect Image", dctectImg));
+                imageInfo.Images.Add(new ImageList(2, "Segment Image", segmentImg));
+                imageInfo.Images.Add(new ImageList(3, "Final Image", finalImg));
+                imageInfo.Status = res.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
             }
         }
 
@@ -232,17 +276,25 @@ namespace DiskInspection.Views
 
         private void btnBack_Click(object sender, RoutedEventArgs e)
         {
-
+            var curIndex = cbbImageIndex.SelectedIndex;
+            if (curIndex > 0)
+                cbbImageIndex.SelectedIndex = curIndex - 1;
         }
 
         private void btnNext_Click(object sender, RoutedEventArgs e)
         {
-
+            var curIndex = cbbImageIndex.SelectedIndex;
+            if (curIndex < SelectedImageInfo.Images.Count - 1)
+                cbbImageIndex.SelectedIndex = curIndex + 1;
         }
 
         private void btnResetScale_Click(object sender, RoutedEventArgs e)
         {
-
+            if (!object.ReferenceEquals(imbImage.Source, null))
+            {
+                imbImage.SetZoomScale(_curImageScale);
+                imbImage.GoToXY(0, 0);
+            }
         }
 
         private void ccbbImageIndex_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -255,6 +307,36 @@ namespace DiskInspection.Views
             _envConfig = newConfig;
             CanSave = true;
             OnPropertyChanged(nameof(CanSave));
+        }
+        public void UpdateMapImage(Bitmap image)
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                if (image == null)
+                {
+                    imbImage.Source = null;
+                }
+                else if (imbImage.Source == null)
+                {
+ 
+                    _curImageScale = GetFittedZoomScale(imbImage, image.Width, image.Height);
+                    imbImage.SourceFromBitmap = image;
+                    imbImage.SetZoomScale(_curImageScale);
+                }
+                else
+                {
+                    imbImage.SourceFromBitmap = image;
+                }
+
+            }));
+        }
+        private double GetFittedZoomScale(object imb, double imageWidth, double imageHeight)
+        {
+            var imageBox = imb as Heal.MyControl.ImageBox;
+            double imageBoxWidth = imageBox.ActualWidth;
+            double imageBoxHeight = imageBox.ActualHeight;
+            var scale = Math.Min(imageBoxWidth / imageWidth, imageBoxHeight / imageHeight);
+            return scale;
         }
     }
 }
