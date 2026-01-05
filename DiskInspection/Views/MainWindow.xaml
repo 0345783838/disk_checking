@@ -62,19 +62,7 @@
                                     Source="/Resources/Icons/settings.png"
                                     Style="{DynamicResource imageButton}" />
                             </Button>
-                            <Separator />
-                            <Button
-                                x:Name="btnSetupCamera"
-                                Margin="5,0,5,0"
-                                Click="btnSetupCamera_Click"
-                                Style="{StaticResource btToolBarStyle}"
-                                ToolTip="Camera Settings">
-                                <Image
-                                    Width="45"
-                                    Height="45"
-                                    Source="/Resources/Icons/camera.png"
-                                    Style="{DynamicResource imageButton}" />
-                            </Button>
+           
                             <Separator />
                             <Button
                                 x:Name="btnDebug"

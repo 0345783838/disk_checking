@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace DiskInspection.Views
+namespace DiskInspection.Views.DebugWindows
 {
     /// <summary>
     /// Interaction logic for ParamsWindow.xaml
@@ -47,7 +48,8 @@ namespace DiskInspection.Views
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
-
+            Regex regex = new Regex(@"^-?(?:\d+)?(?:\.\d*)?$");
+            e.Handled = !regex.IsMatch(e.Text);
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -65,6 +67,12 @@ namespace DiskInspection.Views
 
                 _debugWindow.UpdateConfig(newConfig);
             }
+        }
+
+        private void NumberValidationCaliperLength(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex(@"^-?(?:\d+)?(?:\,\d*)?$");
+            e.Handled = !regex.IsMatch(e.Text);
         }
     }
 }

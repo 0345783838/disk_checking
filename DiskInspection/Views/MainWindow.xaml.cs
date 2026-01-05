@@ -1,5 +1,7 @@
 ﻿using DiskInspection.Controllers;
 using DiskInspection.Views;
+using DiskInspection.Views.DebugWindows;
+using DiskInspection.Views.SettingsWindows;
 using DiskInspection.Views.UtilitiesWindows;
 using System;
 using System.Collections.Generic;
@@ -54,7 +56,8 @@ namespace DiskInspection
 
         private void btnSetupCamera_Click(object sender, RoutedEventArgs e)
         {
-
+            var window = new CameraSettingsWindow();
+            window.Show();
         }
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
@@ -69,10 +72,10 @@ namespace DiskInspection
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //new Task(new Action(() =>
-            //{
-            //    var res = _mainController.RunServiceAsync(20000, "Loading...");
-            //})).Start();
+            new Task(new Action(() =>
+            {
+                var res = _mainController.RunServiceAsync(20000, "Loading...");
+            })).Start();
         }
 
         internal void SetLoadingService(string content)

@@ -1,4 +1,5 @@
-﻿using DiskInspection.Controllers.APIs;
+﻿using DiskInspection.Controllers;
+using DiskInspection.Controllers.APIs;
 using DiskInspection.Models;
 using DiskInspection.Utils;
 using DiskInspection.Views.UtilitiesWindows;
@@ -14,6 +15,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,13 +28,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ZedGraph;
 
-namespace DiskInspection.Views
+namespace DiskInspection.Views.DebugWindows
 {
     /// <summary>
     /// Interaction logic for DebugWindow.xaml
     /// </summary>
     public partial class DebugWindow : Window, INotifyPropertyChanged
     {
+        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         private Properties.Settings _param = Properties.Settings.Default;
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
@@ -41,6 +44,7 @@ namespace DiskInspection.Views
         }
 
         private EnvReader _envConfigRaw;
+        private EnvReader _backupConfig;
         EnvironmentConfig _envConfig;
         public bool CanSave { get; set; } = false;
 
@@ -97,17 +101,23 @@ namespace DiskInspection.Views
 
         public bool IsBackEnable => (SelectedImageInfo !=null && SelectedImageInfo.Images.IndexOf(SelectedImage) > 0);
         public bool IsNextEnable => (SelectedImageInfo != null && SelectedImageInfo.Images.IndexOf(SelectedImage) < SelectedImageInfo.Images.Count - 1);
+        public int MaxValue => (ImagesInfoList.Count > 0 && !Object.ReferenceEquals(ImagesInfoList, null)) ? ImagesInfoList.Count : 1;
+        public int ProcessingCount => (ImagesInfoList.Count > 0 && !Object.ReferenceEquals(ImagesInfoList, null)) ? ImagesInfoList.Count(x => x.Status != (int)FileStatus.NOT_DONE) : 0;
+        public string ProcessingRatio => (ImagesInfoList.Count > 0 && !Object.ReferenceEquals(ImagesInfoList, null)) ? $"Processed: {(((double)ImagesInfoList.Count(x => x.Status != (int)FileStatus.NOT_DONE)) / (double)ImagesInfoList.Count * 100):F2}%" : "0.00%";
 
         public DebugWindow()
         {
             InitializeComponent();
             DataContext = this;
             GetEnvConfig();
+            ImagesInfoList.CollectionChanged += (s, e) => OnPropertyChanged(nameof(MaxValue));
         }
         private void GetEnvConfig()
         {
             var configPath = @"plugin\config\config.env";
             _envConfigRaw = new EnvReader(configPath);
+
+            _backupConfig = _envConfigRaw.Clone();
 
             _envConfig = new EnvironmentConfig(_envConfigRaw.GetFloat("DISK_POINT_DETECT_CONF_THRESH", (float) 0.2), _envConfigRaw.GetFloat("DISK_POINT_DETECT_IOU_THRESH", (float) 0.1),
                 _envConfigRaw.GetFloat("DISK_SEGMENT_CONF_THRESH", (float) 0.95), _envConfigRaw.GetFloat("CALIPER_MIN_EDGE_DISTANCE", 4), _envConfigRaw.GetFloat("CALIPER_MAX_EDGE_DISTANCE", 20),
@@ -147,7 +157,6 @@ namespace DiskInspection.Views
                 ImagesInfoList.Add(imageInfo);
             }
             StartCheckingThread();
-            SelectedImageInfo = ImagesInfoList[0];
         }
 
         private void btnLoadImages_MouseDown(object sender, MouseButtonEventArgs e)
@@ -180,8 +189,6 @@ namespace DiskInspection.Views
                         ImagesInfoList.Add(newImageInfo);
                     }
                 }
-                SelectedImageInfo = ImagesInfoList[ImagesInfoList.Count - 1];
-                dgImageInfoPaths.ScrollIntoView(SelectedImageInfo);
                 StartCheckingThread();
             }
         }
@@ -207,6 +214,9 @@ namespace DiskInspection.Views
                 imageInfo.Images.Add(new ImageList(2, "Segment Image", segmentImg));
                 imageInfo.Images.Add(new ImageList(3, "Final Image", finalImg));
                 imageInfo.Status = res.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
+
+                OnPropertyChanged(nameof(ProcessingCount));
+                OnPropertyChanged(nameof(ProcessingRatio));
             }
         }
 
@@ -224,29 +234,51 @@ namespace DiskInspection.Views
         private void btnSaveSettings_Click(object sender, RoutedEventArgs e)
         {
             var warning = new WarningWindow("Are you sure to save settings?\rBạn có chắc muốn lưu lại params mới?");
-            var res = false;
+            var resSaveConfig = false;
+            var resRestart = false;
             if (warning.ShowDialog() == true)
             {
                 WaitingWindow wait = new WaitingWindow("Đang lưu lại params...");
                 new Task(() =>
                 {
-                    res = UpdateEnvConfig();
+                    resSaveConfig = UpdateEnvConfig();
+                    AIServiceController.CloseProcessExisting();
+                    AIServiceController.Start();
+                    var timeout = 5000;
+                    var timeStep = timeout / 1000;
+                    
+                    for (int i = 0; i < timeStep; i++)
+                    {
+                        Thread.Sleep(1000);
+                        if (APICommunication.CheckAPIStatus(_param.API_URL, 1000))
+                        {
+                            _logger.Info("Re - Start AI Python Engine Successfuly!");
+                            resRestart = true;
+                            break;
+                        }
+                    }
                     wait.KillMe = true;
                 }).Start();
 
                 wait.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 wait.ShowDialog();
             }
-            if (res)
+            if (resSaveConfig && resRestart)
             {
                 var info = new InformationWindow("Save params successfully!\rLưu params thành công!");
                 info.ShowDialog();
             }
-            else
+            else if (!resSaveConfig)
             {
                 var error = new ErrorWindow("Save params failed!\rLưu params không thành công!");
                 error.ShowDialog();
             }
+            else
+            {
+                var error = new ErrorWindow("Restart AI service failed!\rKhông khởi động lại được AI, lưu lại params cũ!");
+                _backupConfig.Save();
+                error.ShowDialog();
+            }   
         }
 
         private bool UpdateEnvConfig()

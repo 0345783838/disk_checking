@@ -206,6 +206,10 @@ namespace DiskInspection.Utils
         {
             File.WriteAllLines(_envPath, _lines.ToArray());
         }
+        public EnvReader Clone()
+        {
+            return new EnvReader(_envPath);
+        }
 
         // ================= APPLY =================
         public void ApplyToEnvironment()

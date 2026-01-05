@@ -194,8 +194,11 @@
     <Compile Include="Models\ImageList.cs" />
     <Compile Include="Utils\Converter.cs" />
     <Compile Include="Utils\EnvReader.cs" />
-    <Compile Include="Views\ParamsWindow.xaml.cs">
+    <Compile Include="Views\DebugWindows\ParamsWindow.xaml.cs">
       <DependentUpon>ParamsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingsWindows\CommonSettingsWindow.xaml.cs">
+      <DependentUpon>CommonSettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\UtilitiesWindows\ErrorWindow.xaml.cs">
       <DependentUpon>ErrorWindow.xaml</DependentUpon>
@@ -221,7 +224,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\DebugWindow.xaml">
+    <Page Include="Views\DebugWindows\DebugWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -243,14 +246,18 @@
     </Compile>
     <Compile Include="Utils\BindingConverter.cs" />
     <Compile Include="Utils\IO.cs" />
-    <Compile Include="Views\DebugWindow.xaml.cs">
+    <Compile Include="Views\DebugWindows\DebugWindow.xaml.cs">
       <DependentUpon>DebugWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\ParamsWindow.xaml">
+    <Page Include="Views\DebugWindows\ParamsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SettingsWindows\CommonSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
