@@ -45,19 +45,14 @@ namespace DiskInspection
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-
+            var window = new CommonSettingsWindow();
+            window.Show();
         }
 
         private void btnDebug_Click(object sender, RoutedEventArgs e)
         {
             var debugWindow = new DebugWindow();
             debugWindow.Show();
-        }
-
-        private void btnSetupCamera_Click(object sender, RoutedEventArgs e)
-        {
-            var window = new CameraSettingsWindow();
-            window.Show();
         }
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
