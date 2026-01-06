@@ -9,21 +9,22 @@ using System.Dynamic;
 using System.Windows.Media.Media3D;
 using System.Windows.Media;
 using System.Windows;
+using System.Collections.Generic;
 
 namespace DiskInspection.Controllers.Camera
 {
     class LincolnCamera
     {
-        private static Object synLock = new Object();
-        private static NLog.Logger logger = NLog.LogManager.GetLogger("debug");
-        private static ArrayList _ListCamInfo;
-        private MyCamera cam;
+        private static Object _synLock = new Object();
+        private static NLog.Logger _logger = NLog.LogManager.GetLogger("debug");
+        private static List<CamInfo> _listCamInfo;
+        private MyCamera _cam;
         public string SN = "";
-        private static MyCamera.MV_CC_DEVICE_INFO_LIST m_pDeviceList;
-        private UInt32 m_nBufSizeForDriver = 3072 * 2048 * 3;
-        private byte[] m_pBufForDriver = new byte[3072 * 2048 * 3];
-        private UInt32 m_nBufSizeForSaveImage = 3072 * 2048 * 3 * 3 + 2048;
-        private byte[] m_pBufForSaveImage = new byte[3072 * 2048 * 3 * 3 + 2048];
+        private static MyCamera.MV_CC_DEVICE_INFO_LIST _pDeviceList;
+        private UInt32 _nBufSizeForDriver = 3072 * 2048 * 3;
+        private byte[] _pBufForDriver = new byte[3072 * 2048 * 3];
+        private UInt32 _nBufSizeForSaveImage = 3072 * 2048 * 3 * 3 + 2048;
+        private byte[] _pBufForSaveImage = new byte[3072 * 2048 * 3 * 3 + 2048];
         public LincolnCamera(string SN)
         {
 
@@ -35,32 +36,32 @@ namespace DiskInspection.Controllers.Camera
         {
             ListDevices();
             GetDeviceByIdx(idx);
-            if (idx < _ListCamInfo.Count)
+            if (idx < _listCamInfo.Count)
             {
-                CamInfo info = (CamInfo)_ListCamInfo[idx];
+                CamInfo info = (CamInfo)_listCamInfo[idx];
                 SN = info.SN;
             }
 
         }
         public bool IsOpen()
         {
-            return cam == null ? false : true;
+            return _cam == null ? false : true;
         }
 
-        public static ArrayList GetListCamInfo()
+        public static List<CamInfo> GetListCamInfo()
         {
             ListDevices();
-            return _ListCamInfo;
+            return _listCamInfo;
         }
         public void SetExposureTime(long value)
         {
-            int ret = cam.MV_CC_SetFloatValue_NET("ExposureTime", (float)value);
+            int ret = _cam.MV_CC_SetFloatValue_NET("ExposureTime", (float)value);
         }
 
         public bool Start()
         {
             int nRet;
-            nRet = cam.MV_CC_StartGrabbing_NET();
+            nRet = _cam.MV_CC_StartGrabbing_NET();
             if (MyCamera.MV_OK != nRet)
             {
                 ShowErrorMsg("Trigger Fail!", nRet);
@@ -72,10 +73,10 @@ namespace DiskInspection.Controllers.Camera
         public bool Stop()
         {
             int nRet = -1;
-            nRet = cam.MV_CC_StopGrabbing_NET();
+            nRet = _cam.MV_CC_StopGrabbing_NET();
             if (nRet != MyCamera.MV_OK)
             {
-                logger.Error("Stop Grabbing Fail!");
+                _logger.Error("Stop Grabbing Fail!");
                 return false;
             }
             return true;
@@ -84,61 +85,61 @@ namespace DiskInspection.Controllers.Camera
         {
             try
             {
-                cam = null;
-                MyCamera.MV_CC_DEVICE_INFO device = (MyCamera.MV_CC_DEVICE_INFO)Marshal.PtrToStructure(m_pDeviceList.pDeviceInfo[idx],
+                _cam = null;
+                MyCamera.MV_CC_DEVICE_INFO device = (MyCamera.MV_CC_DEVICE_INFO)Marshal.PtrToStructure(_pDeviceList.pDeviceInfo[idx],
                                                         typeof(MyCamera.MV_CC_DEVICE_INFO));
-                if (null == cam)
+                if (null == _cam)
                 {
-                    cam = new MyCamera();
-                    if (null == cam)
+                    _cam = new MyCamera();
+                    if (null == _cam)
                     {
                         return;
                     }
                 }
                 int nRet = -1;
-                nRet = cam.MV_CC_CreateDevice_NET(ref device);
+                nRet = _cam.MV_CC_CreateDevice_NET(ref device);
                 if (MyCamera.MV_OK != nRet)
                 {
-                    cam = null;
+                    _cam = null;
                     return;
                 }
 
 
-                nRet = cam.MV_CC_OpenDevice_NET();
+                nRet = _cam.MV_CC_OpenDevice_NET();
                 if (MyCamera.MV_OK != nRet)
                 {
-                    cam.MV_CC_DestroyDevice_NET();
-                    logger.Info("Devie open fail");
-                    cam = null;
+                    _cam.MV_CC_DestroyDevice_NET();
+                    _logger.Info("Devie open fail");
+                    _cam = null;
                     return;
                 }
 
                 if (device.nTLayerType == MyCamera.MV_GIGE_DEVICE)
                 {
-                    int nPacketSize = cam.MV_CC_GetOptimalPacketSize_NET();
+                    int nPacketSize = _cam.MV_CC_GetOptimalPacketSize_NET();
                     if (nPacketSize > 0)
                     {
-                        nRet = cam.MV_CC_SetIntValue_NET("GevSCPSPacketSize", (uint)nPacketSize);
+                        nRet = _cam.MV_CC_SetIntValue_NET("GevSCPSPacketSize", (uint)nPacketSize);
                         if (nRet != MyCamera.MV_OK)
                         {
                             //Console.WriteLine("Warning: Set Packet Size failed {0:x8}", nRet);
-                            logger.Warn("Warning: Set Packet Size failed {0:x8}");
+                            _logger.Warn("Warning: Set Packet Size failed {0:x8}");
                         }
                     }
                     else
                     {
                         //Console.WriteLine("Warning: Get Packet Size failed {0:x8}", nPacketSize);
-                        logger.Warn("Warning: Get Packet Size failed {0:x8}");
+                        _logger.Warn("Warning: Get Packet Size failed {0:x8}");
                     }
                 }
 
-                cam.MV_CC_SetEnumValue_NET("AcquisitionMode", 2);
-                cam.MV_CC_SetEnumValue_NET("TriggerMode", 0);
+                _cam.MV_CC_SetEnumValue_NET("AcquisitionMode", 2);
+                _cam.MV_CC_SetEnumValue_NET("TriggerMode", 0);
 
             }
             catch (Exception ex)
             {
-                logger.Error(ex.ToString());
+                _logger.Error(ex.ToString());
                 return;
             }
         }
@@ -147,13 +148,13 @@ namespace DiskInspection.Controllers.Camera
         {
             int nRet;
 
-            nRet = cam.MV_CC_CloseDevice_NET();
+            nRet = _cam.MV_CC_CloseDevice_NET();
             if (MyCamera.MV_OK != nRet)
             {
                 return false;
             }
 
-            nRet = cam.MV_CC_DestroyDevice_NET();
+            nRet = _cam.MV_CC_DestroyDevice_NET();
             if (MyCamera.MV_OK != nRet)
             {
                 return false;
@@ -164,7 +165,7 @@ namespace DiskInspection.Controllers.Camera
         {
             int? idx = null;
             int i = 0;
-            foreach (CamInfo info in _ListCamInfo)
+            foreach (CamInfo info in _listCamInfo)
             {
                 if (info.SN == SN)
                 {
@@ -179,26 +180,23 @@ namespace DiskInspection.Controllers.Camera
             GetDeviceByIdx((int)idx);
         }
 
-
-
-
         public static bool ListDevices()
         {
             try
             {
-                _ListCamInfo = new ArrayList();
+                _listCamInfo = new List<CamInfo>();
                 System.GC.Collect();
                 int ret;
-                ret = MyCamera.MV_CC_EnumDevices_NET(MyCamera.MV_GIGE_DEVICE | MyCamera.MV_USB_DEVICE, ref m_pDeviceList);
+                ret = MyCamera.MV_CC_EnumDevices_NET(MyCamera.MV_GIGE_DEVICE | MyCamera.MV_USB_DEVICE, ref _pDeviceList);
                 if (ret != 0)
                 {
                     //ShowErrorMsg("Enumerate devices fail!", 0);
                     return false;
                 }
 
-                for (int i = 0; i < m_pDeviceList.nDeviceNum; i++)
+                for (int i = 0; i < _pDeviceList.nDeviceNum; i++)
                 {
-                    MyCamera.MV_CC_DEVICE_INFO device = (MyCamera.MV_CC_DEVICE_INFO)Marshal.PtrToStructure(m_pDeviceList.pDeviceInfo[i], typeof(MyCamera.MV_CC_DEVICE_INFO));
+                    MyCamera.MV_CC_DEVICE_INFO device = (MyCamera.MV_CC_DEVICE_INFO)Marshal.PtrToStructure(_pDeviceList.pDeviceInfo[i], typeof(MyCamera.MV_CC_DEVICE_INFO));
                     if (device.nTLayerType == MyCamera.MV_GIGE_DEVICE)
                     {
                         IntPtr buffer = Marshal.UnsafeAddrOfPinnedArrayElement(device.SpecialInfo.stGigEInfo, 0);
@@ -215,7 +213,7 @@ namespace DiskInspection.Controllers.Camera
                             camInfo.Name = gigeInfo.chManufacturerName;
                             camInfo.SN = gigeInfo.chSerialNumber;
                         }
-                        _ListCamInfo.Add(camInfo);
+                        _listCamInfo.Add(camInfo);
                     }
                     else if (device.nTLayerType == MyCamera.MV_USB_DEVICE)
                     {
@@ -234,16 +232,16 @@ namespace DiskInspection.Controllers.Camera
                             camInfo.SN = usbInfo.chSerialNumber;
 
                         }
-                        _ListCamInfo.Add(camInfo);
+                        _listCamInfo.Add(camInfo);
                     }
                 }
-                if (_ListCamInfo.Count > 0)
+                if (_listCamInfo.Count > 0)
                     return true;
                 return false;
             }
             catch (Exception)
             {
-                logger.Warn("Cant load list camera");
+                _logger.Warn("Cant load list camera");
                 return false;
             }
 
@@ -337,33 +335,33 @@ namespace DiskInspection.Controllers.Camera
 
         public Bitmap GetBitmap()
         {
-            lock (synLock)
+            lock (_synLock)
             {
 
                 int nRet;
                 UInt32 nPayloadSize = 0;
                 MyCamera.MVCC_INTVALUE stParam = new MyCamera.MVCC_INTVALUE();
-                nRet = cam.MV_CC_GetIntValue_NET("PayloadSize", ref stParam);
+                nRet = _cam.MV_CC_GetIntValue_NET("PayloadSize", ref stParam);
                 if (MyCamera.MV_OK != nRet)
                 {
-                    logger.Error("Get PayloadSize failed");
+                    _logger.Error("Get PayloadSize failed");
                     return null;
                 }
                 nPayloadSize = stParam.nCurValue;
-                if (nPayloadSize > m_nBufSizeForDriver)
+                if (nPayloadSize > _nBufSizeForDriver)
                 {
-                    m_nBufSizeForDriver = nPayloadSize;
-                    m_pBufForDriver = new byte[m_nBufSizeForDriver];
-                    m_nBufSizeForSaveImage = m_nBufSizeForDriver * 3 + 2048;
-                    m_pBufForSaveImage = new byte[m_nBufSizeForSaveImage];
+                    _nBufSizeForDriver = nPayloadSize;
+                    _pBufForDriver = new byte[_nBufSizeForDriver];
+                    _nBufSizeForSaveImage = _nBufSizeForDriver * 3 + 2048;
+                    _pBufForSaveImage = new byte[_nBufSizeForSaveImage];
                 }
 
-                IntPtr pData = Marshal.UnsafeAddrOfPinnedArrayElement(m_pBufForDriver, 0);
+                IntPtr pData = Marshal.UnsafeAddrOfPinnedArrayElement(_pBufForDriver, 0);
                 MyCamera.MV_FRAME_OUT_INFO_EX stFrameInfo = new MyCamera.MV_FRAME_OUT_INFO_EX();
-                nRet = cam.MV_CC_GetOneFrameTimeout_NET(pData, m_nBufSizeForDriver, ref stFrameInfo, 1000);
+                nRet = _cam.MV_CC_GetOneFrameTimeout_NET(pData, _nBufSizeForDriver, ref stFrameInfo, 1000);
                 if (MyCamera.MV_OK != nRet)
                 {
-                    logger.Error("No Data!");
+                    _logger.Error("No Data!");
                     return null;
                 }
 
@@ -378,11 +376,11 @@ namespace DiskInspection.Controllers.Camera
                 }
                 else
                 {
-                    logger.Error("No such pixel type!");
+                    _logger.Error("No such pixel type!");
                     return null;
                 }
 
-                IntPtr pImage = Marshal.UnsafeAddrOfPinnedArrayElement(m_pBufForSaveImage, 0);
+                IntPtr pImage = Marshal.UnsafeAddrOfPinnedArrayElement(_pBufForSaveImage, 0);
                 //MyCamera.MV_SAVE_IMAGE_PARAM_EX stSaveParam = new MyCamera.MV_SAVE_IMAGE_PARAM_EX();
                 MyCamera.MV_PIXEL_CONVERT_PARAM stConverPixelParam = new MyCamera.MV_PIXEL_CONVERT_PARAM();
                 stConverPixelParam.nWidth = stFrameInfo.nWidth;
@@ -392,8 +390,8 @@ namespace DiskInspection.Controllers.Camera
                 stConverPixelParam.enSrcPixelType = stFrameInfo.enPixelType;
                 stConverPixelParam.enDstPixelType = enDstPixelType;
                 stConverPixelParam.pDstBuffer = pImage;
-                stConverPixelParam.nDstBufferSize = m_nBufSizeForSaveImage;
-                nRet = cam.MV_CC_ConvertPixelType_NET(ref stConverPixelParam);
+                stConverPixelParam.nDstBufferSize = _nBufSizeForSaveImage;
+                nRet = _cam.MV_CC_ConvertPixelType_NET(ref stConverPixelParam);
                 if (MyCamera.MV_OK != nRet)
                 {
                     return null;
@@ -423,9 +421,9 @@ namespace DiskInspection.Controllers.Camera
                     {
                         for (int j = 0; j < stFrameInfo.nWidth; j++)
                         {
-                            byte chRed = m_pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3];
-                            m_pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3] = m_pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3 + 2];
-                            m_pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3 + 2] = chRed;
+                            byte chRed = _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3];
+                            _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3] = _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3 + 2];
+                            _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3 + 2] = chRed;
                         }
                     }
 

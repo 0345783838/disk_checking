@@ -6,7 +6,9 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DiskInspection.Controllers.APIs
@@ -87,6 +89,111 @@ namespace DiskInspection.Controllers.APIs
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static bool ConnectPlc(string url, string ip, int port, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointConnectPlc, Method.Get);
+            request.AddQueryParameter("ip", ip);
+            request.AddQueryParameter("port", port);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        internal static bool DisConnectPlc(string url, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointDisconnectPlc, Method.Get);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static bool ControlUv(string url, bool status, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointControlUv, Method.Get);
+            request.AddQueryParameter("status", status);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static bool ControlLed(string url, bool status, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointControlLed, Method.Get);
+            request.AddQueryParameter("status", status);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        internal static bool OnError(string url, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointOnError, Method.Get);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
             }
             else
             {

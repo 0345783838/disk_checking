@@ -13,6 +13,7 @@
     Width="1300"
     Height="768"
     MinWidth="1300"
+    Loaded="Window_Loaded"
     MinHeight="768"
     Icon="/Resources/Icons/testing.png"
     Style="{StaticResource WindowStyle}"
@@ -30,8 +31,7 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="99" />
-                <RowDefinition Height="149" />
+                <RowDefinition Height="200" />
                 <RowDefinition />
                 <RowDefinition Height="15" />
             </Grid.RowDefinitions>
@@ -40,42 +40,12 @@
                     Margin="5,5,5,5"
                     BorderBrush="Gray"
                     BorderThickness="1"
-                    Header="Run Mode">
-                    <StackPanel
-                        Margin="5"
-                        HorizontalAlignment="Center"
-                        Orientation="Horizontal">
-                        <RadioButton
-                            Name="rbWhiteLight"
-                            Margin="-20,0,0,0"
-                            VerticalAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            Content="White Light"
-                            FontSize="14"
-                            FontWeight="Bold"
-                            GroupName="rbLightType"
-                            IsChecked="True" />
-                        <RadioButton
-                            Name="rbUvLight"
-                            Margin="40,0,0,0"
-                            VerticalAlignment="Center"
-                            VerticalContentAlignment="Center"
-                            Content="UV Light"
-                            FontSize="14"
-                            FontWeight="Bold"
-                            GroupName="rbLightType"
-                            IsChecked="False" />
-                    </StackPanel>
-                </GroupBox>
-            </Grid>
-            <Grid Grid.Row="1">
-                <GroupBox
-                    Margin="5,5,5,5"
-                    BorderBrush="Gray"
-                    BorderThickness="1"
                     Header="Image Tools">
-                    <TabControl Background="#EEEEEE">
-                        <TabItem Background="#EEEEEE" Header="Offline">
+                    <TabControl Background="#EEEEEE" SelectionChanged="TabControl_SelectionChanged">
+                        <TabItem
+                            Name="tabOffline"
+                            Background="#EEEEEE"
+                            Header="Offline">
                             <StackPanel
                                 Margin="0,0,0,0"
                                 HorizontalAlignment="Center"
@@ -84,8 +54,8 @@
                                 <uc:CustomButton
                                     x:Name="btnLoadFolder"
                                     Title="Load"
-                                    Width="150"
-                                    Height="70"
+                                    Width="170"
+                                    Height="85"
                                     Margin="5,5,5,5"
                                     EndColor="#1e5b53"
                                     IconHeight="45"
@@ -98,8 +68,8 @@
                                 <uc:CustomButton
                                     x:Name="btnLoadImages"
                                     Title="Load"
-                                    Width="150"
-                                    Height="70"
+                                    Width="170"
+                                    Height="85"
                                     Margin="5,5,5,5"
                                     EndColor="#18a5a7"
                                     IconHeight="45"
@@ -111,41 +81,86 @@
                                     Value="Images" />
                             </StackPanel>
                         </TabItem>
-                        <TabItem Background="#EEEEEE" Header="Online">
-                            <StackPanel
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Orientation="Horizontal">
-                                <Label
-                                    VerticalContentAlignment="Center"
-                                    Content="CAM: "
-                                    FontSize="16" />
-                                <ComboBox
-                                    x:Name="cbCamera"
-                                    Width="140"
-                                    Height="50"
-                                    Margin="5,0,10,0" />
-                                <uc:CustomButton
-                                    x:Name="btnTriggerSoftware"
-                                    Title="Capture"
-                                    Width="150"
-                                    Height="75"
-                                    Margin="5,5,5,5"
-                                    EndColor="#112D60"
-                                    IconHeight="45"
-                                    IconWidth="45"
-                                    IsEnabled="{Binding ConfirmEnable}"
-                                    LeftIcon="/Resources/Icons/folder-browser.png"
-                                    MouseDown="btnTriggerSoftware_MouseDown"
-                                    StartColor="#B6C0C5"
-                                    Value="Image" />
+                        <TabItem
+                            Name="tabOnline"
+                            Background="#EEEEEE"
+                            Header="Online">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel
+                                    Margin="5,10,5,15"
+                                    HorizontalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <RadioButton
+                                        Name="rbWhiteLight"
+                                        Margin="-20,0,0,0"
+                                        VerticalAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Checked="rbLight_Checked"
+                                        Content="White Light"
+                                        FontSize="14"
+                                        GroupName="rbLightType"
+                                        IsChecked="True" />
+                                    <RadioButton
+                                        Name="rbUvLight"
+                                        Margin="40,0,0,0"
+                                        VerticalAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Checked="rbLight_Checked"
+                                        Content="UV Light"
+                                        FontSize="14"
+                                        GroupName="rbLightType"
+                                        IsChecked="False" />
+                                </StackPanel>
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <Label
+                                        VerticalContentAlignment="Center"
+                                        Content="CAM: "
+                                        FontSize="16" />
+                                    <ComboBox
+                                        x:Name="cbCamera"
+                                        Width="140"
+                                        Height="50"
+                                        Margin="5,0,10,0"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        FontSize="20">
+                                        <ComboBoxItem
+                                            HorizontalContentAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            Content="CAM 1"
+                                            FontSize="25" />
+                                        <ComboBoxItem
+                                            HorizontalContentAlignment="Center"
+                                            VerticalContentAlignment="Center"
+                                            Content="CAM 2"
+                                            FontSize="20" />
+                                    </ComboBox>
+                                    <uc:CustomButton
+                                        x:Name="btnTriggerSoftware"
+                                        Title="Capture"
+                                        Width="150"
+                                        Height="75"
+                                        Margin="5,5,5,5"
+                                        EndColor="#112D60"
+                                        IconHeight="45"
+                                        IconWidth="45"
+                                        IsEnabled="{Binding ConfirmEnable}"
+                                        LeftIcon="/Resources/Icons/folder-browser.png"
+                                        MouseDown="btnTriggerSoftware_MouseDown"
+                                        StartColor="#B6C0C5"
+                                        Value="Image" />
 
+                                </StackPanel>
                             </StackPanel>
+
                         </TabItem>
                     </TabControl>
                 </GroupBox>
             </Grid>
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="1">
                 <DataGrid
                     Name="dgImageInfoPaths"
                     Margin="10,5,10,5"

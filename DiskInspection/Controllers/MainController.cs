@@ -42,7 +42,7 @@ namespace DiskInspection.Controllers
         }
         public bool CheckAPIStatus()
         {
-            return APICommunication.CheckAPIStatus(_param.API_URL, 1000);
+            return APICommunication.CheckAPIStatus(_param.ApiUrlAi, 1000);
         }
 
         internal void CloseAIService()

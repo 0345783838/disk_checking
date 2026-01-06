@@ -45,5 +45,15 @@ namespace DiskInspection.Controllers.Camera
             }
             return _rightCam;
         }
+        public bool CheckCameraConnection(string SN)
+        {
+            var cam = new LincolnCamera(SN);
+            if (cam.IsOpen())
+            {
+                cam.Close();
+                return cam.IsOpen();
+            }
+            return false;
+        }
     }
 }

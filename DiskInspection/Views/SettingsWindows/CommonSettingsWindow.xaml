@@ -6,8 +6,8 @@
     xmlns:local="clr-namespace:DiskInspection.Views.SettingsWindows"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Settings"
-    Width="500"
-    Height="430"
+    Width="549"
+    Height="458"
     Icon="/Resources/Icons/settings.png"
     ResizeMode="NoResize"
     Style="{DynamicResource WindowStyle}"
@@ -16,7 +16,7 @@
     <Grid>
         <Grid.Resources>
             <Style x:Key="labelName" TargetType="Label">
-                <Setter Property="Width" Value="90" />
+                <Setter Property="Width" Value="80" />
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="Margin" Value="15,5,0,0" />
                 <Setter Property="VerticalAlignment" Value="Center" />
@@ -37,9 +37,9 @@
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="233.616" />
-            <RowDefinition Height="135.424" />
-            <RowDefinition Height="1*" />
+            <RowDefinition Height="229*" />
+            <RowDefinition Height="159*" />
+            <RowDefinition Height="54*" />
         </Grid.RowDefinitions>
         <GroupBox
             Grid.Row="0"
@@ -55,12 +55,13 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0" Style="{StaticResource stPanel}">
-                    <Label Content="CAM 1 IP:" Style="{StaticResource labelName}" />
-                    <TextBox
-                        x:Name="tbCam1Ip"
+                    <Label Content="CAM 1 SN:" Style="{StaticResource labelName}" />
+                    <ComboBox
+                        x:Name="cbbCam1Sn"
                         Width="120"
-                        Style="{StaticResource textBox}"
-                        Text="0.0.0.0" />
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        FontSize="15" />
                     <Label
                         Width="115"
                         Content="Exposure Time:"
@@ -76,14 +77,28 @@
                         Content="(ms)"
                         FontSize="12"
                         Style="{StaticResource labelName}" />
+                    <Button
+                        x:Name="btnCheckCamera1"
+                        Width="28"
+                        Height="28"
+                        Margin="10,0,0,0"
+                        Click="btnCheckCamera1_Click"
+                        ToolTip="Check Connection">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="/Resources/Icons/lan.png"
+                            Style="{DynamicResource imageButton}" />
+                    </Button>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Style="{StaticResource stPanel}">
-                    <Label Content="CAM 2 IP:" Style="{StaticResource labelName}" />
-                    <TextBox
-                        x:Name="tbCam2Ip"
+                    <Label Content="CAM 2 SN:" Style="{StaticResource labelName}" />
+                    <ComboBox
+                        x:Name="cbbCam2Sn"
                         Width="120"
-                        Style="{StaticResource textBox}"
-                        Text="0.0.0.0" />
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        FontSize="15" />
                     <Label
                         Width="115"
                         Content="Exposure Time:"
@@ -99,6 +114,19 @@
                         Content="(ms)"
                         FontSize="12"
                         Style="{StaticResource labelName}" />
+                    <Button
+                        x:Name="btnCheckCamera2"
+                        Width="28"
+                        Height="28"
+                        Margin="10,0,0,0"
+                        Click="btnCheckCamera2_Click"
+                        ToolTip="Check Connection">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="/Resources/Icons/lan.png"
+                            Style="{DynamicResource imageButton}" />
+                    </Button>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Style="{StaticResource stPanel}">
                     <Label Content="PLC IP:" Style="{StaticResource labelName}" />
@@ -106,6 +134,7 @@
                         x:Name="tbPlcIp"
                         Width="120"
                         Style="{StaticResource textBox}"
+                        PreviewTextInput="tbPlcIp_PreviewTextInput"
                         Text="192.168.0.211" />
                     <Label
                         Width="115"
@@ -119,9 +148,22 @@
                     <Label
                         Width="35"
                         Margin="0,5,5,5"
-                        Content="(ms)"
+                        Content=""
                         FontSize="12"
                         Style="{StaticResource labelName}" />
+                    <Button
+                        x:Name="btnCheckPlc"
+                        Width="28"
+                        Height="28"
+                        Margin="10,0,0,0"
+                        Click="btnCheckPlc_Click"
+                        ToolTip="Check Connection">
+                        <Image
+                            Width="20"
+                            Height="20"
+                            Source="/Resources/Icons/lan.png"
+                            Style="{DynamicResource imageButton}" />
+                    </Button>
                 </StackPanel>
             </Grid>
         </GroupBox>
@@ -140,7 +182,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel
                         Grid.Row="0"
-                        Margin="0,-5,0,0"
+                        Margin="0,0,0,0"
                         Style="{StaticResource stPanel}">
                         <Label
                             Width="185"
@@ -149,12 +191,13 @@
                         <CheckBox
                             Name="cbSaveEnable"
                             VerticalAlignment="Center"
-                            Content="(Save 2D, 3D Pad)"
+                            Content="(Enable saving images)"
                             IsChecked="False" />
                     </StackPanel>
                     <StackPanel
-                        Grid.Row="2"
-                        Margin="0,-5,0,0"
+                        Grid.Row="1"
+                        Margin="0,0,0,0"
+                        VerticalAlignment="Center"
                         Style="{StaticResource stPanel}">
                         <Label
                             Width="185"
@@ -163,19 +206,65 @@
                         <TextBox
                             x:Name="tbSavePath"
                             Width="200"
+                            Height="30"
                             HorizontalAlignment="Center"
                             IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}"
+                            IsReadOnly="True"
                             Style="{StaticResource textBox}"
                             Text="/" />
                         <Button
                             x:Name="btnResultBrowser"
-                            Width="30"
-                            Height="20"
+                            Width="32"
+                            Height="32"
                             Margin="10,0,0,0"
                             Click="btnBrowser_Click"
-                            Content="..."
+                            IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}">
+                            <Image
+                                Width="25"
+                                Height="25"
+                                Source="/Resources/Icons/folder-browser.png"
+                                Style="{DynamicResource imageButton}" />
+                        </Button>
+                    </StackPanel>
+                    <StackPanel
+                        Grid.Row="2"
+                        Margin="0,0,0,0"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource stPanel}">
+                        <Label
+                            Width="185"
+                            Content="Save Option:"
+                            Style="{StaticResource labelName}" />
+                        <RadioButton
+                            x:Name="rbSaveOptionResultOrigin"
+                            VerticalAlignment="Center"
+                            Content="Origin + Result"
+                            GroupName="SaveOption"
+                            IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}" />
+                        <RadioButton
+                            x:Name="rbSaveOptionResult"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="Result"
+                            GroupName="SaveOption"
+                            IsChecked="True"
+                            IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}" />
+                        <RadioButton
+                            x:Name="rbSaveOptionOrigin"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="Origin"
+                            GroupName="SaveOption"
+                            IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}" />
+                        <RadioButton
+                            x:Name="rbSaveOptionDebug"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="Debug"
+                            GroupName="SaveOption"
                             IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}" />
                     </StackPanel>
+
                 </Grid>
             </Grid>
         </GroupBox>

@@ -14,8 +14,56 @@
     <Setting Name="EndPointCheckStatus" Type="System.String" Scope="User">
       <Value Profile="(Default)">check_service_status</Value>
     </Setting>
-    <Setting Name="API_URL" Type="System.String" Scope="User">
+    <Setting Name="ApiUrlAi" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://127.0.0.1:8386/ai</Value>
+    </Setting>
+    <Setting Name="Cam1Ip" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Cam2Ip" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="PlcIp" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.0.211</Value>
+    </Setting>
+    <Setting Name="Cam1Exposure" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3000</Value>
+    </Setting>
+    <Setting Name="Cam2Exposure" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3000</Value>
+    </Setting>
+    <Setting Name="SaveEnable" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SaveMode" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="SavePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="PlcPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">8000</Value>
+    </Setting>
+    <Setting Name="EndpointConnectPlc" Type="System.String" Scope="User">
+      <Value Profile="(Default)">connect_plc</Value>
+    </Setting>
+    <Setting Name="EndpointDisconnectPlc" Type="System.String" Scope="User">
+      <Value Profile="(Default)">disconnect_plc</Value>
+    </Setting>
+    <Setting Name="EndpointControlUv" Type="System.String" Scope="User">
+      <Value Profile="(Default)">control_uv</Value>
+    </Setting>
+    <Setting Name="EndpointControlLed" Type="System.String" Scope="User">
+      <Value Profile="(Default)">control_led</Value>
+    </Setting>
+    <Setting Name="EndpointCheckConnection" Type="System.String" Scope="User">
+      <Value Profile="(Default)">check_connection</Value>
+    </Setting>
+    <Setting Name="EndpointOnError" Type="System.String" Scope="User">
+      <Value Profile="(Default)">on_error</Value>
+    </Setting>
+    <Setting Name="ApiUrlCom" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://127.0.0.1:8386/communication</Value>
     </Setting>
   </Settings>
 </SettingsFile>

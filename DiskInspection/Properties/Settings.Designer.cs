@@ -12,7 +12,7 @@ namespace DiskInspection.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.12.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -74,12 +74,204 @@ namespace DiskInspection.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("http://127.0.0.1:8386/ai")]
-        public string API_URL {
+        public string ApiUrlAi {
             get {
-                return ((string)(this["API_URL"]));
+                return ((string)(this["ApiUrlAi"]));
             }
             set {
-                this["API_URL"] = value;
+                this["ApiUrlAi"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Cam1Ip {
+            get {
+                return ((string)(this["Cam1Ip"]));
+            }
+            set {
+                this["Cam1Ip"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Cam2Ip {
+            get {
+                return ((string)(this["Cam2Ip"]));
+            }
+            set {
+                this["Cam2Ip"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.211")]
+        public string PlcIp {
+            get {
+                return ((string)(this["PlcIp"]));
+            }
+            set {
+                this["PlcIp"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000")]
+        public int Cam1Exposure {
+            get {
+                return ((int)(this["Cam1Exposure"]));
+            }
+            set {
+                this["Cam1Exposure"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000")]
+        public int Cam2Exposure {
+            get {
+                return ((int)(this["Cam2Exposure"]));
+            }
+            set {
+                this["Cam2Exposure"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SaveEnable {
+            get {
+                return ((bool)(this["SaveEnable"]));
+            }
+            set {
+                this["SaveEnable"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SaveMode {
+            get {
+                return ((int)(this["SaveMode"]));
+            }
+            set {
+                this["SaveMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SavePath {
+            get {
+                return ((string)(this["SavePath"]));
+            }
+            set {
+                this["SavePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8000")]
+        public int PlcPort {
+            get {
+                return ((int)(this["PlcPort"]));
+            }
+            set {
+                this["PlcPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("connect_plc")]
+        public string EndpointConnectPlc {
+            get {
+                return ((string)(this["EndpointConnectPlc"]));
+            }
+            set {
+                this["EndpointConnectPlc"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("disconnect_plc")]
+        public string EndpointDisconnectPlc {
+            get {
+                return ((string)(this["EndpointDisconnectPlc"]));
+            }
+            set {
+                this["EndpointDisconnectPlc"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("control_uv")]
+        public string EndpointControlUv {
+            get {
+                return ((string)(this["EndpointControlUv"]));
+            }
+            set {
+                this["EndpointControlUv"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("control_led")]
+        public string EndpointControlLed {
+            get {
+                return ((string)(this["EndpointControlLed"]));
+            }
+            set {
+                this["EndpointControlLed"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("check_connection")]
+        public string EndpointCheckConnection {
+            get {
+                return ((string)(this["EndpointCheckConnection"]));
+            }
+            set {
+                this["EndpointCheckConnection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("on_error")]
+        public string EndpointOnError {
+            get {
+                return ((string)(this["EndpointOnError"]));
+            }
+            set {
+                this["EndpointOnError"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://127.0.0.1:8386/communication")]
+        public string ApiUrlCom {
+            get {
+                return ((string)(this["ApiUrlCom"]));
+            }
+            set {
+                this["ApiUrlCom"] = value;
             }
         }
     }

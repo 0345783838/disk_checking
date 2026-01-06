@@ -38,6 +38,7 @@ namespace DiskInspection.Views.DebugWindows
         private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         private Properties.Settings _param = Properties.Settings.Default;
         public event PropertyChangedEventHandler PropertyChanged;
+        private bool _loaded = false;
         protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -204,7 +205,7 @@ namespace DiskInspection.Views.DebugWindows
             {
                 var imageInfo = imagesInfoList[i];
                 Mat image = CvInvoke.Imread(imageInfo.FilePath);
-                var res = APICommunication.DebugImages(_param.API_URL, image, _envConfig);
+                var res = APICommunication.DebugImages(_param.ApiUrlAi, image, _envConfig);
 
                 var dctectImg = Converter.Base64ToBitmap(res.DetectImg);
                 var segmentImg = Converter.Base64ToBitmap(res.SegmentImg);
@@ -250,7 +251,7 @@ namespace DiskInspection.Views.DebugWindows
                     for (int i = 0; i < timeStep; i++)
                     {
                         Thread.Sleep(1000);
-                        if (APICommunication.CheckAPIStatus(_param.API_URL, 1000))
+                        if (APICommunication.CheckAPIStatus(_param.ApiUrlAi, 1000))
                         {
                             _logger.Info("Re - Start AI Python Engine Successfuly!");
                             resRestart = true;
@@ -369,6 +370,34 @@ namespace DiskInspection.Views.DebugWindows
             double imageBoxHeight = imageBox.ActualHeight;
             var scale = Math.Min(imageBoxWidth / imageWidth, imageBoxHeight / imageHeight);
             return scale;
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (tabOffline.IsSelected)
+            {
+                // Cứ tắt led, uv, nếu chưa có kết nối cũng không sao
+                APICommunication.ControlLed(_param.ApiUrlCom, status: false);
+                APICommunication.ControlUv(_param.ApiUrlCom, status: false);
+            }
+            else
+            {
+                rbLight_Checked(null, null);
+            }
+        }
+
+        private void rbLight_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded)
+                return;
+
+
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            _loaded = true;
+            //var plcC
         }
     }
 }
