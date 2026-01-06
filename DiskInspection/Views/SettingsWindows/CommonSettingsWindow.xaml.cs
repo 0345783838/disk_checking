@@ -1,7 +1,9 @@
-﻿using DiskInspection.Controllers.APIs;
+﻿using DiskInspection.Controllers;
+using DiskInspection.Controllers.APIs;
 using DiskInspection.Controllers.Camera;
 using DiskInspection.Views.UtilitiesWindows;
 using Emgu.CV;
+using LiveCharts.Wpf;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections;
@@ -224,8 +226,19 @@ namespace DiskInspection.Views.SettingsWindows
                 return;
             }
 
-            if (_cameraManager.CheckCameraConnection(cbbCam1Sn.Text))
+            var waiting = new WaitingWindow("Checking camera connection...\rĐang kiểm tra kết nối camera...");
+            var cam1Sn = cbbCam1Sn.Text;
+            bool resConnection = false;
+            new Task(() =>
             {
+                resConnection = _cameraManager.CheckCameraConnection(cam1Sn);
+                waiting.KillMe = true;
+            }).Start();
+
+            waiting.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            waiting.ShowDialog();
+            if (resConnection)
+            { 
                 var info = new InformationWindow("Camera connection is OK!\rKết nối camera OK!");
                 info.ShowDialog();
             }

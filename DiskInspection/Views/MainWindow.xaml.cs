@@ -69,7 +69,7 @@ namespace DiskInspection
         {
             new Task(new Action(() =>
             {
-                var res = _mainController.RunServiceAsync(20000, "Loading...");
+                var res = _mainController.RunServiceAsync(20000, "Program is loading...\rChương trình đang khởi động...");
             })).Start();
         }
 

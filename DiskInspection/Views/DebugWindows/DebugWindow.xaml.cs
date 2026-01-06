@@ -391,13 +391,30 @@ namespace DiskInspection.Views.DebugWindows
             if (!_loaded)
                 return;
 
-
+            if (rbWhiteLight.IsChecked == true)
+            {
+                var res = APICommunication.ControlLed(_param.ApiUrlCom, status: true);
+                if (!res)
+                {
+                    var error = new ErrorWindow("Cannot turn on White Light, please check the PLC connection settings!\rKhông thể bật đèn trắng, hãy kiểm tra setting kết nối PLC!");
+                    error.ShowDialog();
+                }
+            }
+            else
+            {
+                var res = APICommunication.ControlUv(_param.ApiUrlCom, status: true);
+                if (!res)
+                {
+                    var error = new ErrorWindow("Cannot turn on UV Light, please check the PLC connection settings!\rKhông thể bật đèn UV, hãy kiểm tra setting kết nối PLC!");
+                    error.ShowDialog();
+                }
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _loaded = true;
-            //var plcC
+            APICommunication.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
         }
     }
 }
