@@ -69,7 +69,7 @@ namespace DiskInspection
         {
             new Task(new Action(() =>
             {
-                var res = _mainController.RunServiceAsync(20000, "Program is loading...\rChương trình đang khởi động...");
+                var res = _mainController.RunServiceAsync(20000, "Program is loading...");
             })).Start();
         }
 
@@ -81,8 +81,6 @@ namespace DiskInspection
                 this.Dispatcher.Invoke(new Action(() =>
                 {
                     WaitingWindow wait = new WaitingWindow(content);
-                    wait.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                    wait.Topmost = true;
                     new Task(() =>
                     {
                         var timestep = timeout / 500;

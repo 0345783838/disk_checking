@@ -76,6 +76,63 @@ namespace DiskInspection.Controllers.APIs
                 return null;
             }
         }
+        public static DebugImageResponse DebugUvImages(string url, Mat image, EnvironmentConfig envConfig)
+        {
+            dynamic obj = new DebugImageResponse();
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(40000)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndPointDebugUv, Method.Post);
+            request.AlwaysMultipartFormData = true;
+
+            // Add File
+            byte[] jpegData = image.ToImage<Bgr, byte>().ToJpegData();
+            request.AddFile("image", jpegData, $"image.jpg");
+
+            // Tạo payload JSON
+            var payload = new
+            {
+                segment_threshold = envConfig.SegmentThreshold,
+                detect_threshold = envConfig.DetectThreshold,
+                detect_iou = envConfig.DetectIou,
+                caliper_min_edge_distance = envConfig.CaliperMinEdgeDistance,
+                caliper_max_edge_distance = envConfig.CaliperMaxEdgeDistance,
+                caliper_length_rate = envConfig.CaliperLengthRate,
+                caliper_thickness_list = envConfig.CaliperThicknessList,
+                disk_num = envConfig.DiskNumber,
+                disk_max_distance = envConfig.DiskMaxDistance,
+                disk_min_distance = envConfig.DiskMinDistance,
+                disk_min_area = envConfig.DiskMinArea
+            };
+            string paramsJson = JsonConvert.SerializeObject(payload);
+            request.AddParameter(
+                                "params_json",
+                                paramsJson,
+                                ParameterType.GetOrPost
+            );
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                try
+                {
+
+                    obj = JsonConvert.DeserializeObject<DebugImageResponse>(response.Content);
+                    return obj;
+                }
+                catch (Exception ex)
+                {
+                    logger.Debug(ex.Message);
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
         public static bool CheckAPIStatus(string url, int timeout = 1000)
         {
             var options = new RestClientOptions(url)

@@ -2,10 +2,10 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DiskInspection.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="LeftCamSN" Type="System.String" Scope="User">
+    <Setting Name="Cam1Sn" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="RightCamSN" Type="System.String" Scope="User">
+    <Setting Name="Cam2Sn" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="EndPointDebug" Type="System.String" Scope="User">
@@ -16,12 +16,6 @@
     </Setting>
     <Setting Name="ApiUrlAi" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://127.0.0.1:8386/ai</Value>
-    </Setting>
-    <Setting Name="Cam1Ip" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="Cam2Ip" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="PlcIp" Type="System.String" Scope="User">
       <Value Profile="(Default)">192.168.0.211</Value>
@@ -64,6 +58,9 @@
     </Setting>
     <Setting Name="ApiUrlCom" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://127.0.0.1:8386/communication</Value>
+    </Setting>
+    <Setting Name="EndPointDebugUv" Type="System.String" Scope="User">
+      <Value Profile="(Default)">check_disk_debug_uv</Value>
     </Setting>
   </Settings>
 </SettingsFile>

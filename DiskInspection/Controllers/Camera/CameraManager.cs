@@ -9,8 +9,8 @@ namespace DiskInspection.Controllers.Camera
     internal class CameraManager
     {
         private static CameraManager _cameraManager;
-        private LincolnCamera _leftCam;
-        private LincolnCamera _rightCam;
+        private LincolnCamera _camera1;
+        private LincolnCamera _camera2;
         public static CameraManager GetInstance()
         {
             if (_cameraManager == null)
@@ -24,26 +24,26 @@ namespace DiskInspection.Controllers.Camera
         {
             _cameraManager = new CameraManager();
         }
-        public LincolnCamera GetTopCamera()
+        public LincolnCamera GetCamera1()
         {
-            if (((_leftCam != null) && (_leftCam.SN != Properties.Settings.Default.LeftCamSN)) || (_leftCam == null))
+            if (((_camera1 != null) && (_camera1.SN != Properties.Settings.Default.Cam1Sn)) || (_camera1 == null))
             {
-                if (_leftCam != null)
-                    _leftCam.Close();
-                _leftCam = new LincolnCamera(Properties.Settings.Default.RightCamSN);
+                if (_camera1 != null)
+                    _camera1.Close();
+                _camera1 = new LincolnCamera(Properties.Settings.Default.Cam2Sn);
             }
-            return _leftCam;
+            return _camera1;
         }
 
-        public LincolnCamera GetBotCamera() 
+        public LincolnCamera GetCamera2() 
         {
-            if (((_rightCam != null) && (_rightCam.SN != Properties.Settings.Default.LeftCamSN)) || (_rightCam == null))
+            if (((_camera2 != null) && (_camera2.SN != Properties.Settings.Default.Cam1Sn)) || (_camera2 == null))
             {
-                if (_rightCam != null)
-                    _rightCam.Close();
-                _rightCam = new LincolnCamera(Properties.Settings.Default.RightCamSN);
+                if (_camera2 != null)
+                    _camera2.Close();
+                _camera2 = new LincolnCamera(Properties.Settings.Default.Cam2Sn);
             }
-            return _rightCam;
+            return _camera2;
         }
         public bool CheckCameraConnection(string SN)
         {

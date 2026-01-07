@@ -1,9 +1,11 @@
 ﻿using DiskInspection.Controllers;
 using DiskInspection.Controllers.APIs;
+using DiskInspection.Controllers.Camera;
 using DiskInspection.Models;
 using DiskInspection.Utils;
 using DiskInspection.Views.UtilitiesWindows;
 using Emgu.CV;
+using Emgu.CV.Structure;
 using LiveCharts.Wpf;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -38,7 +40,11 @@ namespace DiskInspection.Views.DebugWindows
         private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
         private Properties.Settings _param = Properties.Settings.Default;
         public event PropertyChangedEventHandler PropertyChanged;
+        private CameraManager _cameraManager;
+        private LincolnCamera _selectedCamera;
         private bool _loaded = false;
+        private bool _firstTime = true;
+
         protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -97,7 +103,7 @@ namespace DiskInspection.Views.DebugWindows
             if (SelectedImage == null)
                 return;
             lbTitile.Content = SelectedImage.Title;
-            UpdateMapImage(SelectedImage.Image);
+            UpdateImage(SelectedImage.Image);
         }
 
         public bool IsBackEnable => (SelectedImageInfo !=null && SelectedImageInfo.Images.IndexOf(SelectedImage) > 0);
@@ -105,6 +111,7 @@ namespace DiskInspection.Views.DebugWindows
         public int MaxValue => (ImagesInfoList.Count > 0 && !Object.ReferenceEquals(ImagesInfoList, null)) ? ImagesInfoList.Count : 1;
         public int ProcessingCount => (ImagesInfoList.Count > 0 && !Object.ReferenceEquals(ImagesInfoList, null)) ? ImagesInfoList.Count(x => x.Status != (int)FileStatus.NOT_DONE) : 0;
         public string ProcessingRatio => (ImagesInfoList.Count > 0 && !Object.ReferenceEquals(ImagesInfoList, null)) ? $"Processed: {(((double)ImagesInfoList.Count(x => x.Status != (int)FileStatus.NOT_DONE)) / (double)ImagesInfoList.Count * 100):F2}%" : "0.00%";
+        public bool CanCapture { get; set; } = false;
 
         public DebugWindow()
         {
@@ -112,6 +119,7 @@ namespace DiskInspection.Views.DebugWindows
             DataContext = this;
             GetEnvConfig();
             ImagesInfoList.CollectionChanged += (s, e) => OnPropertyChanged(nameof(MaxValue));
+            _cameraManager = CameraManager.GetInstance();
         }
         private void GetEnvConfig()
         {
@@ -223,7 +231,81 @@ namespace DiskInspection.Views.DebugWindows
 
         private void btnTriggerSoftware_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (!_selectedCamera.Start())
+            {
+                var error = new ErrorWindow("Can't capture image, please check the Camera connection settings!\rKhông thể chụp ảnh, hãy kiểm tra setting kết nối Camera!");
+                error.ShowDialog();
+                return;
+            }
+            if (rbUvLight.IsChecked == false && rbWhiteLight.IsChecked == false)
+            {
+                var error = new ErrorWindow("Please select a light source to turn on!\rHãy chọn nguồn đèn để bật!");
+                error.ShowDialog();
+                return;
+            }
 
+
+            Bitmap bitmapImage = _selectedCamera.GetBitmap();
+            Image<Bgr, byte> img = new Image<Bgr, byte>(bitmapImage);
+            UpdateImage(bitmapImage);
+
+            // Case: White Light
+            if (rbWhiteLight.IsChecked == true)
+            {
+                var imageInfo = new ImageDebugInfo(ImagesInfoList.Count + 1, $"Captured Image {MyDateTime.GetStringDateTime()}");
+                ImagesInfoList.Add(imageInfo);
+
+                var imageList = new List<ImageList>();
+                var checkingRes = false;
+                var waiting = new WaitingWindow("Waiting for image processing...\rĐang xử lý hình ảnh...");
+                new Task(() =>
+                {
+                    var res = APICommunication.DebugImages(_param.ApiUrlAi, img.Mat, _envConfig);
+                    var dctectImg = Converter.Base64ToBitmap(res.DetectImg);
+                    var segmentImg = Converter.Base64ToBitmap(res.SegmentImg);
+                    var finalImg = Converter.Base64ToBitmap(res.FinalImg);
+                    checkingRes = res.Result;
+                    imageList = new List<ImageList>()
+                    {
+                        new ImageList(0, "Original Image", bitmapImage),
+                        new ImageList(1, "Detect Image", dctectImg),
+                        new ImageList(2, "Segment Image", segmentImg),
+                        new ImageList(3, "Final Image", finalImg)
+                    };
+                    waiting.KillMe = true;
+                }).Start();
+                waiting.ShowDialog();
+
+                imageInfo.Images = imageList;
+                imageInfo.Status = checkingRes ? (int)FileStatus.OK : (int)FileStatus.NG;
+                SelectedImageInfo = imageInfo;
+            }
+            else
+            {
+                var imageInfo = new ImageDebugInfo(ImagesInfoList.Count + 1, $"Captured Image {MyDateTime.GetStringDateTime()}");
+                ImagesInfoList.Add(imageInfo);
+
+                var imageList = new List<ImageList>();
+                var checkingRes = false;
+                var waiting = new WaitingWindow("Waiting for image processing...\rĐang xử lý hình ảnh...");
+                new Task(() =>
+                {
+                    var res = APICommunication.DebugUvImages(_param.ApiUrlAi, img.Mat, _envConfig);
+                    var finalImg = Converter.Base64ToBitmap(res.FinalImg);
+                    checkingRes = res.Result;
+                    imageList = new List<ImageList>()
+                    {
+                        new ImageList(0, "Original Image", bitmapImage),
+                        new ImageList(1, "Final Image", finalImg)
+                    };
+                    waiting.KillMe = true;
+                }).Start();
+                waiting.ShowDialog();
+
+                imageInfo.Images = imageList;
+                imageInfo.Status = checkingRes ? (int)FileStatus.OK : (int)FileStatus.NG;
+                SelectedImageInfo = imageInfo;
+            }
         }
 
         private void btnSetting_Click(object sender, RoutedEventArgs e)
@@ -341,7 +423,7 @@ namespace DiskInspection.Views.DebugWindows
             CanSave = true;
             OnPropertyChanged(nameof(CanSave));
         }
-        public void UpdateMapImage(Bitmap image)
+        public void UpdateImage(Bitmap image)
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
@@ -377,12 +459,35 @@ namespace DiskInspection.Views.DebugWindows
             if (tabOffline.IsSelected)
             {
                 // Cứ tắt led, uv, nếu chưa có kết nối cũng không sao
-                APICommunication.ControlLed(_param.ApiUrlCom, status: false);
-                APICommunication.ControlUv(_param.ApiUrlCom, status: false);
+                new Task(() =>
+                {
+                    APICommunication.ControlLed(_param.ApiUrlCom, status: false);
+                    APICommunication.ControlUv(_param.ApiUrlCom, status: false);
+                }).Start();
+                rbUvLight.IsChecked = false;
+                rbWhiteLight.IsChecked = false;
             }
             else
             {
-                rbLight_Checked(null, null);
+                if (_firstTime)
+                {
+                    _firstTime = false;
+                    bool resConnection = false;
+                    var waiting = new WaitingWindow("Waiting for connection to PLC...\rĐang chờ kết nối PLC...");
+                    new Task(() => 
+                    {
+                        resConnection = APICommunication.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
+                        waiting.KillMe = true;
+                    }).Start();
+                    waiting.ShowDialog();
+
+                    if (!resConnection)
+                    {
+                        var error = new ErrorWindow("Cannot connect to PLC, please check the PLC connection settings!\rKhông thể kết nối PLC, hãy kiểm tra setting kết nối PLC!");
+                        error.ShowDialog();
+                        return;
+                    }
+                }
             }
         }
 
@@ -414,7 +519,31 @@ namespace DiskInspection.Views.DebugWindows
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _loaded = true;
-            APICommunication.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
+            //APICommunication.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
+        }
+
+        private void cbbCamera_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var cameraName = cbbCamera.SelectedValue.ToString();
+            if (cameraName == "CAM 1")
+            {
+                _selectedCamera = _cameraManager.GetCamera1();
+            }
+            else 
+            {
+                _selectedCamera = _cameraManager.GetCamera2();
+            }
+
+            if (!_selectedCamera.IsOpen())
+            {
+                var error = new ErrorWindow($"Cannot connect to Camera {cameraName}, please check the Camera connection settings!\rKhông thể kết nối Camera {cameraName}, hãy kiểm tra setting kết nối Camera!");
+                error.ShowDialog();
+            }
+            else
+            {
+                CanCapture = true;
+                OnPropertyChanged(nameof(CanCapture));
+            }
         }
     }
 }

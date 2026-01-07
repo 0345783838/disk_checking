@@ -1,15 +1,25 @@
 
 ------------ Debug Window-----------------
 
-1. Xử lý logic điều khiển đèn + thông báo lỗi nếu không bật được đèn bước online
-2. Load camera sẵn lên cbb (load thẳng trong config hoặc get list cam)
+yes 1. Xử lý logic điều khiển đèn + thông báo lỗi nếu không bật được đèn bước online
+yes 2. Load camera sẵn lên cbb (load thẳng trong config hoặc get list cam)
     , check kết nối camera khi select
 
-3. Capture và xử lý
+yes 3. Capture và xử lý
+
+4. Test với camera thực tế -> tối 07/01
 
 => hoàn thiện debug
 
 
 ------------ Main Window-----------------
 
-1. Nghien cuu layout
+1. Nghiên cuu layout -> tối 07/01
+
+2. Luồng logic phán định + hiển thị
+
+3. Update statistics (biểu đồ, thông tin)
+
+4. Luồng lưu ảnh
+
+5. Thông báo message, log....

@@ -26,24 +26,24 @@ namespace DiskInspection.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LeftCamSN {
+        public string Cam1Sn {
             get {
-                return ((string)(this["LeftCamSN"]));
+                return ((string)(this["Cam1Sn"]));
             }
             set {
-                this["LeftCamSN"] = value;
+                this["Cam1Sn"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string RightCamSN {
+        public string Cam2Sn {
             get {
-                return ((string)(this["RightCamSN"]));
+                return ((string)(this["Cam2Sn"]));
             }
             set {
-                this["RightCamSN"] = value;
+                this["Cam2Sn"] = value;
             }
         }
         
@@ -80,30 +80,6 @@ namespace DiskInspection.Properties {
             }
             set {
                 this["ApiUrlAi"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Cam1Ip {
-            get {
-                return ((string)(this["Cam1Ip"]));
-            }
-            set {
-                this["Cam1Ip"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Cam2Ip {
-            get {
-                return ((string)(this["Cam2Ip"]));
-            }
-            set {
-                this["Cam2Ip"] = value;
             }
         }
         
@@ -272,6 +248,18 @@ namespace DiskInspection.Properties {
             }
             set {
                 this["ApiUrlCom"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("check_disk_debug_uv")]
+        public string EndPointDebugUv {
+            get {
+                return ((string)(this["EndPointDebugUv"]));
+            }
+            set {
+                this["EndPointDebugUv"] = value;
             }
         }
     }

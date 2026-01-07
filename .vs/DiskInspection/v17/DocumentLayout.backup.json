@@ -3,55 +3,67 @@
   "WorkspaceRootPath": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|d:\\huynhvc\\others\\disk_checking\\disk_checking\\app\\app\\diskinspection\\views\\debugwindows\\debugwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\debugwindows\\debugwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\debugwindows\\debugwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\debugwindows\\debugwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|d:\\huynhvc\\others\\disk_checking\\disk_checking\\app\\app\\diskinspection\\views\\debugwindows\\debugwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\debugwindows\\debugwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\controllers\\apis\\apicommunication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\controllers\\apis\\apicommunication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|d:\\huynhvc\\others\\disk_checking\\disk_checking\\app\\app\\diskinspection\\views\\settingswindows\\commonsettingswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\settingswindows\\commonsettingswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|d:\\huynhvc\\others\\disk_checking\\disk_checking\\app\\app\\diskinspection\\views\\settingswindows\\commonsettingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\settingswindows\\commonsettingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\settingswindows\\commonsettingswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\properties\\settings.settings||{6D2695F9-5365-4A78-89ED-F205C045BFE6}",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\properties\\settings.settings||{6D2695F9-5365-4A78-89ED-F205C045BFE6}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\resources\\styles\\custombutton2.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\resources\\styles\\custombutton2.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\controllers\\camera\\cameramanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\controllers\\camera\\cameramanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\controllers\\camera\\lincolncamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\controllers\\camera\\lincolncamera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|DiskInspection||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\controllers\\camera\\cameramanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\controllers\\camera\\cameramanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|d:\\huynhvc\\others\\disk_checking\\disk_checking\\app\\app\\diskinspection\\properties\\settings.settings||{6D2695F9-5365-4A78-89ED-F205C045BFE6}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\properties\\settings.settings||{6D2695F9-5365-4A78-89ED-F205C045BFE6}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|d:\\huynhvc\\others\\disk_checking\\disk_checking\\app\\app\\diskinspection\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\utilitieswindows\\waitingwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\utilitieswindows\\waitingwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\controllers\\apis\\apicommunication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\controllers\\apis\\apicommunication.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\resources\\styles\\window.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\resources\\styles\\window.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\settingswindows\\commonsettingswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\settingswindows\\commonsettingswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\utilitieswindows\\waitingwindow.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\utilitieswindows\\waitingwindow.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\controllers\\apis\\aiservicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\controllers\\apis\\aiservicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\resources\\styles\\custombutton2.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\resources\\styles\\custombutton2.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{00000000-0000-0000-0000-000000000000}|\u003CSolution\u003E|DiskInspection||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\debugwindows\\paramswindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -64,10 +76,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\debugwindows\\paramswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\debugwindows\\paramswindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\controllers\\apis\\aiservicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\controllers\\apis\\aiservicecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\utils\\envreader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -94,10 +102,6 @@
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\models\\environmentconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\views\\utilitieswindows\\waitingwindow.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|",
-      "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\views\\utilitieswindows\\waitingwindow.xaml.cs||{8B382828-6202-11D1-8870-0000F87579D2}|"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\models\\debugimageresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\models\\debugimageresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -116,9 +120,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\diskinspection\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|solutionrelative:diskinspection\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AAEC5294-19EC-4949-8643-D23D214A0D44}|DiskInspection\\DiskInspection.csproj|d:\\huynhvc\\others\\disk_checking\\disk_checking\\app\\app\\diskinspection\\||{B270807C-D8C6-49EB-8EBE-8E8D566637A1}|a54ad834-9219-4aa6-b589-607af21c3e26"
     }
   ],
   "DocumentGroupContainers": [
@@ -147,53 +148,44 @@
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{269a02dc-6af8-11d3-bdc4-00c04f688e50}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 5,
               "Title": "Settings.settings",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Properties\\Settings.settings",
               "RelativeDocumentMoniker": "DiskInspection\\Properties\\Settings.settings",
               "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Properties\\Settings.settings",
               "RelativeToolTip": "DiskInspection\\Properties\\Settings.settings",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002767|",
-              "WhenOpened": "2025-12-20T04:19:19.859Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "CameraManager.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\CameraManager.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\Camera\\CameraManager.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\CameraManager.cs",
-              "RelativeToolTip": "DiskInspection\\Controllers\\Camera\\CameraManager.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAEwC8AAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-20T04:01:01.353Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "LincolnCamera.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
-              "RelativeToolTip": "DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
-              "ViewState": "AgIAAHAAAAAAAAAAAAD4v4sAAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-20T04:01:51.885Z",
+              "WhenOpened": "2026-01-07T08:52:58.577Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "CommonSettingsWindow.xaml.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
+              "RelativeToolTip": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
+              "ViewState": "AgIAAAkBAAAAAAAAAAAowBkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-06T01:40:59.047Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "DebugWindow.xaml",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\DebugWindow.xaml",
               "RelativeDocumentMoniker": "DiskInspection\\Views\\DebugWindows\\DebugWindow.xaml",
               "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\DebugWindow.xaml",
               "RelativeToolTip": "DiskInspection\\Views\\DebugWindows\\DebugWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-01-05T06:19:52.093Z",
+              "WhenOpened": "2026-01-07T07:18:24.513Z",
               "EditorCaption": ""
             },
             {
@@ -204,101 +196,14 @@
               "RelativeDocumentMoniker": "DiskInspection\\Views\\DebugWindows\\DebugWindow.xaml.cs",
               "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\DebugWindow.xaml.cs*",
               "RelativeToolTip": "DiskInspection\\Views\\DebugWindows\\DebugWindow.xaml.cs*",
-              "ViewState": "AgIAAH0BAAAAAAAAAAAAwI8BAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAAK8BAAAAAAAAAAAmwMIBAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-30T08:53:17.811Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "CommonSettingsWindow.xaml",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
-              "RelativeDocumentMoniker": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
-              "RelativeToolTip": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-01-06T01:29:11.657Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "CommonSettingsWindow.xaml.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
-              "RelativeToolTip": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml.cs",
-              "ViewState": "AgIAAAEBAAAAAAAAAAAlwCABAABYAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-06T01:40:59.047Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "APICommunication.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\APICommunication.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\APIs\\APICommunication.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\APICommunication.cs",
-              "RelativeToolTip": "DiskInspection\\Controllers\\APIs\\APICommunication.cs",
-              "ViewState": "AgIAAJsAAAAAAAAAAAAhwLUAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T04:37:19.81Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Views\\MainWindow.xaml.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\MainWindow.xaml.cs",
-              "RelativeToolTip": "DiskInspection\\Views\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAAuwDYAAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T04:42:14.469Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "CustomButton2.xaml",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
-              "RelativeDocumentMoniker": "DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
-              "RelativeToolTip": "DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-12-30T04:55:49.685Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "AIServiceController.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
-              "RelativeToolTip": "DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAhwC4AAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T04:41:26.949Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "ParamsWindow.xaml.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
-              "RelativeToolTip": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
-              "ViewState": "AgIAAC0AAAAAAAAAAAAowEsAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T03:04:50.102Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 10,
               "Title": "Window.xaml",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Resources\\Styles\\Window.xaml",
               "RelativeDocumentMoniker": "DiskInspection\\Resources\\Styles\\Window.xaml",
@@ -310,55 +215,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "ParamsWindow.xaml",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
-              "RelativeDocumentMoniker": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
-              "RelativeToolTip": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-01-02T16:32:07.493Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "EnvReader.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Utils\\EnvReader.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Utils\\EnvReader.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Utils\\EnvReader.cs",
-              "RelativeToolTip": "DiskInspection\\Utils\\EnvReader.cs",
-              "ViewState": "AgIAAL0AAAAAAAAAAAAgwNAAAAAeAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T02:37:09.955Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "DiskInspection",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\DiskInspection.csproj",
-              "RelativeDocumentMoniker": "DiskInspection\\DiskInspection.csproj",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\DiskInspection.csproj",
-              "RelativeToolTip": "DiskInspection\\DiskInspection.csproj",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-01-06T03:54:28.705Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "ImageDebugInfo.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Models\\ImageDebugInfo.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Models\\ImageDebugInfo.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Models\\ImageDebugInfo.cs",
-              "RelativeToolTip": "DiskInspection\\Models\\ImageDebugInfo.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAcwCkAAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-30T09:09:43.914Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 7,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\MainWindow.xaml",
               "RelativeDocumentMoniker": "DiskInspection\\Views\\MainWindow.xaml",
@@ -370,7 +227,178 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "WaitingWindow.xaml",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml",
+              "RelativeDocumentMoniker": "DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml",
+              "RelativeToolTip": "DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-01-06T15:42:16.41Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CameraManager.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\CameraManager.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\Camera\\CameraManager.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\CameraManager.cs",
+              "RelativeToolTip": "DiskInspection\\Controllers\\Camera\\CameraManager.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAApwCAAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-20T04:01:01.353Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "LincolnCamera.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
+              "RelativeToolTip": "DiskInspection\\Controllers\\Camera\\LincolnCamera.cs",
+              "ViewState": "AgIAAFUAAAAAAAAAAAAjwGwAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-20T04:01:51.885Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "APICommunication.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\APICommunication.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\APIs\\APICommunication.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\APICommunication.cs",
+              "RelativeToolTip": "DiskInspection\\Controllers\\APIs\\APICommunication.cs",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAkwHMAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-03T04:37:19.81Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Views\\MainWindow.xaml.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\MainWindow.xaml.cs",
+              "RelativeToolTip": "DiskInspection\\Views\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAEcAAAAAAAAAAAAuwFQAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-03T04:42:14.469Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CommonSettingsWindow.xaml",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
+              "RelativeDocumentMoniker": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
+              "RelativeToolTip": "DiskInspection\\Views\\SettingsWindows\\CommonSettingsWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-01-06T15:25:29.607Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "ImageDebugInfo.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Models\\ImageDebugInfo.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Models\\ImageDebugInfo.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Models\\ImageDebugInfo.cs",
+              "RelativeToolTip": "DiskInspection\\Models\\ImageDebugInfo.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAcwCkAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-30T09:09:43.914Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 18,
+              "Title": "ParamsWindow.xaml",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
+              "RelativeDocumentMoniker": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
+              "RelativeToolTip": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-01-02T16:32:07.493Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "EnvReader.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Utils\\EnvReader.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Utils\\EnvReader.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Utils\\EnvReader.cs",
+              "RelativeToolTip": "DiskInspection\\Utils\\EnvReader.cs",
+              "ViewState": "AgIAAL0AAAAAAAAAAAAgwNAAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-03T02:37:09.955Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "CustomButton2.xaml",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
+              "RelativeDocumentMoniker": "DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
+              "RelativeToolTip": "DiskInspection\\Resources\\Styles\\CustomButton2.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-12-30T04:55:49.685Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "WaitingWindow.xaml.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
+              "RelativeToolTip": "DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-30T07:56:31.859Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "DiskInspection",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\DiskInspection.csproj",
+              "RelativeDocumentMoniker": "DiskInspection\\DiskInspection.csproj",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\DiskInspection.csproj",
+              "RelativeToolTip": "DiskInspection\\DiskInspection.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-01-06T03:54:28.705Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "AIServiceController.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
+              "RelativeToolTip": "DiskInspection\\Controllers\\APIs\\AIServiceController.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-03T04:41:26.949Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "ParamsWindow.xaml.cs",
+              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
+              "RelativeDocumentMoniker": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
+              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
+              "RelativeToolTip": "DiskInspection\\Views\\DebugWindows\\ParamsWindow.xaml.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAowEsAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-03T03:04:50.102Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
               "Title": "MainController.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Controllers\\MainController.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Controllers\\MainController.cs",
@@ -378,12 +406,11 @@
               "RelativeToolTip": "DiskInspection\\Controllers\\MainController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAqwA0AAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T04:42:33Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-01-03T04:42:33Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "ImageList.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Models\\ImageList.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Models\\ImageList.cs",
@@ -395,7 +422,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "CustomButton.xaml.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Resources\\Styles\\CustomButton.xaml.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Resources\\Styles\\CustomButton.xaml.cs",
@@ -407,7 +434,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 23,
               "Title": "InformationWindow.xaml.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\InformationWindow.xaml.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Views\\UtilitiesWindows\\InformationWindow.xaml.cs",
@@ -419,7 +446,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "Converter.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Utils\\Converter.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Utils\\Converter.cs",
@@ -431,7 +458,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 24,
               "Title": "EnvironmentConfig.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Models\\EnvironmentConfig.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Models\\EnvironmentConfig.cs",
@@ -442,18 +469,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "WaitingWindow.xaml.cs",
-              "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
-              "RelativeDocumentMoniker": "DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
-              "ToolTip": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
-              "RelativeToolTip": "DiskInspection\\Views\\UtilitiesWindows\\WaitingWindow.xaml.cs",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-30T07:56:31.859Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "DebugImageResponse.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Models\\DebugImageResponse.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Models\\DebugImageResponse.cs",
@@ -464,7 +480,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "WarningWindow.xaml.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Views\\UtilitiesWindows\\WarningWindow.xaml.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Views\\UtilitiesWindows\\WarningWindow.xaml.cs",
@@ -475,7 +491,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "BindingConverter.cs",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\Utils\\BindingConverter.cs",
               "RelativeDocumentMoniker": "DiskInspection\\Utils\\BindingConverter.cs",
@@ -487,7 +503,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "App.xaml",
               "DocumentMoniker": "D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\APP\\DiskInspection\\App.xaml",
               "RelativeDocumentMoniker": "DiskInspection\\App.xaml",

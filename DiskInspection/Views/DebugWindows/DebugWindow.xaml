@@ -13,9 +13,9 @@
     Width="1300"
     Height="768"
     MinWidth="1300"
-    Loaded="Window_Loaded"
     MinHeight="768"
     Icon="/Resources/Icons/testing.png"
+    Loaded="Window_Loaded"
     Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -120,18 +120,20 @@
                                         Content="CAM: "
                                         FontSize="16" />
                                     <ComboBox
-                                        x:Name="cbCamera"
+                                        x:Name="cbbCamera"
                                         Width="140"
                                         Height="50"
                                         Margin="5,0,10,0"
                                         HorizontalContentAlignment="Center"
                                         VerticalContentAlignment="Center"
-                                        FontSize="20">
+                                        FontSize="20"
+                                        SelectedValuePath="Content"
+                                        SelectionChanged="cbbCamera_SelectionChanged">
                                         <ComboBoxItem
                                             HorizontalContentAlignment="Center"
                                             VerticalContentAlignment="Center"
                                             Content="CAM 1"
-                                            FontSize="25" />
+                                            FontSize="20" />
                                         <ComboBoxItem
                                             HorizontalContentAlignment="Center"
                                             VerticalContentAlignment="Center"
@@ -147,7 +149,7 @@
                                         EndColor="#112D60"
                                         IconHeight="45"
                                         IconWidth="45"
-                                        IsEnabled="{Binding ConfirmEnable}"
+                                        IsEnabled="{Binding CanCapture}"
                                         LeftIcon="/Resources/Icons/folder-browser.png"
                                         MouseDown="btnTriggerSoftware_MouseDown"
                                         StartColor="#B6C0C5"

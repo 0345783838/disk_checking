@@ -64,9 +64,9 @@ namespace DiskInspection.Views.SettingsWindows
             }
 
             // Hardware Settings
-            cbbCam1Sn.Text = _param.Cam1Ip;
+            cbbCam1Sn.Text = _param.Cam1Sn;
             tbCam1Exposure.Text = _param.Cam1Exposure.ToString();
-            cbbCam2Sn.Text = _param.Cam2Ip;
+            cbbCam2Sn.Text = _param.Cam2Sn;
             tbCam2Exposure.Text = _param.Cam2Exposure.ToString();
             tbPlcIp.Text = _param.PlcIp;
             tbPlcPort.Text = _param.PlcPort.ToString();
@@ -167,9 +167,9 @@ namespace DiskInspection.Views.SettingsWindows
                 APICommunication.DisConnectPlc(_param.ApiUrlCom);
             }
             // Save Settings
-            _param.Cam1Ip = cbbCam1Sn.Text;
+            _param.Cam1Sn = cbbCam1Sn.Text;
             _param.Cam1Exposure = int.Parse(tbCam1Exposure.Text);
-            _param.Cam2Ip = cbbCam2Sn.Text;
+            _param.Cam2Sn = cbbCam2Sn.Text;
             _param.Cam2Exposure = int.Parse(tbCam2Exposure.Text);
             _param.PlcIp = tbPlcIp.Text;
             _param.PlcPort = int.Parse(tbPlcPort.Text);
@@ -250,14 +250,25 @@ namespace DiskInspection.Views.SettingsWindows
         }
         private void btnCheckCamera2_Click(object sender, RoutedEventArgs e)
         {
-            if (cbbCam1Sn.Text == string.Empty)
+            if (cbbCam2Sn.Text == string.Empty)
             {
                 var error = new ErrorWindow("Please select camera serial number!\rHãy chọn mã Serial cho camera!");
                 error.ShowDialog();
                 return;
             }
 
-            if (_cameraManager.CheckCameraConnection(cbbCam2Sn.Text))
+            var waiting = new WaitingWindow("Checking camera connection...\rĐang kiểm tra kết nối camera...");
+            var cam2Sn = cbbCam2Sn.Text;
+            bool resConnection = false;
+            new Task(() =>
+            {
+                resConnection = _cameraManager.CheckCameraConnection(cam2Sn);
+                waiting.KillMe = true;
+            }).Start();
+
+            waiting.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            waiting.ShowDialog();
+            if (resConnection)
             {
                 var info = new InformationWindow("Camera connection is OK!\rKết nối camera OK!");
                 info.ShowDialog();
@@ -284,11 +295,25 @@ namespace DiskInspection.Views.SettingsWindows
                 return;
             }
 
-            // Connect Modbus check status and then disconnect
-            var result = APICommunication.ConnectPlc(_param.ApiUrlCom, tbPlcIp.Text, int.Parse(tbPlcPort.Text));
+            var waiting = new WaitingWindow("Checking PLC connection...\rĐang kiểm tra kết nối PLC...");
+            bool result = false;
+            var plcIp = tbPlcIp.Text;
+            var plcPort = int.Parse(tbPlcPort.Text);
+            new Task(() =>
+            {
+                result = APICommunication.ConnectPlc(_param.ApiUrlCom, plcIp, plcPort);
+                waiting.KillMe = true;
+            }).Start();
+
+            waiting.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            waiting.ShowDialog();
+
             if (result)
             {
-                APICommunication.DisConnectPlc(_param.ApiUrlCom);
+                new Task(() =>
+                {
+                    APICommunication.DisConnectPlc(_param.ApiUrlCom);
+                }).Start();          
                 var info = new InformationWindow("PLC connection is OK!\rKết nối PLC OK!");
                 info.ShowDialog();
             }
