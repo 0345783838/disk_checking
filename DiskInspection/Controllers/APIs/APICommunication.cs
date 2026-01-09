@@ -195,6 +195,31 @@ namespace DiskInspection.Controllers.APIs
                 return false;
             }
         }
+        internal static bool CheckTrigger(string url, int timeout = 1500)
+        {
+
+        }
+
+        internal static bool CheckPlcConnection(string url, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointCheckConnection, Method.Get);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public static bool ControlUv(string url, bool status, int timeout = 1500)
         {
             var options = new RestClientOptions(url)

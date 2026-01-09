@@ -246,13 +246,14 @@ namespace DiskInspection.Views.DebugWindows
 
 
             Bitmap bitmapImage = _selectedCamera.GetBitmap();
+            //Bitmap bitmapImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-10-50.bmp");
             Image<Bgr, byte> img = new Image<Bgr, byte>(bitmapImage);
             UpdateImage(bitmapImage);
 
             // Case: White Light
             if (rbWhiteLight.IsChecked == true)
             {
-                var imageInfo = new ImageDebugInfo(ImagesInfoList.Count + 1, $"Captured Image {MyDateTime.GetStringDateTime()}");
+                var imageInfo = new ImageDebugInfo(ImagesInfoList.Count + 1, $"Captured Image: {MyDateTime.GetStringDateTime()}");
                 ImagesInfoList.Add(imageInfo);
 
                 var imageList = new List<ImageList>();

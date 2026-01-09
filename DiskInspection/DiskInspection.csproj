@@ -192,11 +192,18 @@
     <Compile Include="Models\DebugImageResponse.cs" />
     <Compile Include="Models\ImageDebugInfo.cs" />
     <Compile Include="Models\ImageList.cs" />
+    <Compile Include="Models\MyEnum.cs" />
     <Compile Include="Utils\Converter.cs" />
     <Compile Include="Utils\DateTime.cs" />
     <Compile Include="Utils\EnvReader.cs" />
     <Compile Include="Views\DebugWindows\ParamsWindow.xaml.cs">
       <DependentUpon>ParamsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ImageViewer.xaml.cs">
+      <DependentUpon>ImageViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PopUpErrorWindow.xaml.cs">
+      <DependentUpon>PopUpErrorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsWindows\CommonSettingsWindow.xaml.cs">
       <DependentUpon>CommonSettingsWindow.xaml</DependentUpon>
@@ -229,6 +236,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ImageViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -255,6 +266,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\DebugWindows\ParamsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PopUpErrorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

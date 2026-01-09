@@ -1,10 +1,12 @@
 ﻿using DiskInspection.Controllers;
+using DiskInspection.Models;
 using DiskInspection.Views;
 using DiskInspection.Views.DebugWindows;
 using DiskInspection.Views.SettingsWindows;
 using DiskInspection.Views.UtilitiesWindows;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -25,22 +27,24 @@ namespace DiskInspection
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         private MainController _mainController;
+        public int AiStatus { get; set; } = (int)(StatusState.UNKNOWN);
+        public int PlcStatus { get; set; } = (int)(StatusState.UNKNOWN);
+        public int Cam1Status { get; set; } = (int)(StatusState.UNKNOWN);
+        public int Cam2Status { get; set; } = (int)(StatusState.UNKNOWN);
         public MainWindow()
         {
             InitializeComponent();
             _mainController = new MainController(this);
             DataContext = this;
-        }
-        private double GetFittedZoomScale(object imb, double imageWidth, double imageHeight)
-        {
-            var imageBox = imb as Heal.MyControl.ImageBox;
-            var imageBoxWidth = imageBox.ActualWidth;
-            var imageBoxHeight = imageBox.ActualHeight;
-            var scale = Math.Min(imageBoxWidth / imageWidth, imageBoxHeight / imageHeight);
-            return scale;
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
@@ -57,7 +61,13 @@ namespace DiskInspection
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
-
+            WaitingWindow wait = new WaitingWindow("Checking running conditions...\rKiểm tra điều kiện chạy");
+            new Task(() =>
+            {
+                _mainController.Start();
+                wait.KillMe = true;
+            }).Start();
+            wait.ShowDialog();
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
@@ -93,10 +103,12 @@ namespace DiskInspection
                             }
                         }
                         wait.KillMe = true;
+                        UpdateAIStatus(true);
                         if (!_mainController._serviceIsRun)
                         {
                             this.Dispatcher.Invoke(new Action(() =>
                             {
+                                UpdateAIStatus(false);
                                 var box = new ErrorWindow("Cannot start AI service! Please contact IT!\rKhông khởi động được AI, Hãy liên hệ bộ phận PI");
                                 box.ShowDialog();
                             }));
@@ -119,5 +131,58 @@ namespace DiskInspection
             }
             Environment.Exit(0);
         }
+        #region Show Dialogs
+        public bool ShowWarning(string content)
+        {
+            var res = false;
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                var box = new WarningWindow(content);
+                box.ShowDialog();
+                res = (bool)box.DialogResult;
+            }));
+            return res;
+        }
+        public void ShowError(string content)
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                var box = new ErrorWindow(content);
+                box.ShowDialog();
+            }));
+        }
+        public void ShowInfo(string content)
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                var box = new InformationWindow(content);
+                box.ShowDialog();
+            }));
+        }
+
+        private void UpdateAIStatus(bool resAI)
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                AiStatus = resAI ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                OnPropertyChanged(nameof(AiStatus));
+            }));
+        }
+        internal void SetStatusService(bool resAI, bool resPLC, bool resCamera1, bool resCamera2)
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                AiStatus = resAI ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                PlcStatus = resPLC? (int)(StatusState.OK) : (int)(StatusState.NG);
+                Cam1Status = resCamera1? (int)(StatusState.OK) : (int)(StatusState.NG);
+                Cam2Status = resCamera2? (int)(StatusState.OK) : (int)(StatusState.NG);
+
+                OnPropertyChanged(nameof(AiStatus));
+                OnPropertyChanged(nameof(PlcStatus));
+                OnPropertyChanged(nameof(Cam1Status));
+                OnPropertyChanged(nameof(Cam2Status));
+            }));
+        }
+        #endregion
     }
 }

@@ -30,14 +30,14 @@ namespace DiskInspection.Controllers.Camera
             {
                 if (_camera1 != null)
                     _camera1.Close();
-                _camera1 = new LincolnCamera(Properties.Settings.Default.Cam2Sn);
+                _camera1 = new LincolnCamera(Properties.Settings.Default.Cam1Sn);
             }
             return _camera1;
         }
 
         public LincolnCamera GetCamera2() 
         {
-            if (((_camera2 != null) && (_camera2.SN != Properties.Settings.Default.Cam1Sn)) || (_camera2 == null))
+            if (((_camera2 != null) && (_camera2.SN != Properties.Settings.Default.Cam2Sn)) || (_camera2 == null))
             {
                 if (_camera2 != null)
                     _camera2.Close();
