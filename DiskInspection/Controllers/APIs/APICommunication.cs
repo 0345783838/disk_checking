@@ -19,12 +19,12 @@ namespace DiskInspection.Controllers.APIs
         public static Properties.Settings _param = Properties.Settings.Default;
 
 
-        public static DebugImageResponse DebugImages(string url,Mat image, EnvironmentConfig envConfig)
+        public static DebugImageResponse DebugImages(string url,Mat image, EnvironmentConfig envConfig, int timeout=10000)
         {
             dynamic obj = new DebugImageResponse();
             var options = new RestClientOptions(url)
             {
-                Timeout = TimeSpan.FromMilliseconds(40000)
+                Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
             var request = new RestRequest(_param.EndPointDebug, Method.Post);
@@ -76,12 +76,12 @@ namespace DiskInspection.Controllers.APIs
                 return null;
             }
         }
-        public static DebugImageResponse DebugUvImages(string url, Mat image, EnvironmentConfig envConfig)
+        public static DebugImageResponse DebugUvImages(string url, Mat image, EnvironmentConfig envConfig, int timeout = 10000)
         {
             dynamic obj = new DebugImageResponse();
             var options = new RestClientOptions(url)
             {
-                Timeout = TimeSpan.FromMilliseconds(40000)
+                Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
             var request = new RestRequest(_param.EndPointDebugUv, Method.Post);
@@ -121,6 +121,74 @@ namespace DiskInspection.Controllers.APIs
 
                     obj = JsonConvert.DeserializeObject<DebugImageResponse>(response.Content);
                     return obj;
+                }
+                catch (Exception ex)
+                {
+                    logger.Debug(ex.Message);
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public static InspectionResponse InspectWhiteLight(string url, Mat image, int timeout = 10000) 
+        {
+            dynamic obj = new InspectionResponse();
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointInspectWhiteLight, Method.Post);
+            request.AlwaysMultipartFormData = true;
+            byte[] jpegData = image.ToImage<Bgr, byte>().ToJpegData();
+            request.AddFile("image", jpegData, $"image.jpg");
+            var response = client.Execute(request);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                try
+                {
+
+                    obj = JsonConvert.DeserializeObject<InspectionResponse>(response.Content);
+                    return obj;
+
+                }
+                catch (Exception ex)
+                {
+                    logger.Debug(ex.Message);
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
+        internal static InspectionResponse InspectUvLight(string url, Mat image, int timeout = 10000)
+        {
+            dynamic obj = new InspectionResponse();
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointInspectUvLight, Method.Post);
+            request.AlwaysMultipartFormData = true;
+            byte[] jpegData = image.ToImage<Bgr, byte>().ToJpegData();
+            request.AddFile("image", jpegData, $"image.jpg");
+            var response = client.Execute(request);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                try
+                {
+
+                    obj = JsonConvert.DeserializeObject<InspectionResponse>(response.Content);
+                    return obj;
+
                 }
                 catch (Exception ex)
                 {
@@ -195,9 +263,43 @@ namespace DiskInspection.Controllers.APIs
                 return false;
             }
         }
-        internal static bool CheckTrigger(string url, int timeout = 1500)
+        internal static (TriggerState, bool) CheckTrigger(string url, int timeout = 1500)
         {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointReadTrigger, Method.Get);
 
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                if (obj.Success == (int)TriggerState.OK)
+                    return (TriggerState.OK, obj.Status);
+            }
+            return (TriggerState.ERROR, false);
+        }
+        internal static bool ResetTrigger(string url, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointResetTrigger, Method.Get);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         internal static bool CheckPlcConnection(string url, int timeout = 1500)
@@ -241,14 +343,35 @@ namespace DiskInspection.Controllers.APIs
                 return false;
             }
         }
-        public static bool ControlLed(string url, bool status, int timeout = 1500)
+        public static bool ControlLed1(string url, bool status, int timeout = 1500)
         {
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointControlLed, Method.Get);
+            var request = new RestRequest(_param.EndpointControlLed1, Method.Get);
+            request.AddQueryParameter("status", status);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static bool ControlLed2(string url, bool status, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointControlLed2, Method.Get);
             request.AddQueryParameter("status", status);
 
             var response = client.Execute(request);

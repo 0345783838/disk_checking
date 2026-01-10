@@ -47,8 +47,8 @@
     <Setting Name="EndpointControlUv" Type="System.String" Scope="User">
       <Value Profile="(Default)">control_uv</Value>
     </Setting>
-    <Setting Name="EndpointControlLed" Type="System.String" Scope="User">
-      <Value Profile="(Default)">control_led</Value>
+    <Setting Name="EndpointControlLed1" Type="System.String" Scope="User">
+      <Value Profile="(Default)">control_led_1</Value>
     </Setting>
     <Setting Name="EndpointCheckConnection" Type="System.String" Scope="User">
       <Value Profile="(Default)">check_connection</Value>
@@ -61,6 +61,21 @@
     </Setting>
     <Setting Name="EndPointDebugUv" Type="System.String" Scope="User">
       <Value Profile="(Default)">check_disk_debug_uv</Value>
+    </Setting>
+    <Setting Name="EndpointReadTrigger" Type="System.String" Scope="User">
+      <Value Profile="(Default)">read_trigger</Value>
+    </Setting>
+    <Setting Name="EndpointResetTrigger" Type="System.String" Scope="User">
+      <Value Profile="(Default)">reset_trigger</Value>
+    </Setting>
+    <Setting Name="EndpointControlLed2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">control_led_2</Value>
+    </Setting>
+    <Setting Name="EndpointInspectWhiteLight" Type="System.String" Scope="User">
+      <Value Profile="(Default)">check_disk_white</Value>
+    </Setting>
+    <Setting Name="EndpointInspectUvLight" Type="System.String" Scope="User">
+      <Value Profile="(Default)">check_disk_uv</Value>
     </Setting>
   </Settings>
 </SettingsFile>

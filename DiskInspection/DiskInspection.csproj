@@ -193,6 +193,7 @@
     <Compile Include="Models\ImageDebugInfo.cs" />
     <Compile Include="Models\ImageList.cs" />
     <Compile Include="Models\MyEnum.cs" />
+    <Compile Include="Models\InspectionResponse.cs" />
     <Compile Include="Utils\Converter.cs" />
     <Compile Include="Utils\DateTime.cs" />
     <Compile Include="Utils\EnvReader.cs" />

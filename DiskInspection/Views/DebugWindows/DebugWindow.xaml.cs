@@ -462,7 +462,8 @@ namespace DiskInspection.Views.DebugWindows
                 // Cứ tắt led, uv, nếu chưa có kết nối cũng không sao
                 new Task(() =>
                 {
-                    APICommunication.ControlLed(_param.ApiUrlCom, status: false);
+                    APICommunication.ControlLed1(_param.ApiUrlCom, status: false);
+                    APICommunication.ControlLed2(_param.ApiUrlCom, status: false);
                     APICommunication.ControlUv(_param.ApiUrlCom, status: false);
                 }).Start();
                 rbUvLight.IsChecked = false;
@@ -499,8 +500,9 @@ namespace DiskInspection.Views.DebugWindows
 
             if (rbWhiteLight.IsChecked == true)
             {
-                var res = APICommunication.ControlLed(_param.ApiUrlCom, status: true);
-                if (!res)
+                var res1 = APICommunication.ControlLed1(_param.ApiUrlCom, status: true);
+                var res2 = APICommunication.ControlLed2(_param.ApiUrlCom, status: false);
+                if (!res1 || !res2)
                 {
                     var error = new ErrorWindow("Cannot turn on White Light, please check the PLC connection settings!\rKhông thể bật đèn trắng, hãy kiểm tra setting kết nối PLC!");
                     error.ShowDialog();

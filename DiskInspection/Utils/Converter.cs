@@ -5,6 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Interop;
+using System.Windows;
+using System.Windows.Media.Imaging;
+using System.Runtime.InteropServices;
 
 namespace DiskInspection.Utils
 {
@@ -24,5 +28,45 @@ namespace DiskInspection.Utils
                 return new Bitmap(ms);
             }
         }
+        public static BitmapSource Base64ToBitmapSource(string base64)
+        {
+            if (base64.Contains(","))
+                base64 = base64.Substring(base64.IndexOf(",") + 1);
+
+            byte[] imageBytes = Convert.FromBase64String(base64);
+
+            using (var ms = new MemoryStream(imageBytes))
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // rất quan trọng
+                bitmap.StreamSource = ms;
+                bitmap.EndInit();
+                bitmap.Freeze(); // cho phép dùng khác thread
+
+                return bitmap;
+            }
+        }
+        public static BitmapSource BitmapToBitmapSource(Bitmap bitmap)
+        {
+            if (bitmap == null) return null;
+
+            IntPtr hBitmap = bitmap.GetHbitmap();
+
+            try
+            {
+                return Imaging.CreateBitmapSourceFromHBitmap(
+                    hBitmap,
+                    IntPtr.Zero,
+                    Int32Rect.Empty,
+                    BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally
+            {
+                DeleteObject(hBitmap);
+            }
+        }
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
     }
 }

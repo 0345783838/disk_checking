@@ -184,5 +184,67 @@ namespace DiskInspection
             }));
         }
         #endregion
+
+        #region Update Image
+
+
+        public void UpdateCam1WhiteOrigin(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam1WhiteOrigin.Source = image;
+            });
+        }
+        public void UpdateCam1WhiteResult(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam1WhiteResult.Source = image;
+            });
+        }
+        public void UpdateCam1UvResult(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam1UvResult.Source = image;
+            });
+        }
+        public void UpdateCam1UvOrigin(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam1UvOrigin.Source = image;
+            });
+        }
+        public void UpdateCam2WhiteOrigin(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam2WhiteOrigin.Source = image;
+            });
+        }
+        public void UpdateCam2WhiteResult(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam2WhiteResult.Source = image;
+            });
+        }
+        public void UpdateCam2UvResult(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam2UvResult.Source = image;
+            });
+        }
+        public void UpdateCam2UvOrigin(BitmapSource image)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                imbCam2UvOrigin.Source = image;
+            });
+        }
+
+        #endregion
     }
 }

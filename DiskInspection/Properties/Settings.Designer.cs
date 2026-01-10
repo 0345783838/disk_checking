@@ -205,13 +205,13 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("control_led")]
-        public string EndpointControlLed {
+        [global::System.Configuration.DefaultSettingValueAttribute("control_led_1")]
+        public string EndpointControlLed1 {
             get {
-                return ((string)(this["EndpointControlLed"]));
+                return ((string)(this["EndpointControlLed1"]));
             }
             set {
-                this["EndpointControlLed"] = value;
+                this["EndpointControlLed1"] = value;
             }
         }
         
@@ -260,6 +260,66 @@ namespace DiskInspection.Properties {
             }
             set {
                 this["EndPointDebugUv"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("read_trigger")]
+        public string EndpointReadTrigger {
+            get {
+                return ((string)(this["EndpointReadTrigger"]));
+            }
+            set {
+                this["EndpointReadTrigger"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("reset_trigger")]
+        public string EndpointResetTrigger {
+            get {
+                return ((string)(this["EndpointResetTrigger"]));
+            }
+            set {
+                this["EndpointResetTrigger"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("control_led_2")]
+        public string EndpointControlLed2 {
+            get {
+                return ((string)(this["EndpointControlLed2"]));
+            }
+            set {
+                this["EndpointControlLed2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("check_disk_white")]
+        public string EndpointInspectWhiteLight {
+            get {
+                return ((string)(this["EndpointInspectWhiteLight"]));
+            }
+            set {
+                this["EndpointInspectWhiteLight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("check_disk_uv")]
+        public string EndpointInspectUvLight {
+            get {
+                return ((string)(this["EndpointInspectUvLight"]));
+            }
+            set {
+                this["EndpointInspectUvLight"] = value;
             }
         }
     }

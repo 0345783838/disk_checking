@@ -12,4 +12,9 @@ namespace DiskInspection.Models
         NG = 1,
         UNKNOWN = 2
     }
+    enum TriggerState
+    {
+        OK = 1,
+        ERROR = -1
+    }
 }
