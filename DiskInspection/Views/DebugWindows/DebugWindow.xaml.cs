@@ -231,7 +231,7 @@ namespace DiskInspection.Views.DebugWindows
 
         private void btnTriggerSoftware_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!_selectedCamera.Start())
+            if (!_selectedCamera.IsOpen())
             {
                 var error = new ErrorWindow("Can't capture image, please check the Camera connection settings!\rKhông thể chụp ảnh, hãy kiểm tra setting kết nối Camera!");
                 error.ShowDialog();
@@ -528,16 +528,26 @@ namespace DiskInspection.Views.DebugWindows
         private void cbbCamera_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var cameraName = cbbCamera.SelectedValue.ToString();
-            if (cameraName == "CAM 1")
+            if (_selectedCamera !=null && _selectedCamera.IsOpen())
             {
-                _selectedCamera = _cameraManager.GetCamera1();
+                _selectedCamera.Stop();
             }
-            else 
+            var waiting = new WaitingWindow("Connecting to camera...\rĐang kết nối đến...");
+            new Task(() =>
             {
-                _selectedCamera = _cameraManager.GetCamera2();
-            }
+                if (cameraName == "CAM 1")
+                {
+                    _selectedCamera = _cameraManager.GetCamera1();
+                }
+                else
+                {
+                    _selectedCamera = _cameraManager.GetCamera2();
+                }
+                waiting.KillMe = true;
+            }).Start();
+            waiting.ShowDialog();
 
-            if (!_selectedCamera.IsOpen())
+            if (_selectedCamera == null || (!_selectedCamera.Start() && !_selectedCamera.IsOpen()))
             {
                 var error = new ErrorWindow($"Cannot connect to Camera {cameraName}, please check the Camera connection settings!\rKhông thể kết nối Camera {cameraName}, hãy kiểm tra setting kết nối Camera!");
                 error.ShowDialog();

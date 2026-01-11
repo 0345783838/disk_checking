@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="Cam1Sn" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">DA7667502</Value>
     </Setting>
     <Setting Name="Cam2Sn" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
