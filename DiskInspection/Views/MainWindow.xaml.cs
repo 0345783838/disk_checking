@@ -121,6 +121,7 @@ namespace DiskInspection
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            _mainController.CloseCamera();
             _mainController.CloseAIService();
             foreach (var item in System.Windows.Application.Current.Windows)
             {

@@ -175,7 +175,7 @@ namespace DiskInspection.Controllers.APIs
                 Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointInspectUvLight, Method.Post);
+            var request = new RestRequest(_param.EndpointInspectWhiteLight, Method.Post);
             request.AlwaysMultipartFormData = true;
             byte[] jpegData = image.ToImage<Bgr, byte>().ToJpegData();
             request.AddFile("image", jpegData, $"image.jpg");
@@ -283,6 +283,7 @@ namespace DiskInspection.Controllers.APIs
         }
         internal static bool ResetTrigger(string url, int timeout = 1500)
         {
+            return true;
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
@@ -324,6 +325,8 @@ namespace DiskInspection.Controllers.APIs
         }
         public static bool ControlUv(string url, bool status, int timeout = 1500)
         {
+            // test debug
+            return true;
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
@@ -345,6 +348,8 @@ namespace DiskInspection.Controllers.APIs
         }
         public static bool ControlLed1(string url, bool status, int timeout = 1500)
         {
+            // test debug
+            return true;
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
@@ -366,6 +371,8 @@ namespace DiskInspection.Controllers.APIs
         }
         public static bool ControlLed2(string url, bool status, int timeout = 1500)
         {
+            // test debug
+            return true;
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)

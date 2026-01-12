@@ -77,5 +77,14 @@
     <Setting Name="EndpointInspectUvLight" Type="System.String" Scope="User">
       <Value Profile="(Default)">check_disk_uv</Value>
     </Setting>
+    <Setting Name="StartShiftTime" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CurrentOK" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="CurrentNG" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
