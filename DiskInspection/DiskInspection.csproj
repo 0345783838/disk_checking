@@ -206,6 +206,9 @@
     <Compile Include="Views\ImageViewer.xaml.cs">
       <DependentUpon>ImageViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\MainWindowNewLevel.xaml.cs">
+      <DependentUpon>MainWindowNewLevel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PopUpErrorWindow.xaml.cs">
       <DependentUpon>PopUpErrorWindow.xaml</DependentUpon>
     </Compile>
@@ -243,6 +246,10 @@
     <Page Include="Views\ImageViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainWindowNewLevel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
