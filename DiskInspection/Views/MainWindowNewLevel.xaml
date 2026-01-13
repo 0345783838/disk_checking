@@ -423,7 +423,29 @@
                         Margin="5"
                         BorderBrush="Gray"
                         BorderThickness="1"
-                        Header="Inspection Infos" />
+                        Header="Inspection Infos">
+                        <DockPanel LastChildFill="False">
+                            <Border
+                                x:Name="bdMachineState"
+                                Width="200"
+                                Height="60"
+                                Margin="2"
+                                Background="{Binding Cam1Status, Converter={StaticResource MainStatusColorConverter}, FallbackValue='Gray'}"
+                                BorderBrush="White"
+                                BorderThickness="0.7"
+                                CornerRadius="5"
+                                DockPanel.Dock="Top">
+                                <Label
+                                    x:Name="lbMachineState"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Content="{Binding Cam1Status, Converter={StaticResource MainStatusConverter}, FallbackValue='UNKNOWN'}"
+                                    FontSize="12"
+                                    FontWeight="Bold"
+                                    Foreground="White" />
+                            </Border>
+                        </DockPanel>
+                    </GroupBox>
                 </Grid>
                 <Grid Grid.Row="2">
                     <GroupBox

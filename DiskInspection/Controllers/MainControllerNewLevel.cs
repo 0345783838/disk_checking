@@ -31,9 +31,14 @@ namespace DiskInspection.Controllers
         public event Action<string> ErrorOccurred;
 
         public event Action<bool> OnPlcConnected;
-
+        public event Action<bool> OnCam1Connected;
+        public event Action<bool> OnCam2Connected;
 
         #endregion
+
+        public MainControllerNewLevel()
+        {
+        }
 
         #region LIFECYCLE
 
@@ -43,7 +48,7 @@ namespace DiskInspection.Controllers
                 return;
 
             _cts = new CancellationTokenSource();
-            SetState(InspectState.WaitTrigger);
+            SetState(InspectState.Init);
 
             try
             {
@@ -78,25 +83,30 @@ namespace DiskInspection.Controllers
         {
             switch (_state)
             {
-                case InspectState.WaitTrigger:
-                    if (await CheckTriggerAsync())
-                        SetState(InspectState.InspectCam1);
-                    break;
-
-                case InspectState.InspectCam1:
-                    await InspectCamera1Async(ct);
-                    SetState(InspectState.InspectCam2);
-                    break;
-
-                case InspectState.InspectCam2:
-                    await InspectCamera2Async(ct);
-                    SetState(InspectState.Report);
-                    break;
-
-                case InspectState.Report:
-                    InspectionDone?.Invoke(new InspectSummary(true, true));
+                case InspectState.Init:
+                    await CheckHardwareReady(ct);
                     SetState(InspectState.WaitTrigger);
                     break;
+
+                //case InspectState.WaitTrigger:
+                //    if (await CheckTriggerAsync())
+                //        SetState(InspectState.InspectCam1);
+                //    break;
+
+                //case InspectState.InspectCam1:
+                //    await InspectCamera1Async(ct);
+                //    SetState(InspectState.InspectCam2);
+                //    break;
+
+                //case InspectState.InspectCam2:
+                //    await InspectCamera2Async(ct);
+                //    SetState(InspectState.Report);
+                //    break;
+
+                //case InspectState.Report:
+                //    InspectionDone?.Invoke(new InspectSummary(true, true));
+                //    SetState(InspectState.WaitTrigger);
+                //    break;
             }
         }
 
@@ -107,6 +117,15 @@ namespace DiskInspection.Controllers
 
             _state = newState;
             StateChanged?.Invoke(newState);
+        }
+
+        #endregion
+
+
+        #region HARDWARE CHECKS
+        private async Task CheckHardwareReady(CancellationToken ct)
+        {
+            
         }
 
         #endregion

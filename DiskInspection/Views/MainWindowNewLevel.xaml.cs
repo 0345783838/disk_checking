@@ -1,26 +1,14 @@
 ﻿using DiskInspection.Controllers;
 using DiskInspection.Models;
-using DiskInspection.Views;
 using DiskInspection.Views.DebugWindows;
 using DiskInspection.Views.SettingsWindows;
 using DiskInspection.Views.UtilitiesWindows;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DiskInspection
 {
@@ -35,15 +23,15 @@ namespace DiskInspection
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        private MainController _mainController;
+        private MainControllerNewLevel _mainController;
         public int AiStatus { get; set; } = (int)(StatusState.UNKNOWN);
         public int PlcStatus { get; set; } = (int)(StatusState.UNKNOWN);
         public int Cam1Status { get; set; } = (int)(StatusState.UNKNOWN);
         public int Cam2Status { get; set; } = (int)(StatusState.UNKNOWN);
-        public MainWindow()
+        public MainWindowNewLevel()
         {
             InitializeComponent();
-            _mainController = new MainController(this);
+            _mainController = new MainControllerNewLevel();
             DataContext = this;
         }
 

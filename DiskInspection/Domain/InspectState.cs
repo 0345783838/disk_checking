@@ -9,9 +9,10 @@ namespace DiskInspection.Domain
     public enum InspectState
     {
         Idle,
+        Init,
         WaitTrigger,
-        InspectCam1,
-        InspectCam2,
-        Report
+        Inspect,
+        Report,
+        Error
     }
 }

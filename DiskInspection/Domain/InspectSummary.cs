@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace DiskInspection.Domain
 {
-    public sealed class InspectSummary
+    public class InspectSummary
     {
         public bool Cam1Ok { get; private set; }
         public bool Cam2Ok { get; private set; }
+
 
         public InspectSummary(bool cam1Ok, bool cam2Ok)
         {

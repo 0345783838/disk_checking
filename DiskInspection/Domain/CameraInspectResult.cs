@@ -2,15 +2,16 @@
 
 namespace DiskInspection.Domain
 {
-    public sealed class CameraInspectResult
+    public class CameraInspectResult
     {
-        public bool Ok { get; private set; }
+        public bool IsOk { get; private set; }
         public Bitmap Origin { get; private set; }
         public Bitmap Result { get; private set; }
 
-        public CameraInspectResult(bool ok, Bitmap origin, Bitmap result)
+
+        public CameraInspectResult(bool isOk, Bitmap origin, Bitmap result)
         {
-            Ok = ok;
+            IsOk = isOk;
             Origin = origin;
             Result = result;
         }

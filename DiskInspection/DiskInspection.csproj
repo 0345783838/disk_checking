@@ -188,6 +188,7 @@
     <Compile Include="Controllers\APIs\APICommunication.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\MainControllerNewLevel.cs" />
+    <Compile Include="Controllers\PLC\PlcController.cs" />
     <Compile Include="Domain\CameraInspectResult.cs" />
     <Compile Include="Domain\InspectState.cs" />
     <Compile Include="Domain\InspectSummary.cs" />
