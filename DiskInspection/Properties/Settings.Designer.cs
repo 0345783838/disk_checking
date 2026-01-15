@@ -193,13 +193,13 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("control_uv")]
-        public string EndpointControlUv {
+        [global::System.Configuration.DefaultSettingValueAttribute("control_uv_1")]
+        public string EndpointControlUv1 {
             get {
-                return ((string)(this["EndpointControlUv"]));
+                return ((string)(this["EndpointControlUv1"]));
             }
             set {
-                this["EndpointControlUv"] = value;
+                this["EndpointControlUv1"] = value;
             }
         }
         
@@ -355,6 +355,18 @@ namespace DiskInspection.Properties {
             }
             set {
                 this["CurrentNG"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("control_uv_2")]
+        public string EndpointControlUv2 {
+            get {
+                return ((string)(this["EndpointControlUv2"]));
+            }
+            set {
+                this["EndpointControlUv2"] = value;
             }
         }
     }

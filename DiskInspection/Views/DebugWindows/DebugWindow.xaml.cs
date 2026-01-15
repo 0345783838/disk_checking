@@ -1,6 +1,7 @@
 ﻿using DiskInspection.Controllers;
 using DiskInspection.Controllers.APIs;
 using DiskInspection.Controllers.Camera;
+using DiskInspection.Controllers.PLC;
 using DiskInspection.Models;
 using DiskInspection.Utils;
 using DiskInspection.Views.UtilitiesWindows;
@@ -462,9 +463,10 @@ namespace DiskInspection.Views.DebugWindows
                 // Cứ tắt led, uv, nếu chưa có kết nối cũng không sao
                 new Task(() =>
                 {
-                    APICommunication.ControlLed1(_param.ApiUrlCom, status: false);
-                    APICommunication.ControlLed2(_param.ApiUrlCom, status: false);
-                    APICommunication.ControlUv(_param.ApiUrlCom, status: false);
+                    PlcController.ControlLed1(_param.ApiUrlCom, status: false);
+                    PlcController.ControlLed2(_param.ApiUrlCom, status: false);
+                    PlcController.ControlUv1(_param.ApiUrlCom, status: false);
+                    PlcController.ControlUv2(_param.ApiUrlCom, status: false);
                 }).Start();
                 rbUvLight.IsChecked = false;
                 rbWhiteLight.IsChecked = false;
@@ -478,7 +480,7 @@ namespace DiskInspection.Views.DebugWindows
                     var waiting = new WaitingWindow("Waiting for connection to PLC...\rĐang chờ kết nối PLC...");
                     new Task(() => 
                     {
-                        resConnection = APICommunication.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
+                        resConnection = PlcController.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
                         waiting.KillMe = true;
                     }).Start();
                     waiting.ShowDialog();
@@ -500,8 +502,8 @@ namespace DiskInspection.Views.DebugWindows
 
             if (rbWhiteLight.IsChecked == true)
             {
-                var res1 = APICommunication.ControlLed1(_param.ApiUrlCom, status: true);
-                var res2 = APICommunication.ControlLed2(_param.ApiUrlCom, status: false);
+                var res1 = PlcController.ControlLed1(_param.ApiUrlCom, status: true);
+                var res2 = PlcController.ControlLed2(_param.ApiUrlCom, status: false);
                 if (!res1 || !res2)
                 {
                     var error = new ErrorWindow("Cannot turn on White Light, please check the PLC connection settings!\rKhông thể bật đèn trắng, hãy kiểm tra setting kết nối PLC!");
@@ -510,7 +512,7 @@ namespace DiskInspection.Views.DebugWindows
             }
             else
             {
-                var res = APICommunication.ControlUv(_param.ApiUrlCom, status: true);
+                var res = PlcController.ControlUv1(_param.ApiUrlCom, status: true);
                 if (!res)
                 {
                     var error = new ErrorWindow("Cannot turn on UV Light, please check the PLC connection settings!\rKhông thể bật đèn UV, hãy kiểm tra setting kết nối PLC!");

@@ -55,11 +55,15 @@ namespace DiskInspection.Utils
 
             try
             {
-                return Imaging.CreateBitmapSourceFromHBitmap(
+                var bitmapSource = Imaging.CreateBitmapSourceFromHBitmap(
                     hBitmap,
                     IntPtr.Zero,
                     Int32Rect.Empty,
                     BitmapSizeOptions.FromEmptyOptions());
+
+                bitmapSource.Freeze();
+
+                return bitmapSource;
             }
             finally
             {

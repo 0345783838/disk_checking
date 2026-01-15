@@ -187,11 +187,7 @@
     <Compile Include="Controllers\APIs\AIServiceController.cs" />
     <Compile Include="Controllers\APIs\APICommunication.cs" />
     <Compile Include="Controllers\MainController.cs" />
-    <Compile Include="Controllers\MainControllerNewLevel.cs" />
     <Compile Include="Controllers\PLC\PlcController.cs" />
-    <Compile Include="Domain\CameraInspectResult.cs" />
-    <Compile Include="Domain\InspectState.cs" />
-    <Compile Include="Domain\InspectSummary.cs" />
     <Compile Include="Models\EnvironmentConfig.cs" />
     <Compile Include="Models\DebugImageResponse.cs" />
     <Compile Include="Models\ImageDebugInfo.cs" />
@@ -206,9 +202,6 @@
     </Compile>
     <Compile Include="Views\ImageViewer.xaml.cs">
       <DependentUpon>ImageViewer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\MainWindowNewLevel.xaml.cs">
-      <DependentUpon>MainWindowNewLevel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PopUpErrorWindow.xaml.cs">
       <DependentUpon>PopUpErrorWindow.xaml</DependentUpon>
@@ -247,10 +240,6 @@
     <Page Include="Views\ImageViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MainWindowNewLevel.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

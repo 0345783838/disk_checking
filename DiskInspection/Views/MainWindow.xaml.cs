@@ -62,12 +62,24 @@ namespace DiskInspection
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
             WaitingWindow wait = new WaitingWindow("Checking running conditions...\rKiểm tra điều kiện chạy");
+            bool startOK = false;
             new Task(() =>
             {
-                _mainController.Start();
+                startOK = _mainController.Start();
                 wait.KillMe = true;
             }).Start();
             wait.ShowDialog();
+
+            if (startOK)
+            {
+                btnStart.IsEnabled = false;
+                btnStop.IsEnabled = true;
+            }
+            else
+            {
+                btnStart.IsEnabled = true;
+                btnStop.IsEnabled = false;
+            }
         }
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
@@ -191,59 +203,59 @@ namespace DiskInspection
 
         public void UpdateCam1WhiteOrigin(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam1WhiteOrigin.Source = image;
-            });
+            }));
         }
         public void UpdateCam1WhiteResult(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam1WhiteResult.Source = image;
-            });
+            }));
         }
         public void UpdateCam1UvResult(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam1UvResult.Source = image;
-            });
+            }));
         }
         public void UpdateCam1UvOrigin(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam1UvOrigin.Source = image;
-            });
+            }));
         }
         public void UpdateCam2WhiteOrigin(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam2WhiteOrigin.Source = image;
-            });
+            }));
         }
         public void UpdateCam2WhiteResult(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam2WhiteResult.Source = image;
-            });
+            }));
         }
         public void UpdateCam2UvResult(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam2UvResult.Source = image;
-            });
+            }));
         }
         public void UpdateCam2UvOrigin(BitmapSource image)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 imbCam2UvOrigin.Source = image;
-            });
+            }));
         }
 
         #endregion

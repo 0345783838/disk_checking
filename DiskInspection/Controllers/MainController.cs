@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
+using DiskInspection.Controllers.PLC;
 
 namespace DiskInspection.Controllers
 {
@@ -28,8 +29,8 @@ namespace DiskInspection.Controllers
         private CameraManager _cameraManager;
         private LincolnCamera _camera1;
         private LincolnCamera _camera2;
-        private DispatcherTimer _statusTimer;
-        private DispatcherTimer _plcTimer;
+        private System.Timers.Timer _statusTimer;
+        private System.Timers.Timer _plcTimer;
         private readonly object _cam1WhiteOriginLock = new object();
         private readonly object _cam1WhiteResultLock = new object();
         private readonly object _cam1UvOriginLock = new object();
@@ -38,6 +39,9 @@ namespace DiskInspection.Controllers
         private readonly object _cam2WhiteResultLock = new object();
         private readonly object _cam2UvOriginLock = new object();
         private readonly object _cam2UvResultLock = new object();
+
+        private readonly object _statusLock = new object();
+        private readonly object _plcLock = new object();
 
         private BitmapSource _cam1LastWhiteBitmap;
         private BitmapSource _cam1LastWhiteResultBitmap;
@@ -83,7 +87,7 @@ namespace DiskInspection.Controllers
             _serviceIsRun = false;
         }
 
-        public void Start()
+        public bool Start()
         {
             _logger.Info("Starting inspection...");
             _ForceStopProcess = false;
@@ -92,6 +96,12 @@ namespace DiskInspection.Controllers
                 _logger.Debug("Cameras, PLC and AI are ready, Ready for inspection...");
                 StartStatusTimer();
                 StartPlcTimer();
+                return true;
+            }
+            else
+            {
+                _logger.Error("Cameras, PLC and AI are not ready, Stop inspection...");
+                return false;
             }
         }
 
@@ -99,16 +109,16 @@ namespace DiskInspection.Controllers
         private void StartPlcTimer()
         {
             if (_plcTimer != null) return;
-            _plcTimer = new DispatcherTimer();
-            _plcTimer.Interval = TimeSpan.FromSeconds(0.5);
-            _plcTimer.Tick += PlcTimer_Tick;
-            _plcTimer.Start();
+            _plcTimer = new System.Timers.Timer(50);
+            _plcTimer.Elapsed += PlcTimer_Elapsed;
+            _plcTimer.AutoReset = true;
+            _plcTimer.Enabled = true;
         }
 
-        private async void PlcTimer_Tick(object sender, EventArgs e)
+        private async void PlcTimer_Elapsed(object sender, EventArgs e)
         {
             StopPlcTimer();
-            var (resTrigger, status) = APICommunication.CheckTrigger(_param.ApiUrlCom, 1000);
+            var (resTrigger, status) = PlcController.CheckTrigger(_param.ApiUrlCom, 1000);
             if (resTrigger == TriggerState.ERROR)
             {
                 _mainWindow.ShowError(
@@ -123,7 +133,7 @@ namespace DiskInspection.Controllers
 
             // Trigger OK
             // --- reset trigger first
-            var resResetTg = APICommunication.ResetTrigger(_param.ApiUrlCom, 1000);
+            var resResetTg = PlcController.ResetTrigger(_param.ApiUrlCom, 1000);
             if (!resResetTg)
             {
                 _mainWindow.ShowError(
@@ -133,14 +143,13 @@ namespace DiskInspection.Controllers
             }
 
             // --- start inspection
-            var cam1Task = InpsectCamera1Async();
-            var cam2Task = InpsectCamera2Async(); // nếu có
+            var results = await Task.WhenAll(
+                InpsectCamera1Async(),
+                InpsectCamera2Async());
 
-            var cam1Result = await cam1Task;
-            var cam2Result = await cam2Task;
+            var cam1Result = results[0];
+            var cam2Result = results[1];
 
-            await Task.WhenAll(cam1Task, cam2Task);
-            
             if (!cam1Result.status || !cam2Result.status)
             {
                 //_mainWindow.UpdateNg(cam1Result, cam2Result);
@@ -149,7 +158,7 @@ namespace DiskInspection.Controllers
             {
                 //_mainWindow.UpdateOk();
             }
-
+            StartPlcTimer();
         }
 
         private async Task<(bool status, List<string> errors)> InpsectCamera1Async()
@@ -158,7 +167,7 @@ namespace DiskInspection.Controllers
             List<string> errors = new List<string>();
 
             // ================= WHITE LIGHT =================
-            if (!await Task.Run(() => APICommunication.ControlLed1(_param.ApiUrlCom, true, 1000)))
+            if (!await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, true, 1000)))
             {
                 _mainWindow.ShowError(
                     "Cannot turn on LED 1! Please check the PLC connection\r" +
@@ -171,7 +180,7 @@ namespace DiskInspection.Controllers
             //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
             Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-14-20.bmp");
 
-            await Task.Run(() => APICommunication.ControlLed1(_param.ApiUrlCom, false, 1000));
+            await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
 
             lock (_cam1WhiteOriginLock)
             {
@@ -183,9 +192,9 @@ namespace DiskInspection.Controllers
                 APICommunication.InspectWhiteLight(
                     _param.ApiUrlAi,
                     new Image<Bgr, byte>(frameWhite).Mat,
-                    1000));
+                    10000));
 
-            if (resWhite == null || !resWhite.Result)
+            if (resWhite == null)
             {
                 totalStatus = false;
                 _mainWindow.ShowError(
@@ -206,7 +215,7 @@ namespace DiskInspection.Controllers
             await Task.Yield(); // 👈 nhường UI render
 
             // ================= UV LIGHT =================
-            if (!await Task.Run(() => APICommunication.ControlUv(_param.ApiUrlCom, true, 1000)))
+            if (!await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, true, 1000)))
             {
                 _mainWindow.ShowError(
                     "Cannot turn on UV light! Please check the PLC connection\r" +
@@ -219,7 +228,7 @@ namespace DiskInspection.Controllers
             //Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
             Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-14-20.bmp");
 
-            await Task.Run(() => APICommunication.ControlUv(_param.ApiUrlCom, false, 1000));
+            await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
 
             lock (_cam1UvOriginLock)
             {
@@ -231,9 +240,9 @@ namespace DiskInspection.Controllers
                 APICommunication.InspectUvLight(
                     _param.ApiUrlAi,
                     new Image<Bgr, byte>(frameUv).Mat,
-                    1000));
+                    10000));
 
-            if (resUv == null || !resUv.Result)
+            if (resUv == null)
             {
                 totalStatus = false;
                 _mainWindow.ShowError(
@@ -260,7 +269,7 @@ namespace DiskInspection.Controllers
             List<string> errors = new List<string>();
 
             // ================= WHITE LIGHT =================
-            if (!await Task.Run(() => APICommunication.ControlLed2(_param.ApiUrlCom, true, 1000)))
+            if (!await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, true, 1000)))
             {
                 _mainWindow.ShowError(
                     "Cannot turn on LED 2! Please check the PLC connection\r" +
@@ -273,7 +282,7 @@ namespace DiskInspection.Controllers
             //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
             Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-07-51.bmp");
 
-            await Task.Run(() => APICommunication.ControlLed2(_param.ApiUrlCom, false, 1000));
+            await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
 
             lock (_cam2WhiteOriginLock)
             {
@@ -286,9 +295,9 @@ namespace DiskInspection.Controllers
                 APICommunication.InspectWhiteLight(
                     _param.ApiUrlAi,
                     new Image<Bgr, byte>(frameWhite).Mat,
-                    1000));
+                    10000));
 
-            if (resWhite == null || !resWhite.Result)
+            if (resWhite == null)
             {
                 totalStatus = false;
                 _mainWindow.ShowError(
@@ -309,7 +318,7 @@ namespace DiskInspection.Controllers
             await Task.Yield(); // 👈 nhường UI render
 
             // ================= UV LIGHT =================
-            if (!await Task.Run(() => APICommunication.ControlUv(_param.ApiUrlCom, true, 1000)))
+            if (!await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, true, 1000)))
             {
                 _mainWindow.ShowError(
                     "Cannot turn on UV light! Please check the PLC connection\r" +
@@ -322,7 +331,7 @@ namespace DiskInspection.Controllers
             //Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
             Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-07-51.bmp");
 
-            await Task.Run(() => APICommunication.ControlUv(_param.ApiUrlCom, false, 1000));
+            await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
 
             lock (_cam2UvOriginLock)
             {
@@ -334,9 +343,9 @@ namespace DiskInspection.Controllers
                 APICommunication.InspectUvLight(
                     _param.ApiUrlAi,
                     new Image<Bgr, byte>(frameUv).Mat,
-                    1000));
+                    10000));
 
-            if (resUv == null || !resUv.Result)
+            if (resUv == null)
             {
                 totalStatus = false;
                 _mainWindow.ShowError(
@@ -602,19 +611,24 @@ namespace DiskInspection.Controllers
         public void StartStatusTimer()
         {
             if (_statusTimer != null) return;
-            _statusTimer = new DispatcherTimer();
-            _statusTimer.Interval = TimeSpan.FromSeconds(1);
-            _statusTimer.Tick += StatusTimer_Tick;
-            _statusTimer.Start();
+            _statusTimer = new System.Timers.Timer(1000);
+            _statusTimer.Elapsed += StatusTimer_Elapsed;
+            _statusTimer.AutoReset = true;
+            _statusTimer.Enabled = true;
         }
 
-        private void StatusTimer_Tick(object sender, EventArgs e)
+        private void StatusTimer_Elapsed(object sender, EventArgs e)
         {
-            var resAI = APICommunication.CheckAPIStatus(_param.ApiUrlAi);
-            var resPLC = APICommunication.CheckPlcConnection(_param.ApiUrlCom);
-            var resCamera1 = _camera1.IsOpen();
-            var resCamera2 = _camera2.IsOpen();
-            _mainWindow.SetStatusService(resAI, resPLC, resCamera1, resCamera2);
+            lock (_statusLock)
+            {
+                StopStatusTimer();
+                var resAI = APICommunication.CheckAPIStatus(_param.ApiUrlAi);
+                var resPLC = PlcController.CheckPlcConnection(_param.ApiUrlCom);
+                var resCamera1 = _camera1 != null && _camera1.IsOpen();
+                var resCamera2 = _camera2 != null && _camera2.IsOpen();
+                _mainWindow.SetStatusService(resAI, resPLC, resCamera1, resCamera2);
+                StartStatusTimer();
+            }
         }
         public void StopStatusTimer()
         {
@@ -666,9 +680,9 @@ namespace DiskInspection.Controllers
         private bool CheckAndStartPLC()
         {
             return true;
-            if (!APICommunication.CheckPlcConnection(_param.ApiUrlCom))
+            if (!PlcController.CheckPlcConnection(_param.ApiUrlCom))
             {
-                var resConnection = APICommunication.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
+                var resConnection = PlcController.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
                 if (!resConnection)
                 {
                     _mainWindow.ShowError("Không kết nối được với PLC, hãy kiểm tra kết nối\nCannot connect to PLC! Please check the connection");

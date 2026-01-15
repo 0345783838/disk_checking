@@ -1,6 +1,7 @@
 ﻿using DiskInspection.Controllers;
 using DiskInspection.Controllers.APIs;
 using DiskInspection.Controllers.Camera;
+using DiskInspection.Controllers.PLC;
 using DiskInspection.Views.UtilitiesWindows;
 using Emgu.CV;
 using LiveCharts.Wpf;
@@ -156,7 +157,7 @@ namespace DiskInspection.Views.SettingsWindows
                 error.ShowDialog();
                 return;
             }
-            if (!APICommunication.ConnectPlc(_param.ApiUrlCom, tbPlcIp.Text, int.Parse(tbPlcPort.Text)))
+            if (!PlcController.ConnectPlc(_param.ApiUrlCom, tbPlcIp.Text, int.Parse(tbPlcPort.Text)))
             {
                 var error = new ErrorWindow("No connection to PLC!\rKhông có kết nối PLC!");
                 error.ShowDialog();
@@ -164,7 +165,7 @@ namespace DiskInspection.Views.SettingsWindows
             }
             else
             {
-                APICommunication.DisConnectPlc(_param.ApiUrlCom);
+                PlcController.DisConnectPlc(_param.ApiUrlCom);
             }
             // Save Settings
             _param.Cam1Sn = cbbCam1Sn.Text;
@@ -301,7 +302,7 @@ namespace DiskInspection.Views.SettingsWindows
             var plcPort = int.Parse(tbPlcPort.Text);
             new Task(() =>
             {
-                result = APICommunication.ConnectPlc(_param.ApiUrlCom, plcIp, plcPort);
+                result = PlcController.ConnectPlc(_param.ApiUrlCom, plcIp, plcPort);
                 waiting.KillMe = true;
             }).Start();
 
@@ -312,7 +313,7 @@ namespace DiskInspection.Views.SettingsWindows
             {
                 new Task(() =>
                 {
-                    APICommunication.DisConnectPlc(_param.ApiUrlCom);
+                    PlcController.DisConnectPlc(_param.ApiUrlCom);
                 }).Start();          
                 var info = new InformationWindow("PLC connection is OK!\rKết nối PLC OK!");
                 info.ShowDialog();

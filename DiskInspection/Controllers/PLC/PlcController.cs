@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace DiskInspection.Controllers.PLC
 {
+ 
     class PlcController
     {
+        public static bool _firstTrigger = true;
         private static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         public static Properties.Settings _param = Properties.Settings.Default;
 
@@ -59,6 +61,16 @@ namespace DiskInspection.Controllers.PLC
         }
         internal static (TriggerState, bool) CheckTrigger(string url, int timeout = 1500)
         {
+            if (_firstTrigger)
+            {
+                _firstTrigger = false;
+                return (TriggerState.OK, true);
+            }
+            else
+            {
+                return (TriggerState.OK, false);
+            }
+
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
@@ -77,6 +89,7 @@ namespace DiskInspection.Controllers.PLC
         }
         internal static bool ResetTrigger(string url, int timeout = 1500)
         {
+
             return true;
             var options = new RestClientOptions(url)
             {
@@ -117,7 +130,7 @@ namespace DiskInspection.Controllers.PLC
                 return false;
             }
         }
-        public static bool ControlUv(string url, bool status, int timeout = 1500)
+        public static bool ControlUv1(string url, bool status, int timeout = 1500)
         {
             // test debug
             return true;
@@ -126,7 +139,30 @@ namespace DiskInspection.Controllers.PLC
                 Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointControlUv, Method.Get);
+            var request = new RestRequest(_param.EndpointControlUv1, Method.Get);
+            request.AddQueryParameter("status", status);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static bool ControlUv2(string url, bool status, int timeout = 1500)
+        {
+            // test debug
+            return true;
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointControlUv2, Method.Get);
             request.AddQueryParameter("status", status);
 
             var response = client.Execute(request);
