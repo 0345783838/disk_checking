@@ -1,25 +1,9 @@
+1. Update biểu đồ theo ca làm việc
 
------------- Debug Window-----------------
+2. Chia thông tin result ra 2 cột Cam (status, disk count, disk min/max distance)
 
-yes 1. Xử lý logic điều khiển đèn + thông báo lỗi nếu không bật được đèn bước online
-yes 2. Load camera sẵn lên cbb (load thẳng trong config hoặc get list cam)
-    , check kết nối camera khi select
+3. Logging (nên có user control để sau sử dụng lại)
 
-yes 3. Capture và xử lý
+4. Sửa service trả về thêm disk count và min/max distance
 
-4. Test với camera thực tế -> tối 07/01
-
-=> hoàn thiện debug
-
-
------------- Main Window-----------------
-
-1. Nghiên cuu layout -> tối 07/01
-
-2. Luồng logic phán định + hiển thị
-
-3. Update statistics (biểu đồ, thông tin)
-
-4. Luồng lưu ảnh
-
-5. Thông báo message, log....
+5. Thu thập thêm data, train lại detect + cls + seg chuẩn chỉ

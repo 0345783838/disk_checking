@@ -357,7 +357,7 @@
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="300" />
-                    <RowDefinition Height="250" />
+                    <RowDefinition Height="246" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
@@ -368,14 +368,36 @@
                         Header="Statistics">
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="5*" />
                                 <RowDefinition Height="22*" />
                                 <RowDefinition Height="5*" />
                             </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <Label Content="Working Shift:" />
+                                    <Label
+                                        Name="lbWorkingShift"
+                                        Content="7:00 - 18:30"
+                                        FontWeight="Bold"
+                                        Foreground="DarkBlue" />
+                                    <Label Content="---" />
+                                    <Label Content="Date:" />
+                                    <Label
+                                        Name="lbDate"
+                                        Content="16/01/2026"
+                                        FontWeight="Bold"
+                                        Foreground="DarkBlue" />
+                                </StackPanel>
+
+                            </Grid>
                             <lvc:PieChart
-                                Grid.Row="0"
+                                Grid.Row="1"
                                 LegendLocation="Right"
                                 Series="{Binding PieSeriesCollection}" />
-                            <Grid Grid.Row="1">
+                            <Grid Grid.Row="2">
                                 <StackPanel
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
@@ -423,14 +445,186 @@
                         Margin="5"
                         BorderBrush="Gray"
                         BorderThickness="1"
-                        Header="Inspection Infos" />
+                        Header="Inspection Infos">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="60" />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0" Margin="0,5,0,0">
+                                <Border
+                                    x:Name="bdInspectionStatus"
+                                    Margin="65,0,65,0"
+                                    Background="{Binding InspectionStatus, Converter={StaticResource MainStatusColorConverter}, FallbackValue='Gray'}"
+                                    BorderBrush="White"
+                                    BorderThickness="0.7"
+                                    CornerRadius="5">
+                                    <Label
+                                        x:Name="lbInspectionStatus"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Content="{Binding InspectionStatus, Converter={StaticResource MainStatusConverter}, FallbackValue='UNKNOWN'}"
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Foreground="White" />
+                                </Border>
+                            </Grid>
+                            <Grid Grid.Row="1" Margin="0,5,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="1*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.Resources>
+                                    <Style x:Key="stLabel" TargetType="Label">
+                                        <Setter Property="Width" Value="90" />
+                                        <Setter Property="FontSize" Value="12" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Foreground" Value="Gray" />
+                                    </Style>
+                                    <Style x:Key="stInfo" TargetType="Label">
+                                        <Setter Property="Width" Value="Auto" />
+                                        <Setter Property="FontSize" Value="14" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Foreground" Value="DarkBlue" />
+                                    </Style>
+                                </Grid.Resources>
+                                <Grid Grid.Column="0">
+                                    <DockPanel LastChildFill="False">
+                                        <Label
+                                            HorizontalAlignment="Center"
+                                            Content="CAM1"
+                                            DockPanel.Dock="Top"
+                                            FontSize="14"
+                                            FontWeight="Bold"
+                                            Foreground="Orange" />
+                                        <Separator Margin="15,-5,15,0" DockPanel.Dock="Top" />
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Status:" Style="{DynamicResource stLabel}" />
+                                            <Border
+                                                x:Name="bdStatusCam1"
+                                                Width="45"
+                                                Height="Auto"
+                                                Background="Gray"
+                                                BorderBrush="Gray"
+                                                BorderThickness="0.7"
+                                                CornerRadius="5">
+                                                <Label
+                                                    x:Name="lbStatusCam1"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Content="{Binding TotalOKCount, FallbackValue='N/A'}"
+                                                    FontSize="14"
+                                                    FontWeight="Bold"
+                                                    Foreground="White" />
+                                            </Border>
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Disk Count:" Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbDiskCountCam1"
+                                                HorizontalAlignment="Center"
+                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Min Distance:" Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbMinDisCam1"
+                                                HorizontalAlignment="Center"
+                                                Content="{Binding SelectedImagePath.X, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Max Distance:" Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbMaxDisCam1"
+                                                HorizontalAlignment="Center"
+                                                Content="{Binding SelectedImagePath.Y, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+
+                                    </DockPanel>
+                                </Grid>
+                                <Grid Grid.Column="1">
+                                    <Border
+                                        Width="1"
+                                        Margin="0,5,0,5"
+                                        Background="DarkGray" />
+                                </Grid>
+                                <Grid Grid.Column="2">
+                                    <DockPanel LastChildFill="False">
+                                        <Label
+                                            HorizontalAlignment="Center"
+                                            Content="CAM2"
+                                            DockPanel.Dock="Top"
+                                            FontSize="14"
+                                            FontWeight="Bold"
+                                            Foreground="Orange" />
+                                        <Separator Margin="15,-5,15,0" DockPanel.Dock="Top" />
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Status:" Style="{DynamicResource stLabel}" />
+                                            <Border
+                                                x:Name="bdStatusCam2"
+                                                Width="45"
+                                                Height="Auto"
+                                                Background="Gray"
+                                                BorderBrush="Gray"
+                                                BorderThickness="0.7"
+                                                CornerRadius="5">
+                                                <Label
+                                                    x:Name="lbStatusCam2"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Content="{Binding TotalOKCount, FallbackValue='N/A'}"
+                                                    FontSize="14"
+                                                    FontWeight="Bold"
+                                                    Foreground="White" />
+                                            </Border>
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Disk Count:" Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbDiskCountCam2"
+                                                HorizontalAlignment="Center"
+                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Min Distance:" Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbMinDisCam2"
+                                                HorizontalAlignment="Center"
+                                                Content="{Binding SelectedImagePath.X, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label Content="Max Distance:" Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbMaxDisCam2"
+                                                HorizontalAlignment="Center"
+                                                Content="{Binding SelectedImagePath.Y, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+
+                                    </DockPanel>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </GroupBox>
                 </Grid>
                 <Grid Grid.Row="2">
                     <GroupBox
                         Margin="5"
                         BorderBrush="Gray"
                         BorderThickness="1"
-                        Header="Messages" />
+                        Header="Messages">
+                        <TabControl />
+                    </GroupBox>
                 </Grid>
             </Grid>
         </Grid>
