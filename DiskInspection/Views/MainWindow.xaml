@@ -357,7 +357,7 @@
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="300" />
-                    <RowDefinition Height="246" />
+                    <RowDefinition Height="282" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
@@ -524,10 +524,21 @@
                                             </Border>
                                         </DockPanel>
                                         <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                                            <Label Content="Disk Count:" Style="{DynamicResource stLabel}" />
+                                            <Label Content="Finish Time:" Style="{DynamicResource stLabel}" />
                                             <Label
-                                                x:Name="lbDiskCountCam1"
+                                                x:Name="lbFinishTimeCam1"
                                                 HorizontalAlignment="Center"
+                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label
+                                                Width="96"
+                                                Content="UV Disk Count:"
+                                                Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbUvDiskCountCam1"
+                                                Width="45"
                                                 Content="{Binding TimeStamp, FallbackValue='N/A'}"
                                                 Style="{DynamicResource stInfo}" />
                                         </DockPanel>
@@ -587,10 +598,21 @@
                                             </Border>
                                         </DockPanel>
                                         <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                                            <Label Content="Disk Count:" Style="{DynamicResource stLabel}" />
+                                            <Label Content="Finish Time:" Style="{DynamicResource stLabel}" />
                                             <Label
-                                                x:Name="lbDiskCountCam2"
+                                                x:Name="lbFinishTimeCam2"
                                                 HorizontalAlignment="Center"
+                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label
+                                                Width="96"
+                                                Content="UV Disk Count:"
+                                                Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbUvDiskCountCam2"
+                                                Width="45"
                                                 Content="{Binding TimeStamp, FallbackValue='N/A'}"
                                                 Style="{DynamicResource stInfo}" />
                                         </DockPanel>
