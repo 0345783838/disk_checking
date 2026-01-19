@@ -611,7 +611,7 @@ namespace DiskInspection.Controllers
         public void StartStatusTimer()
         {
             if (_statusTimer != null) return;
-            _statusTimer = new System.Timers.Timer(1000);
+            _statusTimer = new System.Timers.Timer(2000);
             _statusTimer.Elapsed += StatusTimer_Elapsed;
             _statusTimer.AutoReset = true;
             _statusTimer.Enabled = true;

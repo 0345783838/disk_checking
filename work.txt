@@ -7,3 +7,7 @@
 4. Sửa service trả về thêm disk count và min/max distance
 
 5. Thu thập thêm data, train lại detect + cls + seg chuẩn chỉ
+
+6. Đổi lại logic bật đen khi debug, capture thì mới bật
+
+7. Form pupup ảnh to kèm lỗi

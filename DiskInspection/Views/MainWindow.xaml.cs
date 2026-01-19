@@ -1,5 +1,6 @@
 ﻿using DiskInspection.Controllers;
 using DiskInspection.Models;
+using DiskInspection.Services;
 using DiskInspection.Views;
 using DiskInspection.Views.DebugWindows;
 using DiskInspection.Views.SettingsWindows;
@@ -160,8 +161,7 @@ namespace DiskInspection
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
-                var box = new ErrorWindow(content);
-                box.ShowDialog();
+                ErrorService.ShowError(content);
             }));
         }
         public void ShowInfo(string content)

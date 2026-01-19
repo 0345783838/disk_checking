@@ -13,7 +13,6 @@ namespace DiskInspection.Models
         public string ErrorCode { get; set; }
         public string ErrorDesc { get; set; }
         public string ResImg { get; set; }
-        public int DiskCount { get; set; }
         public double MinDiskDistance { get; set; }
         public double MaxDiskDistance { get; set; }
     }
