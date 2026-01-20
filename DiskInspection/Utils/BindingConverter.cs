@@ -88,4 +88,41 @@ namespace DiskInspection.Utils
             return value;
         }
     }
+    public class MainResCamStatusConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int status)
+            {
+                if (status == (int)(StatusState.OK)) return "OK";
+                else if (status == (int)(StatusState.NG)) return "NG";
+                return "N/A";
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+    public class MainInspectionStatusConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int status)
+            {
+                if (status == (int)(StatusState.OK)) return "PASSED";
+                else if (status == (int)(StatusState.NG)) return "FAILED";
+                return "N/A";
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+
 }

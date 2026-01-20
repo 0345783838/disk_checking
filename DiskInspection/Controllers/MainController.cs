@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using DiskInspection.Controllers.PLC;
+using System.Diagnostics;
 
 namespace DiskInspection.Controllers
 {
@@ -150,221 +151,264 @@ namespace DiskInspection.Controllers
             var cam1Result = results[0];
             var cam2Result = results[1];
 
+            _mainWindow.UpdateInspectionStatusCam1(cam1Result.status);
+            _mainWindow.UpdateCam1ProcessedTime(cam1Result.time);
+            _mainWindow.UpdateInspectionStatusCam2(cam2Result.status);
+            _mainWindow.UpdateCam2ProcessedTime(cam2Result.time);
+
             if (!cam1Result.status || !cam2Result.status)
             {
-                //_mainWindow.UpdateNg(cam1Result, cam2Result);
+                _mainWindow.UpdateInspectionStatus(false);
             }
             else
             {
-                //_mainWindow.UpdateOk();
+                _mainWindow.UpdateInspectionStatus(true);
             }
             StartPlcTimer();
         }
 
-        private async Task<(bool status, List<string> errors)> InpsectCamera1Async()
+        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera1Async()
         {
-            bool totalStatus = true;
-            List<string> errors = new List<string>();
-
-            // ================= WHITE LIGHT =================
-            if (!await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, true, 1000)))
+            var sw = Stopwatch.StartNew();
+            try
             {
-                _mainWindow.ShowError(
-                    "Cannot turn on LED 1! Please check the PLC connection\r" +
-                    "Không bật được đèn LED 1, hãy kiểm tra kết nối PLC!");
-                return (false, null);
-            }
+                bool totalStatus = true;
+                List<string> errors = new List<string>();
 
-            await Task.Delay(_param.Cam1Exposure + 10);
-
-            //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
-            Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-14-20.bmp");
-
-            await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
-
-            lock (_cam1WhiteOriginLock)
-            {
-                _cam1LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
-            }
-            _mainWindow.UpdateCam1WhiteOrigin(_cam1LastWhiteBitmap);   // 🔥 update NGAY
-
-            var resWhite = await Task.Run(() =>
-                APICommunication.InspectWhiteLight(
-                    _param.ApiUrlAi,
-                    new Image<Bgr, byte>(frameWhite).Mat,
-                    10000));
-
-            if (resWhite == null)
-            {
-                totalStatus = false;
-                _mainWindow.ShowError(
-                    "Cannot run AI inspection! Please check the AI engine\r" +
-                    "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                return (false, null);
-            }
-            else
-            {
-                lock (_cam1WhiteResultLock)
+                // ================= WHITE LIGHT =================
+                if (!await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, true, 1000)))
                 {
-                    _cam1LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
+                    _mainWindow.ShowError(
+                        "Cannot turn on LED 1! Please check the PLC connection\r" +
+                        "Không bật được đèn LED 1, hãy kiểm tra kết nối PLC!");
+                    return (false, null, sw.Elapsed);
                 }
-                _mainWindow.UpdateCam1WhiteResult(_cam1LastWhiteResultBitmap); // 🔥 update NGAY
-            }
 
-            frameWhite.Dispose();
-            await Task.Yield(); // 👈 nhường UI render
+                await Task.Delay(_param.Cam1Exposure + 10);
 
-            // ================= UV LIGHT =================
-            if (!await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, true, 1000)))
-            {
-                _mainWindow.ShowError(
-                    "Cannot turn on UV light! Please check the PLC connection\r" +
-                    "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
-                return (false, null);
-            }
+                //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
+                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_1\Image_20260111234233379.bmp");
 
-            await Task.Delay(_param.Cam1Exposure + 10);
+                await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
 
-            //Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
-            Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-14-20.bmp");
-
-            await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
-
-            lock (_cam1UvOriginLock)
-            {
-                _cam1LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
-            }
-            _mainWindow.UpdateCam1UvOrigin(_cam1LastUvBitmap); // 🔥 update NGAY
-
-            var resUv = await Task.Run(() =>
-                APICommunication.InspectUvLight(
-                    _param.ApiUrlAi,
-                    new Image<Bgr, byte>(frameUv).Mat,
-                    10000));
-
-            if (resUv == null)
-            {
-                totalStatus = false;
-                _mainWindow.ShowError(
-                    "Cannot run AI inspection! Please check the AI engine\r" +
-                    "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                return (false, null);
-            }
-            else
-            {
-                lock (_cam1UvResultLock)
+                lock (_cam1WhiteOriginLock)
                 {
-                    _cam1LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
+                    _cam1LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
                 }
-                _mainWindow.UpdateCam1UvResult(_cam1LastUvResultBitmap); // 🔥 update NGAY
+                _mainWindow.UpdateCam1WhiteOrigin(_cam1LastWhiteBitmap);   // 🔥 update NGAY
+
+                var resWhite = await Task.Run(() =>
+                    APICommunication.InspectWhiteLight(
+                        _param.ApiUrlAi,
+                        new Image<Bgr, byte>(frameWhite).Mat,
+                        10000));
+
+                if (resWhite == null)
+                {
+                    totalStatus = false;
+                    _mainWindow.ShowError(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    return (false, null,  sw.Elapsed);
+                }
+                else
+                {
+                    lock (_cam1WhiteResultLock)
+                    {
+                        _cam1LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
+                    }
+                    _mainWindow.UpdateCam1WhiteResult(_cam1LastWhiteResultBitmap); // 🔥 update NGAY
+                    _mainWindow.UpdateCam1MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
+                    if(!resWhite.Result)
+                        totalStatus = false;
+                }
+
+                frameWhite.Dispose();
+                await Task.Yield(); // 👈 nhường UI render
+
+                // ================= UV LIGHT =================
+                if (!await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, true, 1000)))
+                {
+                    _mainWindow.ShowError(
+                        "Cannot turn on UV light! Please check the PLC connection\r" +
+                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
+                    return (false, null, sw.Elapsed);
+                }
+
+                await Task.Delay(_param.Cam1Exposure + 10);
+
+                //Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
+                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\uv\Image__2025-12-04__21-45-37 - Copy.bmp");
+
+                await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
+
+                lock (_cam1UvOriginLock)
+                {
+                    _cam1LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
+                }
+
+                // Update result to UI
+                _mainWindow.UpdateCam1UvOrigin(_cam1LastUvBitmap); // 🔥 update NGAY
+
+                var resUv = await Task.Run(() =>
+                    APICommunication.InspectUvLight(
+                        _param.ApiUrlAi,
+                        new Image<Bgr, byte>(frameUv).Mat,
+                        resWhite.CropBox,
+                        resWhite.UvBox1,
+                        resWhite.UvBox2,
+                        10000));
+
+                if (resUv == null)
+                {
+                    totalStatus = false;
+                    _mainWindow.ShowError(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    return (false, null, sw.Elapsed);
+                }
+                else
+                {
+                    lock (_cam1UvResultLock)
+                    {
+                        _cam1LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
+                    }
+                    _mainWindow.UpdateCam1UvResult(_cam1LastUvResultBitmap);
+                    _mainWindow.UpdateCam1DiskUv(resUv.CountUvDisk);
+                    if (!resUv.Result)
+                        totalStatus = false;
+                }
+
+                frameUv.Dispose();
+                return (totalStatus, errors, sw.Elapsed);
+
             }
-
-            frameUv.Dispose();
-
-            return (totalStatus, errors);
+            finally
+            {
+                sw.Stop();
+            }
         }
-        private async Task<(bool status, List<string> errors)> InpsectCamera2Async()
+        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera2Async()
         {
-            bool totalStatus = true;
-            List<string> errors = new List<string>();
-
-            // ================= WHITE LIGHT =================
-            if (!await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, true, 1000)))
+            var sw = Stopwatch.StartNew();
+            try
             {
-                _mainWindow.ShowError(
-                    "Cannot turn on LED 2! Please check the PLC connection\r" +
-                    "Không bật được đèn LED 2, hãy kiểm tra kết nối PLC!");
-                return (false, null);
-            }
+                bool totalStatus = true;
+                List<string> errors = new List<string>();
 
-            await Task.Delay(_param.Cam2Exposure + 10);
-
-            //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
-            Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-07-51.bmp");
-
-            await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
-
-            lock (_cam2WhiteOriginLock)
-            {
-                _cam2LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
-            }
-            _mainWindow.UpdateCam2WhiteOrigin(_cam2LastWhiteBitmap);   // 🔥 update NGAY
-
-
-            var resWhite = await Task.Run(() =>
-                APICommunication.InspectWhiteLight(
-                    _param.ApiUrlAi,
-                    new Image<Bgr, byte>(frameWhite).Mat,
-                    10000));
-
-            if (resWhite == null)
-            {
-                totalStatus = false;
-                _mainWindow.ShowError(
-                    "Cannot run AI inspection! Please check the AI engine\r" +
-                    "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                return (false, null);
-            }
-            else
-            {
-                lock (_cam2WhiteResultLock)
+                // ================= WHITE LIGHT =================
+                if (!await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, true, 1000)))
                 {
-                    _cam2LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
+                    _mainWindow.ShowError(
+                        "Cannot turn on LED 2! Please check the PLC connection\r" +
+                        "Không bật được đèn LED 2, hãy kiểm tra kết nối PLC!");
+                    return (false, null, sw.Elapsed);
                 }
-                _mainWindow.UpdateCam2WhiteResult(_cam2LastWhiteResultBitmap); // 🔥 update NGAY
-            }
 
-            frameWhite.Dispose();
-            await Task.Yield(); // 👈 nhường UI render
+                await Task.Delay(_param.Cam2Exposure + 10);
 
-            // ================= UV LIGHT =================
-            if (!await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, true, 1000)))
-            {
-                _mainWindow.ShowError(
-                    "Cannot turn on UV light! Please check the PLC connection\r" +
-                    "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
-                return (false, null);
-            }
+                //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
+                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_1\Image_20260111234233379.bmp");
 
-            await Task.Delay(_param.Cam2Exposure + 10);
+                await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
 
-            //Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
-            Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\02_01\Image__2026-01-02__00-07-51.bmp");
-
-            await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
-
-            lock (_cam2UvOriginLock)
-            {
-                _cam2LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
-            }
-            _mainWindow.UpdateCam2UvOrigin(_cam2LastUvBitmap); // 🔥 update NGAY
-
-            var resUv = await Task.Run(() =>
-                APICommunication.InspectUvLight(
-                    _param.ApiUrlAi,
-                    new Image<Bgr, byte>(frameUv).Mat,
-                    10000));
-
-            if (resUv == null)
-            {
-                totalStatus = false;
-                _mainWindow.ShowError(
-                    "Cannot run AI inspection! Please check the AI engine\r" +
-                    "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                return (false, null);
-            }
-            else
-            {
-                lock (_cam2UvResultLock)
+                lock (_cam2WhiteOriginLock)
                 {
-                    _cam2LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
+                    _cam2LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
                 }
-                _mainWindow.UpdateCam2UvResult(_cam2LastUvResultBitmap); // 🔥 update NGAY
+                _mainWindow.UpdateCam2WhiteOrigin(_cam2LastWhiteBitmap);   // 🔥 update NGAY
+
+                var resWhite = await Task.Run(() =>
+                    APICommunication.InspectWhiteLight(
+                        _param.ApiUrlAi,
+                        new Image<Bgr, byte>(frameWhite).Mat,
+                        10000));
+
+
+                if (resWhite == null)
+                {
+                    totalStatus = false;
+                    _mainWindow.ShowError(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    return (false, null, sw.Elapsed);
+                }
+                else
+                {
+                    lock (_cam2WhiteResultLock)
+                    {
+                        _cam2LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
+                    }
+                    _mainWindow.UpdateCam2WhiteResult(_cam2LastWhiteResultBitmap); // 🔥 update NGAY
+                    _mainWindow.UpdateCam2MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
+                    if (!resWhite.Result)
+                        totalStatus = false;
+                }
+
+                frameWhite.Dispose();
+                await Task.Yield(); // 👈 nhường UI render
+
+                // ================= UV LIGHT =================
+                if (!await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, true, 1000)))
+                {
+                    _mainWindow.ShowError(
+                        "Cannot turn on UV light! Please check the PLC connection\r" +
+                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
+                    return (false, null, sw.Elapsed);
+                }
+
+                await Task.Delay(_param.Cam2Exposure + 10);
+
+                //Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
+                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\uv\Image__2025-12-04__21-45-37 - Copy.bmp");
+
+                await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
+
+                lock (_cam2UvOriginLock)
+                {
+                    _cam2LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
+                }
+                _mainWindow.UpdateCam2UvOrigin(_cam2LastUvBitmap); // 🔥 update NGAY
+
+                var resUv = await Task.Run(() =>
+                    APICommunication.InspectUvLight(
+                        _param.ApiUrlAi,
+                        new Image<Bgr, byte>(frameUv).Mat,
+                        resWhite.CropBox,
+                        resWhite.UvBox1,
+                        resWhite.UvBox2,
+                        10000));
+
+                if (resUv == null)
+                {
+                    totalStatus = false;
+                    _mainWindow.ShowError(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    return (false, null, sw.Elapsed);
+                }
+                else
+                {
+                    lock (_cam2UvResultLock)
+                    {
+                        _cam2LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
+                    }
+                    _mainWindow.UpdateCam2UvResult(_cam2LastUvResultBitmap); // 🔥 update NGAY
+                    _mainWindow.UpdateCam2DiskUv(resUv.CountUvDisk);
+                    if (!resUv.Result)
+                        totalStatus = false;
+                }
+
+                frameUv.Dispose();
+
+                return (totalStatus, errors, sw.Elapsed);
+            }
+            finally
+            {
+                sw.Stop();
             }
 
-            frameUv.Dispose();
 
-            return (totalStatus, errors);
         }
 
         //private (bool status, List<string> errors) InpsectCamera1()

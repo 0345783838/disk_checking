@@ -41,6 +41,10 @@ namespace DiskInspection
         public int PlcStatus { get; set; } = (int)(StatusState.UNKNOWN);
         public int Cam1Status { get; set; } = (int)(StatusState.UNKNOWN);
         public int Cam2Status { get; set; } = (int)(StatusState.UNKNOWN);
+        public int InspectionStatusCam1 { get; set; } = (int)(StatusState.UNKNOWN);
+        public int InspectionStatusCam2 { get; set; } = (int)(StatusState.UNKNOWN);
+        public int InspectionStatus { get; set; } = (int)(StatusState.UNKNOWN);
+
         public MainWindow()
         {
             InitializeComponent();
@@ -259,5 +263,81 @@ namespace DiskInspection
         }
 
         #endregion
+
+        #region Update Result CAM 1
+        internal void UpdateInspectionStatus(bool status)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                InspectionStatus = status ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                OnPropertyChanged(nameof(InspectionStatus));
+            }));
+        }
+        internal void UpdateInspectionStatusCam1(bool status)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                InspectionStatusCam1 = status ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                OnPropertyChanged(nameof(InspectionStatusCam1));
+            }));
+        }
+        internal void UpdateCam1DiskUv(int countUvDisk)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbUvDiskCountCam1.Content = countUvDisk.ToString();
+            }));
+        }
+        internal void UpdateCam1MinMaxDis(double maxDis, double minDis)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbMaxDisCam1.Content = maxDis.ToString("F2");
+                lbMinDisCam1.Content = minDis.ToString("F2");
+            }));
+        }
+        internal void UpdateCam1ProcessedTime(TimeSpan time)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbFinishTimeCam1.Content = $"{time.Seconds}.{time.Milliseconds:D2} (s)";
+            }));
+        }
+
+        #endregion
+
+        #region Update Result CAM 2
+        internal void UpdateInspectionStatusCam2(bool status)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                InspectionStatusCam2 = status ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                OnPropertyChanged(nameof(InspectionStatusCam2));
+            }));
+        }
+        internal void UpdateCam2DiskUv(int countUvDisk)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbUvDiskCountCam2.Content = countUvDisk.ToString();
+            }));
+        }
+        internal void UpdateCam2MinMaxDis(double minDis, double maxDis)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbMaxDisCam2.Content = maxDis.ToString("F2");
+                lbMinDisCam2.Content = minDis.ToString("F2");
+            }));
+        }
+        internal void UpdateCam2ProcessedTime(TimeSpan time)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbFinishTimeCam2.Content = $"{time.Seconds}.{time.Milliseconds:D2} (s)";
+            }));
+        }
+        #endregion
+
     }
 }

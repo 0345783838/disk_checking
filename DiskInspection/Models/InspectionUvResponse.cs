@@ -6,17 +6,12 @@ using System.Threading.Tasks;
 
 namespace DiskInspection.Models
 {
-    
-    public class InspectionResponse
+    public class InspectionUvResponse
     {
         public bool Result { get; set; }
         public string ErrorCode { get; set; }
         public string ErrorDesc { get; set; }
         public string ResImg { get; set; }
-        public double MinDiskDistance { get; set; }
-        public double MaxDiskDistance { get; set; }
-        public string CropBox { get; set; }
-        public string UvBox1 { get; set; }
-        public string UvBox2 { get; set; }
+        public int CountUvDisk { get; set; }
     }
 }

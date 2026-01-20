@@ -167,18 +167,33 @@ namespace DiskInspection.Controllers.APIs
                 return null;
             }
         }
-        internal static InspectionResponse InspectUvLight(string url, Mat image, int timeout = 10000)
+        internal static InspectionUvResponse InspectUvLight(string url, Mat image, string crop_box, string uv_box_1, string uv_box_2, int timeout = 10000)
         {
-            dynamic obj = new InspectionResponse();
+            dynamic obj = new InspectionUvResponse();
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointInspectWhiteLight, Method.Post);
+            var request = new RestRequest(_param.EndpointInspectUvLight, Method.Post);
             request.AlwaysMultipartFormData = true;
             byte[] jpegData = image.ToImage<Bgr, byte>().ToJpegData();
             request.AddFile("image", jpegData, $"image.jpg");
+
+            // Tạo payload JSON
+            var payload = new
+            {
+                crop_box = crop_box,
+                uv_box_1 = uv_box_1,
+                uv_box_2 = uv_box_2
+            };
+            string paramsJson = JsonConvert.SerializeObject(payload);
+            request.AddParameter(
+                                "uv_box",
+                                paramsJson,
+                                ParameterType.GetOrPost
+            );
+
             var response = client.Execute(request);
 
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
@@ -186,7 +201,7 @@ namespace DiskInspection.Controllers.APIs
                 try
                 {
 
-                    obj = JsonConvert.DeserializeObject<InspectionResponse>(response.Content);
+                    obj = JsonConvert.DeserializeObject<InspectionUvResponse>(response.Content);
                     return obj;
 
                 }

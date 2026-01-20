@@ -192,6 +192,7 @@
     <Compile Include="Models\DebugImageResponse.cs" />
     <Compile Include="Models\ImageDebugInfo.cs" />
     <Compile Include="Models\ImageList.cs" />
+    <Compile Include="Models\InspectionUvResponse.cs" />
     <Compile Include="Models\MyEnum.cs" />
     <Compile Include="Models\InspectionResponse.cs" />
     <Compile Include="Services\ErrorService.cs" />

@@ -21,6 +21,8 @@
     <Window.Resources>
         <utils:MainStatusColorConverter x:Key="MainStatusColorConverter" />
         <utils:MainStatusConverter x:Key="MainStatusConverter" />
+        <utils:MainResCamStatusConverter x:Key="MainResCamStatusConverter" />
+        <utils:MainInspectionStatusConverter x:Key="MainInspectionStatusConverter" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -357,7 +359,7 @@
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="300" />
-                    <RowDefinition Height="282" />
+                    <RowDefinition Height="313" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
@@ -450,20 +452,22 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="60" />
                                 <RowDefinition />
+                                <RowDefinition Height="35" />
                             </Grid.RowDefinitions>
                             <Grid Grid.Row="0" Margin="0,5,0,0">
                                 <Border
                                     x:Name="bdInspectionStatus"
-                                    Margin="65,0,65,0"
+                                    Margin="85,0,85,0"
                                     Background="{Binding InspectionStatus, Converter={StaticResource MainStatusColorConverter}, FallbackValue='Gray'}"
                                     BorderBrush="White"
                                     BorderThickness="0.7"
-                                    CornerRadius="5">
+                                    CornerRadius="5"
+                                    DockPanel.Dock="Left">
                                     <Label
                                         x:Name="lbInspectionStatus"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Content="{Binding InspectionStatus, Converter={StaticResource MainStatusConverter}, FallbackValue='UNKNOWN'}"
+                                        Content="{Binding InspectionStatus, Converter={StaticResource MainInspectionStatusConverter}, FallbackValue='UNKNOWN'}"
                                         FontSize="18"
                                         FontWeight="Bold"
                                         Foreground="White" />
@@ -509,7 +513,7 @@
                                                 x:Name="bdStatusCam1"
                                                 Width="45"
                                                 Height="Auto"
-                                                Background="Gray"
+                                                Background="{Binding InspectionStatusCam1, FallbackValue='Gray', Converter={StaticResource MainStatusColorConverter}}"
                                                 BorderBrush="Gray"
                                                 BorderThickness="0.7"
                                                 CornerRadius="5">
@@ -517,7 +521,7 @@
                                                     x:Name="lbStatusCam1"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
-                                                    Content="{Binding TotalOKCount, FallbackValue='N/A'}"
+                                                    Content="{Binding InspectionStatusCam1, FallbackValue='N/A', Converter={StaticResource MainResCamStatusConverter}}"
                                                     FontSize="14"
                                                     FontWeight="Bold"
                                                     Foreground="White" />
@@ -528,17 +532,6 @@
                                             <Label
                                                 x:Name="lbFinishTimeCam1"
                                                 HorizontalAlignment="Center"
-                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
-                                                Style="{DynamicResource stInfo}" />
-                                        </DockPanel>
-                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                                            <Label
-                                                Width="96"
-                                                Content="UV Disk Count:"
-                                                Style="{DynamicResource stLabel}" />
-                                            <Label
-                                                x:Name="lbUvDiskCountCam1"
-                                                Width="45"
                                                 Content="{Binding TimeStamp, FallbackValue='N/A'}"
                                                 Style="{DynamicResource stInfo}" />
                                         </DockPanel>
@@ -558,7 +551,17 @@
                                                 Content="{Binding SelectedImagePath.Y, FallbackValue='N/A'}"
                                                 Style="{DynamicResource stInfo}" />
                                         </DockPanel>
-
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label
+                                                Width="96"
+                                                Content="UV Disk Count:"
+                                                Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbUvDiskCountCam1"
+                                                Width="45"
+                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
                                     </DockPanel>
                                 </Grid>
                                 <Grid Grid.Column="1">
@@ -583,7 +586,7 @@
                                                 x:Name="bdStatusCam2"
                                                 Width="45"
                                                 Height="Auto"
-                                                Background="Gray"
+                                                Background="{Binding InspectionStatusCam2, FallbackValue='Gray', Converter={StaticResource MainStatusColorConverter}}"
                                                 BorderBrush="Gray"
                                                 BorderThickness="0.7"
                                                 CornerRadius="5">
@@ -591,7 +594,7 @@
                                                     x:Name="lbStatusCam2"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
-                                                    Content="{Binding TotalOKCount, FallbackValue='N/A'}"
+                                                    Content="{Binding InspectionStatusCam2, FallbackValue='N/A', Converter={StaticResource MainResCamStatusConverter}}"
                                                     FontSize="14"
                                                     FontWeight="Bold"
                                                     Foreground="White" />
@@ -602,17 +605,6 @@
                                             <Label
                                                 x:Name="lbFinishTimeCam2"
                                                 HorizontalAlignment="Center"
-                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
-                                                Style="{DynamicResource stInfo}" />
-                                        </DockPanel>
-                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
-                                            <Label
-                                                Width="96"
-                                                Content="UV Disk Count:"
-                                                Style="{DynamicResource stLabel}" />
-                                            <Label
-                                                x:Name="lbUvDiskCountCam2"
-                                                Width="45"
                                                 Content="{Binding TimeStamp, FallbackValue='N/A'}"
                                                 Style="{DynamicResource stInfo}" />
                                         </DockPanel>
@@ -632,9 +624,39 @@
                                                 Content="{Binding SelectedImagePath.Y, FallbackValue='N/A'}"
                                                 Style="{DynamicResource stInfo}" />
                                         </DockPanel>
+                                        <DockPanel DockPanel.Dock="Top" LastChildFill="True">
+                                            <Label
+                                                Width="96"
+                                                Content="UV Disk Count:"
+                                                Style="{DynamicResource stLabel}" />
+                                            <Label
+                                                x:Name="lbUvDiskCountCam2"
+                                                Width="45"
+                                                Content="{Binding TimeStamp, FallbackValue='N/A'}"
+                                                Style="{DynamicResource stInfo}" />
+                                        </DockPanel>
 
                                     </DockPanel>
                                 </Grid>
+                            </Grid>
+                            <Grid Grid.Row="2" Margin="0,-10,0,0">
+                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                    <Label
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Content="Timestamp:"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="Gray" />
+                                    <Label
+                                        Name="lbTimestamp"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Content="16/01/2026 15:28:33"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="DarkBlue" />
+                                </StackPanel>
                             </Grid>
                         </Grid>
                     </GroupBox>
