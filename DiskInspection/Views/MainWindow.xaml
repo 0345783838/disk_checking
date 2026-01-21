@@ -667,7 +667,8 @@
                         BorderBrush="Gray"
                         BorderThickness="1"
                         Header="Messages">
-                        <ListBox ItemsSource="{Binding Logger.Logs}">
+                        <ListBox x:Name="LogListBox"
+                                 ItemsSource="{Binding Logger.Logs}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock>

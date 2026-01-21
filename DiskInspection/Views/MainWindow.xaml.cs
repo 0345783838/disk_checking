@@ -62,6 +62,25 @@ namespace DiskInspection
             _mainController = new MainController(this);
             DataContext = this;
             InitStatistics();
+            Logger.Logs.CollectionChanged += Logs_CollectionChanged;
+        }
+        private void Logs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action !=
+                System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                return;
+
+            if (LogListBox.Items.Count == 0)
+                return;
+
+            // Scroll sau khi UI render xong
+            LogListBox.Dispatcher.BeginInvoke(
+                new Action(() =>
+                {
+                    LogListBox.ScrollIntoView(
+                        LogListBox.Items[LogListBox.Items.Count - 1]);
+                }),
+                System.Windows.Threading.DispatcherPriority.Background);
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)

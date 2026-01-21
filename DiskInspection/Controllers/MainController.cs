@@ -105,6 +105,7 @@ namespace DiskInspection.Controllers
             else
             {
                 _logger.Error("Cameras, PLC and AI are not ready, Stop inspection...");
+                AppLogger.Instance.Error("Cameras, PLC and AI are not ready, Stop inspection...", "System");
                 return false;
             }
         }
@@ -128,13 +129,17 @@ namespace DiskInspection.Controllers
                 _mainWindow.ShowError(
                     "Cannot connect to PLC to read trigger! Please check the connection\r " +
                     "Không kết nối được với PLC để đọc trigger, hãy kiểm tra kết nối!");
+                AppLogger.Instance.Error(
+                    "Cannot connect to PLC to read trigger! Please check the connection\r " +
+                    "Không kết nối được với PLC để đọc trigger, hãy kiểm tra kết nối!", "PLC");
                 return;
+
             }
             if (resTrigger == TriggerState.Ok && !status)
             {
                 return;
             }
-
+            AppLogger.Instance.Info("Trigger received, start inspection...", "PLC");
             // Trigger OK
             // --- reset trigger first
             var resResetTg = PlcController.ResetTrigger(_param.ApiUrlCom, 1000);
@@ -143,6 +148,9 @@ namespace DiskInspection.Controllers
                 _mainWindow.ShowError(
                     "Cannot reset trigger! Please check the PLC connection\r" +
                     "Không reset được trigger, hãy kiểm tra kết nối PLC!");
+                AppLogger.Instance.Error(
+                    "Cannot reset trigger! Please check the PLC connection\r" +
+                    "Không reset được trigger, hãy kiểm tra kết nối PLC!", "PLC");
                 return;
             }
 
@@ -164,12 +172,15 @@ namespace DiskInspection.Controllers
             _mainWindow.UpdateStatistics(totalStatus);
             _mainWindow.UpdateTimeStamp();
 
+            AppLogger.Instance.Info("Inspection completed. Waiting for trigger...", "SYSTEM");
+
             StartPlcTimer();
         }
 
         private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera1Async()
         {
             var sw = Stopwatch.StartNew();
+            AppLogger.Instance.Info("Start inspecting camera 1...", "CAM1");
             try
             {
                 bool totalStatus = true;
@@ -181,6 +192,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot turn on LED 1! Please check the PLC connection\r" +
                         "Không bật được đèn LED 1, hãy kiểm tra kết nối PLC!");
+                    AppLogger.Instance.Error(
+                        "Cannot turn on LED 1! Please check the PLC connection\r" +
+                        "Không bật được đèn LED 1, hãy kiểm tra kết nối PLC!", "PLC");
                     return (false, null, sw.Elapsed);
                 }
 
@@ -188,6 +202,7 @@ namespace DiskInspection.Controllers
 
                 //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
                 Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_1\Image_20260111234233379.bmp");
+                AppLogger.Instance.Info("Captured image from camera 1 with white light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
 
@@ -209,6 +224,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot run AI inspection! Please check the AI engine\r" +
                         "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    AppLogger.Instance.Error(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM1 AI");
                     return (false, null,  sw.Elapsed);
                 }
                 else
@@ -221,6 +239,8 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam1MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
                     if(!resWhite.Result)
                         totalStatus = false;
+
+                    AppLogger.Instance.Info("AI inspection for camera 1 with white light completed.", "CAM1 AI");
                 }
 
                 frameWhite.Dispose();
@@ -232,6 +252,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot turn on UV light! Please check the PLC connection\r" +
                         "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
+                    AppLogger.Instance.Error(
+                        "Cannot turn on UV light! Please check the PLC connection\r" +
+                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!", "PLC");
                     return (false, null, sw.Elapsed);
                 }
 
@@ -239,6 +262,7 @@ namespace DiskInspection.Controllers
 
                 //Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
                 Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\uv\Image__2025-12-04__21-45-37 - Copy.bmp");
+                AppLogger.Instance.Info("Captured image from camera 1 with UV light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
 
@@ -265,6 +289,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot run AI inspection! Please check the AI engine\r" +
                         "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    AppLogger.Instance.Error(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM1 AI");
                     return (false, null, sw.Elapsed);
                 }
                 else
@@ -277,6 +304,8 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam1DiskUv(resUv.CountUvDisk);
                     if (!resUv.Result)
                         totalStatus = false;
+
+                    AppLogger.Instance.Info("AI inspection for camera 1 with UV light completed.", "CAM1 AI");
                 }
 
                 frameUv.Dispose();
@@ -291,6 +320,7 @@ namespace DiskInspection.Controllers
         private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera2Async()
         {
             var sw = Stopwatch.StartNew();
+            AppLogger.Instance.Info("Start inspecting camera 2...", "CAM2");
             try
             {
                 bool totalStatus = true;
@@ -302,6 +332,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot turn on LED 2! Please check the PLC connection\r" +
                         "Không bật được đèn LED 2, hãy kiểm tra kết nối PLC!");
+                    AppLogger.Instance.Error(
+                        "Cannot turn on LED 2! Please check the PLC connection\r" +
+                        "Không bật được đèn LED 2, hãy kiểm tra kết nối PLC!", "PLC");
                     return (false, null, sw.Elapsed);
                 }
 
@@ -309,6 +342,7 @@ namespace DiskInspection.Controllers
 
                 //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
                 Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_1\Image_20260111234233379.bmp");
+                AppLogger.Instance.Info("Captured image from camera 2 with white light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
 
@@ -331,6 +365,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot run AI inspection! Please check the AI engine\r" +
                         "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    AppLogger.Instance.Error(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM2 AI");
                     return (false, null, sw.Elapsed);
                 }
                 else
@@ -343,6 +380,8 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam2MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
                     if (!resWhite.Result)
                         totalStatus = false;
+
+                    AppLogger.Instance.Info("AI inspection for camera 2 with white light completed.", "CAM2 AI");
                 }
 
                 frameWhite.Dispose();
@@ -354,6 +393,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot turn on UV light! Please check the PLC connection\r" +
                         "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
+                    AppLogger.Instance.Error(
+                        "Cannot turn on UV light! Please check the PLC connection\r" +
+                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!", "PLC");
                     return (false, null, sw.Elapsed);
                 }
 
@@ -361,6 +403,7 @@ namespace DiskInspection.Controllers
 
                 //Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
                 Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\uv\Image__2025-12-04__21-45-37 - Copy.bmp");
+                AppLogger.Instance.Info("Captured image from camera 2 with UV light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
 
@@ -385,6 +428,9 @@ namespace DiskInspection.Controllers
                     _mainWindow.ShowError(
                         "Cannot run AI inspection! Please check the AI engine\r" +
                         "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
+                    AppLogger.Instance.Error(
+                        "Cannot run AI inspection! Please check the AI engine\r" +
+                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM2 AI");
                     return (false, null, sw.Elapsed);
                 }
                 else
@@ -397,6 +443,8 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam2DiskUv(resUv.CountUvDisk);
                     if (!resUv.Result)
                         totalStatus = false;
+
+                    AppLogger.Instance.Info("AI inspection for camera 2 with UV light completed.", "CAM2 AI");
                 }
 
                 frameUv.Dispose();
@@ -407,8 +455,6 @@ namespace DiskInspection.Controllers
             {
                 sw.Stop();
             }
-
-
         }
 
         //private (bool status, List<string> errors) InpsectCamera1()
