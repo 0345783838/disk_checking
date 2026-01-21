@@ -58,8 +58,8 @@ namespace DiskInspection.Utils
         {
             if (value is int status)
             {
-                if (status == (int)(StatusState.OK)) return "CONNECTED";
-                else if (status == (int)(StatusState.NG)) return "DISCONNECTED";
+                if (status == (int)(StatusState.Ok)) return "CONNECTED";
+                else if (status == (int)(StatusState.Ng)) return "DISCONNECTED";
                 return "UNKNOWN";
             }
             return value;
@@ -76,8 +76,8 @@ namespace DiskInspection.Utils
         {
             if (value is int status)
             {
-                if (status == (int)(StatusState.OK)) return "DarkGreen";
-                else if (status == (int)(StatusState.NG))  return "Red";
+                if (status == (int)(StatusState.Ok)) return "DarkGreen";
+                else if (status == (int)(StatusState.Ng))  return "Red";
                 return "Gray";
             }
             return value;
@@ -94,8 +94,9 @@ namespace DiskInspection.Utils
         {
             if (value is int status)
             {
-                if (status == (int)(StatusState.OK)) return "OK";
-                else if (status == (int)(StatusState.NG)) return "NG";
+                if (status == (int)(StatusState.Ok)) return "OK";
+                else if (status == (int)(StatusState.Ng)) return "NG";
+                else if (status == (int)(StatusState.Inspecting)) return "...";
                 return "N/A";
             }
             return value;
@@ -112,8 +113,9 @@ namespace DiskInspection.Utils
         {
             if (value is int status)
             {
-                if (status == (int)(StatusState.OK)) return "PASSED";
-                else if (status == (int)(StatusState.NG)) return "FAILED";
+                if (status == (int)(StatusState.Ok)) return "PASSED";
+                else if (status == (int)(StatusState.Ng)) return "FAILED";
+                else if (status == (int)(StatusState.Inspecting)) return "INSPECTING";
                 return "N/A";
             }
             return value;

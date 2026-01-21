@@ -386,7 +386,7 @@
                                         FontWeight="Bold"
                                         Foreground="DarkBlue" />
                                     <Label Content="---" />
-                                    <Label Content="Date:" />
+                                    <Label Content="Start Date:" />
                                     <Label
                                         Name="lbDate"
                                         Content="16/01/2026"
@@ -468,7 +468,7 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         Content="{Binding InspectionStatus, Converter={StaticResource MainInspectionStatusConverter}, FallbackValue='UNKNOWN'}"
-                                        FontSize="18"
+                                        FontSize="24"
                                         FontWeight="Bold"
                                         Foreground="White" />
                                 </Border>
@@ -522,7 +522,7 @@
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
                                                     Content="{Binding InspectionStatusCam1, FallbackValue='N/A', Converter={StaticResource MainResCamStatusConverter}}"
-                                                    FontSize="14"
+                                                    FontSize="16"
                                                     FontWeight="Bold"
                                                     Foreground="White" />
                                             </Border>
@@ -595,7 +595,7 @@
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
                                                     Content="{Binding InspectionStatusCam2, FallbackValue='N/A', Converter={StaticResource MainResCamStatusConverter}}"
-                                                    FontSize="14"
+                                                    FontSize="16"
                                                     FontWeight="Bold"
                                                     Foreground="White" />
                                             </Border>
@@ -652,7 +652,7 @@
                                         Name="lbTimestamp"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        Content="16/01/2026 15:28:33"
+                                        Content="N/A"
                                         FontSize="14"
                                         FontWeight="Bold"
                                         Foreground="DarkBlue" />
@@ -667,7 +667,35 @@
                         BorderBrush="Gray"
                         BorderThickness="1"
                         Header="Messages">
-                        <TabControl />
+                        <ListBox ItemsSource="{Binding Logger.Logs}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <Run Foreground="Gray" Text="{Binding TimeText, Mode=OneWay}" />
+                                        <Run Text=" [" />
+                                        <Run FontWeight="Bold" Text="{Binding Source, Mode=OneWay}" />
+                                        <Run Text="] " />
+                                        <Run Text="{Binding Message, Mode=OneWay}">
+                                            <Run.Style>
+                                                <Style TargetType="Run">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Level}" Value="Error">
+                                                            <Setter Property="Foreground" Value="Red" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Level}" Value="Warning">
+                                                            <Setter Property="Foreground" Value="Orange" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Level}" Value="Success">
+                                                            <Setter Property="Foreground" Value="LimeGreen" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Run.Style>
+                                        </Run>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </GroupBox>
                 </Grid>
             </Grid>

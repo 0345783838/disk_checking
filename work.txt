@@ -1,13 +1,10 @@
-1. Update biểu đồ theo ca làm việc
 
-2. Chia thông tin result ra 2 cột Cam (status, disk count, disk min/max distance)
+1. Logging
 
-3. Logging (nên có user control để sau sử dụng lại)
+2. Add Log thông suốt chương trình
 
-4. Sửa service trả về thêm disk count và min/max distance
+3. Add Inspecting State
 
-5. Thu thập thêm data, train lại detect + cls + seg chuẩn chỉ
+5. Pop up Error Image, hoặc click vào Image Pop Up lên (nên làm chung 1 form chờ)
 
 6. Đổi lại logic bật đen khi debug, capture thì mới bật
-
-7. Form pupup ảnh to kèm lỗi

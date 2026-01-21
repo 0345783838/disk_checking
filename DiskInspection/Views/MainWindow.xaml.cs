@@ -1,10 +1,13 @@
 ﻿using DiskInspection.Controllers;
 using DiskInspection.Models;
 using DiskInspection.Services;
+using DiskInspection.Utils;
 using DiskInspection.Views;
 using DiskInspection.Views.DebugWindows;
 using DiskInspection.Views.SettingsWindows;
 using DiskInspection.Views.UtilitiesWindows;
+using LiveCharts.Wpf;
+using LiveCharts;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,6 +25,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Globalization;
 
 namespace DiskInspection
 {
@@ -31,25 +35,33 @@ namespace DiskInspection
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        private Properties.Settings _param = Properties.Settings.Default;
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         private MainController _mainController;
-        public int AiStatus { get; set; } = (int)(StatusState.UNKNOWN);
-        public int PlcStatus { get; set; } = (int)(StatusState.UNKNOWN);
-        public int Cam1Status { get; set; } = (int)(StatusState.UNKNOWN);
-        public int Cam2Status { get; set; } = (int)(StatusState.UNKNOWN);
-        public int InspectionStatusCam1 { get; set; } = (int)(StatusState.UNKNOWN);
-        public int InspectionStatusCam2 { get; set; } = (int)(StatusState.UNKNOWN);
-        public int InspectionStatus { get; set; } = (int)(StatusState.UNKNOWN);
+        public int AiStatus { get; set; } = (int)(StatusState.Unknown);
+        public int PlcStatus { get; set; } = (int)(StatusState.Unknown);
+        public int Cam1Status { get; set; } = (int)(StatusState.Unknown);
+        public int Cam2Status { get; set; } = (int)(StatusState.Unknown);
+        public int InspectionStatusCam1 { get; set; } = (int)(StatusState.Unknown);
+        public int InspectionStatusCam2 { get; set; } = (int)(StatusState.Unknown);
+        public int InspectionStatus { get; set; } = (int)(StatusState.Unknown);
+
+        public AppLogger Logger => AppLogger.Instance;
+
+        private PieSeries _okSeries;
+        private PieSeries _ngSeries;
+        public SeriesCollection PieSeriesCollection { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
             _mainController = new MainController(this);
             DataContext = this;
+            InitStatistics();
         }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
@@ -181,7 +193,7 @@ namespace DiskInspection
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
-                AiStatus = resAI ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                AiStatus = resAI ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
                 OnPropertyChanged(nameof(AiStatus));
             }));
         }
@@ -189,10 +201,10 @@ namespace DiskInspection
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
-                AiStatus = resAI ? (int)(StatusState.OK) : (int)(StatusState.NG);
-                PlcStatus = resPLC? (int)(StatusState.OK) : (int)(StatusState.NG);
-                Cam1Status = resCamera1? (int)(StatusState.OK) : (int)(StatusState.NG);
-                Cam2Status = resCamera2? (int)(StatusState.OK) : (int)(StatusState.NG);
+                AiStatus = resAI ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                PlcStatus = resPLC? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                Cam1Status = resCamera1? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                Cam2Status = resCamera2? (int)(StatusState.Ok) : (int)(StatusState.Ng);
 
                 OnPropertyChanged(nameof(AiStatus));
                 OnPropertyChanged(nameof(PlcStatus));
@@ -265,19 +277,11 @@ namespace DiskInspection
         #endregion
 
         #region Update Result CAM 1
-        internal void UpdateInspectionStatus(bool status)
-        {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                InspectionStatus = status ? (int)(StatusState.OK) : (int)(StatusState.NG);
-                OnPropertyChanged(nameof(InspectionStatus));
-            }));
-        }
         internal void UpdateInspectionStatusCam1(bool status)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                InspectionStatusCam1 = status ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                InspectionStatusCam1 = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
                 OnPropertyChanged(nameof(InspectionStatusCam1));
             }));
         }
@@ -311,7 +315,7 @@ namespace DiskInspection
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                InspectionStatusCam2 = status ? (int)(StatusState.OK) : (int)(StatusState.NG);
+                InspectionStatusCam2 = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
                 OnPropertyChanged(nameof(InspectionStatusCam2));
             }));
         }
@@ -339,5 +343,106 @@ namespace DiskInspection
         }
         #endregion
 
+        #region Update Statistic
+        internal void UpdateInspectionStatus(bool status)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                InspectionStatus = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                OnPropertyChanged(nameof(InspectionStatus));
+            }));
+        }
+
+        internal void UpdateTimeStamp()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbTimestamp.Content = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            }));
+        }
+
+        internal void UpdateCurrentShiftTime(string curShiftTime)
+        {
+            DateTime dt = DateTime.ParseExact(
+                curShiftTime,
+                "yyyy-MM-dd HH:mm:ss",
+                CultureInfo.InvariantCulture);
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbDate.Content = dt.ToString("dd/MM/yyyy");
+                lbWorkingShift.Content = $"{dt.ToString("HH:mm")} - {dt.AddHours(12).ToString("HH:mm")}";
+            }));
+        }
+        internal void UpdateStatistics(bool status, bool firstTime=false)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                // Check shift time
+                var curShiftTime = MyDateTime.GetCurShiftStartTime();
+                if (curShiftTime != _param.StartShiftTime)
+                {
+                    _param.StartShiftTime = curShiftTime;
+                    _param.CurrentOK = 0;
+                    _param.CurrentNG = 0;
+                    _param.Save();
+                    UpdateCurrentShiftTime(_param.StartShiftTime);
+                }
+
+                if (firstTime)
+                {
+                    tbOKCount.Text = _param.CurrentOK.ToString();
+                    tbNGCount.Text = _param.CurrentNG.ToString();
+                    UpdateStatistics(_param.CurrentOK, _param.CurrentNG);
+                    UpdateCurrentShiftTime(_param.StartShiftTime);
+                }
+                else
+                {
+                    if (status)
+                    {
+                        _param.CurrentOK += 1;
+                        tbOKCount.Text = _param.CurrentOK.ToString();
+                    }
+                    else
+                    {
+                        _param.CurrentNG += 1;
+                        tbNGCount.Text = _param.CurrentNG.ToString();
+                    }
+                    UpdateStatistics(_param.CurrentOK, _param.CurrentNG);
+                    _param.Save();
+                }
+            }));
+        }
+        private void InitStatistics()
+        {
+            _okSeries = new PieSeries
+            {
+                Title = "OK",
+                Values = new ChartValues<double> { 0 },
+                DataLabels = true,
+                LabelPoint = chartPoint => $"{chartPoint.Participation:P2}", // <-- thêm %
+                Fill = new SolidColorBrush(System.Windows.Media.Colors.Green)
+            };
+
+            _ngSeries = new PieSeries
+            {
+                Title = "NG",
+                Values = new ChartValues<double> { 0 },
+                DataLabels = true,
+                LabelPoint = chartPoint => $"{chartPoint.Participation:P2}",
+                Fill = new SolidColorBrush(System.Windows.Media.Colors.Red)
+            };
+            PieSeriesCollection = new SeriesCollection { _okSeries, _ngSeries };
+            UpdateStatistics(true, firstTime: true);
+        }
+        public void UpdateStatistics(int okCount, int ngCount)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                _okSeries.Values[0] = (double)okCount;
+                _ngSeries.Values[0] = (double)ngCount;
+            });
+        }
+        #endregion
     }
 }

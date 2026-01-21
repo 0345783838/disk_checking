@@ -64,11 +64,11 @@ namespace DiskInspection.Controllers.PLC
             if (_firstTrigger)
             {
                 _firstTrigger = false;
-                return (TriggerState.OK, true);
+                return (TriggerState.Ok, true);
             }
             else
             {
-                return (TriggerState.OK, false);
+                return (TriggerState.Ok, false);
             }
 
             var options = new RestClientOptions(url)
@@ -82,10 +82,10 @@ namespace DiskInspection.Controllers.PLC
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 dynamic obj = JsonConvert.DeserializeObject(response.Content);
-                if (obj.Success == (int)TriggerState.OK)
-                    return (TriggerState.OK, obj.Status);
+                if (obj.Success == (int)TriggerState.Ok)
+                    return (TriggerState.Ok, obj.Status);
             }
-            return (TriggerState.ERROR, false);
+            return (TriggerState.Error, false);
         }
         internal static bool ResetTrigger(string url, int timeout = 1500)
         {

@@ -325,9 +325,10 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.DateTime StartShiftTime {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string StartShiftTime {
             get {
-                return ((global::System.DateTime)(this["StartShiftTime"]));
+                return ((string)(this["StartShiftTime"]));
             }
             set {
                 this["StartShiftTime"] = value;

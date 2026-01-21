@@ -8,13 +8,21 @@ namespace DiskInspection.Models
 {
     enum StatusState
     {
-        OK = 0,
-        NG = 1,
-        UNKNOWN = 2
+        Ok = 0,
+        Ng = 1,
+        Inspecting = 3,
+        Unknown = 2
     }
     enum TriggerState
     {
-        OK = 1,
-        ERROR = -1
+        Ok = 1,
+        Error = -1
+    }
+    public enum LogLevel
+    {
+        Info,
+        Success,
+        Warning,
+        Error
     }
 }

@@ -61,6 +61,7 @@ namespace DiskInspection.Controllers
         {
             _mainWindow.SetLoadingService(content);
             _logger.Info("Start Service");
+            AppLogger.Instance.Info("Loading Program...", "SYSTEM");
             AIServiceController.CloseProcessExisting();
             AIServiceController.Start();
 
@@ -71,6 +72,7 @@ namespace DiskInspection.Controllers
                 if (CheckAPIStatus())
                 {
                     _logger.Info("Start AI Python Engine Successfuly!");
+                    AppLogger.Instance.Info("Load Program Successfuly!", "SYSTEM");
                     _serviceIsRun = true;
                     return true;
                 }
@@ -95,6 +97,7 @@ namespace DiskInspection.Controllers
             if (CheckAndStartCamera() && CheckAndStartPLC() && CheckAndStartAI())
             {
                 _logger.Debug("Cameras, PLC and AI are ready, Ready for inspection...");
+                AppLogger.Instance.Info("Cameras, PLC and AI are ready, Ready for inspection...", "System");
                 StartStatusTimer();
                 StartPlcTimer();
                 return true;
@@ -120,14 +123,14 @@ namespace DiskInspection.Controllers
         {
             StopPlcTimer();
             var (resTrigger, status) = PlcController.CheckTrigger(_param.ApiUrlCom, 1000);
-            if (resTrigger == TriggerState.ERROR)
+            if (resTrigger == TriggerState.Error)
             {
                 _mainWindow.ShowError(
                     "Cannot connect to PLC to read trigger! Please check the connection\r " +
                     "Không kết nối được với PLC để đọc trigger, hãy kiểm tra kết nối!");
                 return;
             }
-            if (resTrigger == TriggerState.OK && !status)
+            if (resTrigger == TriggerState.Ok && !status)
             {
                 return;
             }
@@ -156,14 +159,11 @@ namespace DiskInspection.Controllers
             _mainWindow.UpdateInspectionStatusCam2(cam2Result.status);
             _mainWindow.UpdateCam2ProcessedTime(cam2Result.time);
 
-            if (!cam1Result.status || !cam2Result.status)
-            {
-                _mainWindow.UpdateInspectionStatus(false);
-            }
-            else
-            {
-                _mainWindow.UpdateInspectionStatus(true);
-            }
+            var totalStatus = cam1Result.status && cam2Result.status;
+            _mainWindow.UpdateInspectionStatus(totalStatus);
+            _mainWindow.UpdateStatistics(totalStatus);
+            _mainWindow.UpdateTimeStamp();
+
             StartPlcTimer();
         }
 

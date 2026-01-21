@@ -186,6 +186,7 @@
     </ApplicationDefinition>
     <Compile Include="Controllers\APIs\AIServiceController.cs" />
     <Compile Include="Controllers\APIs\APICommunication.cs" />
+    <Compile Include="Controllers\AppLogger.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\PLC\PlcController.cs" />
     <Compile Include="Models\EnvironmentConfig.cs" />
@@ -193,6 +194,7 @@
     <Compile Include="Models\ImageDebugInfo.cs" />
     <Compile Include="Models\ImageList.cs" />
     <Compile Include="Models\InspectionUvResponse.cs" />
+    <Compile Include="Models\LogItem.cs" />
     <Compile Include="Models\MyEnum.cs" />
     <Compile Include="Models\InspectionResponse.cs" />
     <Compile Include="Services\ErrorService.cs" />
