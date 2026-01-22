@@ -207,8 +207,8 @@
     <Compile Include="Views\ImageViewer.xaml.cs">
       <DependentUpon>ImageViewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\PopUpErrorWindow.xaml.cs">
-      <DependentUpon>PopUpErrorWindow.xaml</DependentUpon>
+    <Compile Include="Views\ImageViewerWindow.xaml.cs">
+      <DependentUpon>ImageViewerWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsWindows\CommonSettingsWindow.xaml.cs">
       <DependentUpon>CommonSettingsWindow.xaml</DependentUpon>
@@ -274,7 +274,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\PopUpErrorWindow.xaml">
+    <Page Include="Views\ImageViewerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

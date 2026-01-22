@@ -97,7 +97,7 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public int Cam1Exposure {
             get {
                 return ((int)(this["Cam1Exposure"]));
@@ -109,7 +109,7 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
         public int Cam2Exposure {
             get {
                 return ((int)(this["Cam2Exposure"]));

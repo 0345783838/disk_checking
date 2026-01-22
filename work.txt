@@ -1,9 +1,11 @@
 
-1. Logging
+--ok-- 1. Logging
 
-2. Add Log thông suốt chương trình
+--ok-- 2. Add Log thông suốt chương trình
 
-3. Add Inspecting State
+--ok-- 3. Add Inspecting State
+
+--ok-- 4. Stop luồng
 
 5. Pop up Error Image, hoặc click vào Image Pop Up lên (nên làm chung 1 form chờ)
 

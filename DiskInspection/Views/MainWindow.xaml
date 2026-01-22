@@ -23,6 +23,7 @@
         <utils:MainStatusConverter x:Key="MainStatusConverter" />
         <utils:MainResCamStatusConverter x:Key="MainResCamStatusConverter" />
         <utils:MainInspectionStatusConverter x:Key="MainInspectionStatusConverter" />
+        <utils:TextColorConverter x:Key="TextColorConverter" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -459,8 +460,8 @@
                                     x:Name="bdInspectionStatus"
                                     Margin="85,0,85,0"
                                     Background="{Binding InspectionStatus, Converter={StaticResource MainStatusColorConverter}, FallbackValue='Gray'}"
-                                    BorderBrush="White"
                                     BorderThickness="0.7"
+                                    BorderBrush="Gray"
                                     CornerRadius="5"
                                     DockPanel.Dock="Left">
                                     <Label
@@ -470,7 +471,7 @@
                                         Content="{Binding InspectionStatus, Converter={StaticResource MainInspectionStatusConverter}, FallbackValue='UNKNOWN'}"
                                         FontSize="24"
                                         FontWeight="Bold"
-                                        Foreground="White" />
+                                        Foreground="{Binding InspectionStatus, Converter={StaticResource TextColorConverter}}" />
                                 </Border>
                             </Grid>
                             <Grid Grid.Row="1" Margin="0,5,0,0">
@@ -505,7 +506,7 @@
                                             DockPanel.Dock="Top"
                                             FontSize="14"
                                             FontWeight="Bold"
-                                            Foreground="Orange" />
+                                            Foreground="#1A43BF" />
                                         <Separator Margin="15,-5,15,0" DockPanel.Dock="Top" />
                                         <DockPanel DockPanel.Dock="Top" LastChildFill="True">
                                             <Label Content="Status:" Style="{DynamicResource stLabel}" />
@@ -524,7 +525,7 @@
                                                     Content="{Binding InspectionStatusCam1, FallbackValue='N/A', Converter={StaticResource MainResCamStatusConverter}}"
                                                     FontSize="16"
                                                     FontWeight="Bold"
-                                                    Foreground="White" />
+                                                    Foreground="{Binding InspectionStatusCam1, Converter={StaticResource TextColorConverter}}" />
                                             </Border>
                                         </DockPanel>
                                         <DockPanel DockPanel.Dock="Top" LastChildFill="True">
@@ -578,7 +579,7 @@
                                             DockPanel.Dock="Top"
                                             FontSize="14"
                                             FontWeight="Bold"
-                                            Foreground="Orange" />
+                                            Foreground="#1A43BF" />
                                         <Separator Margin="15,-5,15,0" DockPanel.Dock="Top" />
                                         <DockPanel DockPanel.Dock="Top" LastChildFill="True">
                                             <Label Content="Status:" Style="{DynamicResource stLabel}" />
@@ -597,7 +598,7 @@
                                                     Content="{Binding InspectionStatusCam2, FallbackValue='N/A', Converter={StaticResource MainResCamStatusConverter}}"
                                                     FontSize="16"
                                                     FontWeight="Bold"
-                                                    Foreground="White" />
+                                                    Foreground="{Binding InspectionStatusCam2, Converter={StaticResource TextColorConverter}}" />
                                             </Border>
                                         </DockPanel>
                                         <DockPanel DockPanel.Dock="Top" LastChildFill="True">
@@ -667,8 +668,7 @@
                         BorderBrush="Gray"
                         BorderThickness="1"
                         Header="Messages">
-                        <ListBox x:Name="LogListBox"
-                                 ItemsSource="{Binding Logger.Logs}">
+                        <ListBox x:Name="LogListBox" ItemsSource="{Binding Logger.Logs}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock>

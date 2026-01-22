@@ -11,7 +11,8 @@ namespace DiskInspection.Models
         Ok = 0,
         Ng = 1,
         Inspecting = 3,
-        Unknown = 2
+        Unknown = 2,
+        Stopped = 4
     }
     enum TriggerState
     {

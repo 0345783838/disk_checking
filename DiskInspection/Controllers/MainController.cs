@@ -17,6 +17,7 @@ using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using DiskInspection.Controllers.PLC;
 using System.Diagnostics;
+using Newtonsoft.Json.Linq;
 
 namespace DiskInspection.Controllers
 {
@@ -53,10 +54,14 @@ namespace DiskInspection.Controllers
         private BitmapSource _cam2LastUvBitmap;
         private BitmapSource _cam2LastUvResultBitmap;
 
+        private CancellationTokenSource _inspectCts;
+        private bool _isRunning = false;
+
         public MainController(MainWindow window)
         {
             _mainWindow = window;
         }
+        #region Initialize Program
         public bool RunServiceAsync(int timeout, string content)
         {
             _mainWindow.SetLoadingService(content);
@@ -69,27 +74,20 @@ namespace DiskInspection.Controllers
             for (int i = 0; i < timeStep; i++)
             {
                 Thread.Sleep(1000);
-                if (CheckAPIStatus())
+                if (APICommunication.CheckAPIStatus(_param.ApiUrlAi, 200))
                 {
-                    _logger.Info("Start AI Python Engine Successfuly!");
-                    AppLogger.Instance.Info("Load Program Successfuly!", "SYSTEM");
+                    _logger.Info("Start AI Engine Successfuly!");
+                    AppLogger.Instance.Info("Loaded Program Successfuly!", "SYSTEM");
                     _serviceIsRun = true;
                     return true;
                 }
             }
             return false;
         }
-        public bool CheckAPIStatus()
-        {
-            return APICommunication.CheckAPIStatus(_param.ApiUrlAi, 1000);
-        }
 
-        internal void CloseAIService()
-        {
-            AIServiceController.CloseProcessExisting();
-            _serviceIsRun = false;
-        }
+        #endregion
 
+        #region Start Program
         public bool Start()
         {
             _logger.Info("Starting inspection...");
@@ -97,7 +95,9 @@ namespace DiskInspection.Controllers
             if (CheckAndStartCamera() && CheckAndStartPLC() && CheckAndStartAI())
             {
                 _logger.Debug("Cameras, PLC and AI are ready, Ready for inspection...");
-                AppLogger.Instance.Info("Cameras, PLC and AI are ready, Ready for inspection...", "System");
+                AppLogger.Instance.Info("Cameras, PLC and AI are ready, Ready for inspection...", "SYSTEM");
+                _isRunning = true;
+                _inspectCts = new CancellationTokenSource();
                 StartStatusTimer();
                 StartPlcTimer();
                 return true;
@@ -105,10 +105,66 @@ namespace DiskInspection.Controllers
             else
             {
                 _logger.Error("Cameras, PLC and AI are not ready, Stop inspection...");
-                AppLogger.Instance.Error("Cameras, PLC and AI are not ready, Stop inspection...", "System");
+                AppLogger.Instance.Error("Cameras, PLC and AI are not ready, Stop inspection...", "SYSTEM");
                 return false;
             }
         }
+        #endregion
+
+        #region Check Condition + Initialize
+        private bool CheckAndStartAI()
+        {
+            if (!APICommunication.CheckAPIStatus(_param.ApiUrlAi))
+            {
+                var res = _mainWindow.ShowWarning($"AI engine is not running, proceed to restart?\nAI engine đang không chạy, bạn muốn khởi động lại AI engine?!");
+                var resRestart = RunServiceAsync(20000, "Restarting AI engine...");
+                if (!resRestart)
+                {
+                    _mainWindow.ShowError("Restart AI engine fail, please contact the vendor!\r AI engine khởi động thất bại, hãy liên hệ với vendor!");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool CheckAndStartCamera()
+        {
+            return true;
+            _cameraManager = CameraManager.GetInstance();
+            _camera1 = _cameraManager.GetCamera1();
+            _camera2 = _cameraManager.GetCamera2();
+            if (!_camera1.IsOpen())
+            {
+                _mainWindow.ShowError(string.Format("Không mở được camera 1 với SN {0}\nCan't open 1 camera with SN:{0}", _param.Cam1Sn));
+                return false;
+            }
+            if (!_camera2.IsOpen())
+            {
+                _mainWindow.ShowError(string.Format("Không mở được camera 2 với SN {0}\nCan't open 2 camera with SN:{0}", _param.Cam2Sn));
+                return true;
+            }
+            _camera1.SetExposureTime(_param.Cam1Exposure);
+            _camera2.SetExposureTime(_param.Cam2Exposure);
+            _camera1.Start();
+            _camera2.Start();
+            return true;
+        }
+        private bool CheckAndStartPLC()
+        {
+            return true;
+            if (!PlcController.CheckPlcConnection(_param.ApiUrlCom))
+            {
+                var resConnection = PlcController.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
+                if (!resConnection)
+                {
+                    _mainWindow.ShowError("Không kết nối được với PLC, hãy kiểm tra kết nối\nCannot connect to PLC! Please check the connection");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        #endregion
 
         #region PLC Timer
         private void StartPlcTimer()
@@ -122,7 +178,11 @@ namespace DiskInspection.Controllers
 
         private async void PlcTimer_Elapsed(object sender, EventArgs e)
         {
+            if (!_isRunning || _inspectCts.IsCancellationRequested)
+                return;
+
             StopPlcTimer();
+
             var (resTrigger, status) = PlcController.CheckTrigger(_param.ApiUrlCom, 1000);
             if (resTrigger == TriggerState.Error)
             {
@@ -140,6 +200,7 @@ namespace DiskInspection.Controllers
                 return;
             }
             AppLogger.Instance.Info("Trigger received, start inspection...", "PLC");
+            _mainWindow.UpdateInspectingMode();
             // Trigger OK
             // --- reset trigger first
             var resResetTg = PlcController.ResetTrigger(_param.ApiUrlCom, 1000);
@@ -155,35 +216,57 @@ namespace DiskInspection.Controllers
             }
 
             // --- start inspection
-            var results = await Task.WhenAll(
-                InpsectCamera1Async(),
-                InpsectCamera2Async());
+            var token = _inspectCts.Token;
+            try
+            {
+                var results = await Task.WhenAll(
+               InpsectCamera1Async(token),
+               InpsectCamera2Async(token));
 
-            var cam1Result = results[0];
-            var cam2Result = results[1];
+                if (token.IsCancellationRequested)
+                    return;
 
-            _mainWindow.UpdateInspectionStatusCam1(cam1Result.status);
-            _mainWindow.UpdateCam1ProcessedTime(cam1Result.time);
-            _mainWindow.UpdateInspectionStatusCam2(cam2Result.status);
-            _mainWindow.UpdateCam2ProcessedTime(cam2Result.time);
+                var cam1Result = results[0];
+                var cam2Result = results[1];
 
-            var totalStatus = cam1Result.status && cam2Result.status;
-            _mainWindow.UpdateInspectionStatus(totalStatus);
-            _mainWindow.UpdateStatistics(totalStatus);
-            _mainWindow.UpdateTimeStamp();
+                _mainWindow.UpdateInspectionStatusCam1(cam1Result.status);
+                _mainWindow.UpdateCam1ProcessedTime(cam1Result.time);
+                _mainWindow.UpdateInspectionStatusCam2(cam2Result.status);
+                _mainWindow.UpdateCam2ProcessedTime(cam2Result.time);
 
-            AppLogger.Instance.Info("Inspection completed. Waiting for trigger...", "SYSTEM");
+                var totalStatus = cam1Result.status && cam2Result.status;
+                _mainWindow.UpdateInspectionStatus(totalStatus);
+                _mainWindow.UpdateStatistics(totalStatus);
+                _mainWindow.UpdateTimeStamp();
 
-            StartPlcTimer();
+                if (!totalStatus)
+                {
+                    PlcController.OnError(_param.ApiUrlCom);
+                    AppLogger.Instance.Info("Inspection NG, sent NG signal", "PLC");
+                }
+
+                AppLogger.Instance.Info("Inspection completed. Waiting for trigger...", "SYSTEM");
+            }
+            catch (OperationCanceledException)
+            {
+                AppLogger.Instance.Info("Inspection cancelled.", "SYSTEM");
+            }
+            finally
+            {
+                if (_isRunning)
+                    StartPlcTimer();
+            }
         }
 
-        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera1Async()
+        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera1Async(CancellationToken token)
         {
             var sw = Stopwatch.StartNew();
             AppLogger.Instance.Info("Start inspecting camera 1...", "CAM1");
             try
             {
                 bool totalStatus = true;
+
+                token.ThrowIfCancellationRequested();
                 List<string> errors = new List<string>();
 
                 // ================= WHITE LIGHT =================
@@ -201,7 +284,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam1Exposure + 10);
 
                 //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_1\Image_20260111234233379.bmp");
+                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\07_12\Image__2025-12-07__23-59-13.bmp");
                 AppLogger.Instance.Info("Captured image from camera 1 with white light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
@@ -212,6 +295,7 @@ namespace DiskInspection.Controllers
                 }
                 _mainWindow.UpdateCam1WhiteOrigin(_cam1LastWhiteBitmap);   // 🔥 update NGAY
 
+                token.ThrowIfCancellationRequested();
                 var resWhite = await Task.Run(() =>
                     APICommunication.InspectWhiteLight(
                         _param.ApiUrlAi,
@@ -231,6 +315,7 @@ namespace DiskInspection.Controllers
                 }
                 else
                 {
+                    token.ThrowIfCancellationRequested();
                     lock (_cam1WhiteResultLock)
                     {
                         _cam1LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
@@ -247,6 +332,8 @@ namespace DiskInspection.Controllers
                 await Task.Yield(); // 👈 nhường UI render
 
                 // ================= UV LIGHT =================
+
+                token.ThrowIfCancellationRequested();
                 if (!await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, true, 1000)))
                 {
                     _mainWindow.ShowError(
@@ -274,6 +361,7 @@ namespace DiskInspection.Controllers
                 // Update result to UI
                 _mainWindow.UpdateCam1UvOrigin(_cam1LastUvBitmap); // 🔥 update NGAY
 
+                token.ThrowIfCancellationRequested();
                 var resUv = await Task.Run(() =>
                     APICommunication.InspectUvLight(
                         _param.ApiUrlAi,
@@ -296,6 +384,7 @@ namespace DiskInspection.Controllers
                 }
                 else
                 {
+                    token.ThrowIfCancellationRequested();
                     lock (_cam1UvResultLock)
                     {
                         _cam1LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
@@ -317,13 +406,16 @@ namespace DiskInspection.Controllers
                 sw.Stop();
             }
         }
-        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera2Async()
+        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera2Async(CancellationToken token)
         {
             var sw = Stopwatch.StartNew();
             AppLogger.Instance.Info("Start inspecting camera 2...", "CAM2");
             try
             {
                 bool totalStatus = true;
+
+                token.ThrowIfCancellationRequested();
+
                 List<string> errors = new List<string>();
 
                 // ================= WHITE LIGHT =================
@@ -341,7 +433,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam2Exposure + 10);
 
                 //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_1\Image_20260111234233379.bmp");
+                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\07_12\Image__2025-12-07__23-59-13.bmp");
                 AppLogger.Instance.Info("Captured image from camera 2 with white light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
@@ -352,6 +444,7 @@ namespace DiskInspection.Controllers
                 }
                 _mainWindow.UpdateCam2WhiteOrigin(_cam2LastWhiteBitmap);   // 🔥 update NGAY
 
+                token.ThrowIfCancellationRequested();
                 var resWhite = await Task.Run(() =>
                     APICommunication.InspectWhiteLight(
                         _param.ApiUrlAi,
@@ -372,6 +465,7 @@ namespace DiskInspection.Controllers
                 }
                 else
                 {
+                    token.ThrowIfCancellationRequested();
                     lock (_cam2WhiteResultLock)
                     {
                         _cam2LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
@@ -388,6 +482,7 @@ namespace DiskInspection.Controllers
                 await Task.Yield(); // 👈 nhường UI render
 
                 // ================= UV LIGHT =================
+                token.ThrowIfCancellationRequested();
                 if (!await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, true, 1000)))
                 {
                     _mainWindow.ShowError(
@@ -413,6 +508,7 @@ namespace DiskInspection.Controllers
                 }
                 _mainWindow.UpdateCam2UvOrigin(_cam2LastUvBitmap); // 🔥 update NGAY
 
+                token.ThrowIfCancellationRequested();
                 var resUv = await Task.Run(() =>
                     APICommunication.InspectUvLight(
                         _param.ApiUrlAi,
@@ -435,6 +531,7 @@ namespace DiskInspection.Controllers
                 }
                 else
                 {
+                    token.ThrowIfCancellationRequested();
                     lock (_cam2UvResultLock)
                     {
                         _cam2LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
@@ -691,6 +788,9 @@ namespace DiskInspection.Controllers
             if (_plcTimer != null)
             {
                 _plcTimer.Stop();
+                _plcTimer.Elapsed -= PlcTimer_Elapsed;
+                _plcTimer.AutoReset = false;
+                _plcTimer.Dispose();
                 _plcTimer = null;
             }
         }
@@ -712,8 +812,8 @@ namespace DiskInspection.Controllers
             lock (_statusLock)
             {
                 StopStatusTimer();
-                var resAI = APICommunication.CheckAPIStatus(_param.ApiUrlAi);
-                var resPLC = PlcController.CheckPlcConnection(_param.ApiUrlCom);
+                var resAI = APICommunication.CheckAPIStatus(_param.ApiUrlAi, timeout: 100);
+                var resPLC = PlcController.CheckPlcConnection(_param.ApiUrlCom, timeout: 100);
                 var resCamera1 = _camera1 != null && _camera1.IsOpen();
                 var resCamera2 = _camera2 != null && _camera2.IsOpen();
                 _mainWindow.SetStatusService(resAI, resPLC, resCamera1, resCamera2);
@@ -725,63 +825,50 @@ namespace DiskInspection.Controllers
             if (_statusTimer != null)
             {
                 _statusTimer.Stop();
+                _statusTimer.Elapsed -= StatusTimer_Elapsed;
+                _statusTimer.AutoReset = false;
+                _statusTimer.Dispose();
                 _statusTimer = null;
             }
         }
         #endregion
 
-        private bool CheckAndStartAI()
+        #region Stop Program
+        public void Stop()
         {
-            if (!APICommunication.CheckAPIStatus(_param.ApiUrlAi))
-            {
-                var res = _mainWindow.ShowWarning($"AI engine is not running, proceed to restart?\nAI engine đang không chạy, bạn muốn khởi động lại AI engine?!");
-                var resRestart = RunServiceAsync(20000, "Restarting AI engine...");
-                if (!resRestart)
-                {
-                    _mainWindow.ShowError("Restart AI engine fail, please contact the vendor!\r AI engine khởi động thất bại, hãy liên hệ với vendor!");
-                    return false;
-                }
-            }
-            return true;
-        }
+            if (!_isRunning)
+                return;
 
-        private bool CheckAndStartCamera()
-        {
-            return true;
-            _cameraManager = CameraManager.GetInstance();
-            _camera1 = _cameraManager.GetCamera1();
-            _camera2 = _cameraManager.GetCamera2();
-            if (!_camera1.IsOpen())
-            {
-                _mainWindow.ShowError(string.Format("Không mở được camera 1 với SN {0}\nCan't open 1 camera with SN:{0}", _param.Cam1Sn));
-                return false;
-            }
-            if (!_camera2.IsOpen())
-            {
-                _mainWindow.ShowError(string.Format("Không mở được camera 2 với SN {0}\nCan't open 2 camera with SN:{0}", _param.Cam2Sn));
-                return true;
-            }
-            _camera1.SetExposureTime(_param.Cam1Exposure);
-            _camera2.SetExposureTime(_param.Cam2Exposure);
-            _camera1.Start();
-            _camera2.Start();
-            return true;
-        }
-        private bool CheckAndStartPLC()
-        {
-            return true;
-            if (!PlcController.CheckPlcConnection(_param.ApiUrlCom))
-            {
-                var resConnection = PlcController.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
-                if (!resConnection)
-                {
-                    _mainWindow.ShowError("Không kết nối được với PLC, hãy kiểm tra kết nối\nCannot connect to PLC! Please check the connection");
-                    return false;
-                }
-            }
-            return true;
-        }
+            _isRunning = false;
 
+            StopPlcTimer();
+            StopStatusTimer();
+
+            if (_inspectCts != null && !_inspectCts.IsCancellationRequested)
+                _inspectCts.Cancel();
+
+            // đảm bảo tắt hết đèn
+            PlcController.ControlLed1(_param.ApiUrlCom, false, 500);
+            PlcController.ControlLed2(_param.ApiUrlCom, false, 500);
+            PlcController.ControlUv1(_param.ApiUrlCom, false, 500);
+            PlcController.ControlUv2(_param.ApiUrlCom, false, 500);
+            // close hết cameras
+            if (_camera1 != null)
+                _camera1.Stop();
+            if (_camera2 != null)
+                _camera2.Stop();
+
+            _logger.Info("User stopped system.");
+            AppLogger.Instance.Info("User stopped system.", "SYSTEM");
+        }
+        #endregion
+
+        #region Close Program
+        internal void CloseAIService()
+        {
+            AIServiceController.CloseProcessExisting();
+            _serviceIsRun = false;
+        }
         internal void CloseCamera()
         {
             if (_camera1 != null && _camera1.IsOpen())
@@ -793,5 +880,15 @@ namespace DiskInspection.Controllers
                 _camera2.Close();
             }
         }
+
+        internal void ShutdownLight()
+        {
+            PlcController.ControlLed1(_param.ApiUrlCom, false);
+            PlcController.ControlLed2(_param.ApiUrlCom, false);
+            PlcController.ControlUv1(_param.ApiUrlCom, false);
+            PlcController.ControlUv2(_param.ApiUrlCom, false);
+
+        }
+        #endregion
     }
 }

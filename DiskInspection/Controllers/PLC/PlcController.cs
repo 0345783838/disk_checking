@@ -61,6 +61,7 @@ namespace DiskInspection.Controllers.PLC
         }
         internal static (TriggerState, bool) CheckTrigger(string url, int timeout = 1500)
         {
+            //return (TriggerState.Ok, true);
             if (_firstTrigger)
             {
                 _firstTrigger = false;

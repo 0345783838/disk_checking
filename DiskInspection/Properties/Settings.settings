@@ -21,10 +21,10 @@
       <Value Profile="(Default)">192.168.0.211</Value>
     </Setting>
     <Setting Name="Cam1Exposure" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">500</Value>
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="Cam2Exposure" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">500</Value>
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="SaveEnable" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

@@ -17,9 +17,9 @@ namespace DiskInspection.Views
     /// <summary>
     /// Interaction logic for PopUpErrorWindow.xaml
     /// </summary>
-    public partial class PopUpErrorWindow : Window
+    public partial class ImageViewerWindow : Window
     {
-        public PopUpErrorWindow()
+        public ImageViewerWindow()
         {
             InitializeComponent();
         }

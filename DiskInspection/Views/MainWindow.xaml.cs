@@ -120,7 +120,26 @@ namespace DiskInspection
 
         private void btnStop_Click(object sender, RoutedEventArgs e)
         {
+            var warning = new WarningWindow("Are you sure to stop?\rBạn có muốn dừng chương trình?");
+            if (warning.ShowDialog() == true)
+            {
+                _mainController.Stop();
+                btnStart.IsEnabled = true;
+                btnStop.IsEnabled = false;
 
+                UpdateStoppedUI();
+            }
+        }
+
+        private void UpdateStoppedUI()
+        {
+            InspectionStatus = (int)(StatusState.Stopped);
+            InspectionStatusCam1 = (int)(StatusState.Stopped);
+            InspectionStatusCam2 = (int)(StatusState.Stopped);
+
+            OnPropertyChanged(nameof(InspectionStatus));
+            OnPropertyChanged(nameof(InspectionStatusCam1));
+            OnPropertyChanged(nameof(InspectionStatusCam2));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -169,6 +188,7 @@ namespace DiskInspection
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            _mainController.ShutdownLight();
             _mainController.CloseCamera();
             _mainController.CloseAIService();
             foreach (var item in System.Windows.Application.Current.Windows)
@@ -311,7 +331,7 @@ namespace DiskInspection
                 lbUvDiskCountCam1.Content = countUvDisk.ToString();
             }));
         }
-        internal void UpdateCam1MinMaxDis(double maxDis, double minDis)
+        internal void UpdateCam1MinMaxDis(double minDis, double maxDis)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -363,14 +383,6 @@ namespace DiskInspection
         #endregion
 
         #region Update Statistic
-        internal void UpdateInspectionStatus(bool status)
-        {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                InspectionStatus = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
-                OnPropertyChanged(nameof(InspectionStatus));
-            }));
-        }
 
         internal void UpdateTimeStamp()
         {
@@ -449,7 +461,7 @@ namespace DiskInspection
                 Values = new ChartValues<double> { 0 },
                 DataLabels = true,
                 LabelPoint = chartPoint => $"{chartPoint.Participation:P2}",
-                Fill = new SolidColorBrush(System.Windows.Media.Colors.Red)
+                Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(249, 68, 73))
             };
             PieSeriesCollection = new SeriesCollection { _okSeries, _ngSeries };
             UpdateStatistics(true, firstTime: true);
@@ -462,6 +474,51 @@ namespace DiskInspection
                 _ngSeries.Values[0] = (double)ngCount;
             });
         }
+
         #endregion
+        #region Update Inspection Status
+        internal void UpdateInspectionStatus(bool status)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                InspectionStatus = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                OnPropertyChanged(nameof(InspectionStatus));
+            }));
+        }
+        internal void UpdateInspectingMode()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                UpdateCam1WhiteOrigin(null);
+                UpdateCam2WhiteOrigin(null);
+                UpdateCam1WhiteResult(null);
+                UpdateCam2WhiteResult(null);
+                UpdateCam1UvOrigin(null);
+                UpdateCam2UvOrigin(null);
+                UpdateCam1UvResult(null);
+                UpdateCam2UvResult(null);
+
+                InspectionStatus = (int)(StatusState.Inspecting);
+                InspectionStatusCam1 = (int)(StatusState.Inspecting);
+                InspectionStatusCam2 = (int)(StatusState.Inspecting);
+
+                lbFinishTimeCam1.Content = "...";
+                lbFinishTimeCam2.Content = "...";
+                lbMaxDisCam1.Content = "...";
+                lbMaxDisCam2.Content = "...";
+                lbMinDisCam1.Content = "...";
+                lbMinDisCam2.Content = "...";
+                lbUvDiskCountCam1.Content = "...";
+                lbUvDiskCountCam2.Content = "...";
+
+                lbTimestamp.Content = "...";
+
+                OnPropertyChanged(nameof(InspectionStatus));
+                OnPropertyChanged(nameof(InspectionStatusCam1));
+                OnPropertyChanged(nameof(InspectionStatusCam2));
+            }));
+        }
+        #endregion
+
     }
 }

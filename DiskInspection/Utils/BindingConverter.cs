@@ -60,6 +60,7 @@ namespace DiskInspection.Utils
             {
                 if (status == (int)(StatusState.Ok)) return "CONNECTED";
                 else if (status == (int)(StatusState.Ng)) return "DISCONNECTED";
+                else if (status == (int)(StatusState.Stopped)) return "STOPPED";
                 return "UNKNOWN";
             }
             return value;
@@ -77,7 +78,9 @@ namespace DiskInspection.Utils
             if (value is int status)
             {
                 if (status == (int)(StatusState.Ok)) return "DarkGreen";
-                else if (status == (int)(StatusState.Ng))  return "Red";
+                else if (status == (int)(StatusState.Ng))  return "#F94449";
+                else if (status == (int)(StatusState.Inspecting)) return "#E6B400";
+                else if (status == (int)(StatusState.Stopped)) return "#C30010";
                 return "Gray";
             }
             return value;
@@ -88,6 +91,26 @@ namespace DiskInspection.Utils
             return value;
         }
     }
+    public class TextColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int status)
+            {
+                if (status == (int)(StatusState.Ok)) return "White";
+                else if (status == (int)(StatusState.Ng)) return "White";
+                else if (status == (int)(StatusState.Inspecting)) return "White";
+                return "White";
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+
     public class MainResCamStatusConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -97,6 +120,7 @@ namespace DiskInspection.Utils
                 if (status == (int)(StatusState.Ok)) return "OK";
                 else if (status == (int)(StatusState.Ng)) return "NG";
                 else if (status == (int)(StatusState.Inspecting)) return "...";
+                else if (status == (int)(StatusState.Stopped)) return "X";
                 return "N/A";
             }
             return value;
@@ -114,8 +138,9 @@ namespace DiskInspection.Utils
             if (value is int status)
             {
                 if (status == (int)(StatusState.Ok)) return "PASSED";
-                else if (status == (int)(StatusState.Ng)) return "FAILED";
+                else if (status == (int)(StatusState.Ng)) return "NOT GOOD";
                 else if (status == (int)(StatusState.Inspecting)) return "INSPECTING";
+                else if (status == (int)(StatusState.Stopped)) return "STOPPED";
                 return "N/A";
             }
             return value;
