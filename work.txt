@@ -1,12 +1,15 @@
+1. Add logic add ảnh vào image list của Image Viewer
 
---ok-- 1. Logging
+2. Popup ảnh khi NG với error index truyền vào
 
---ok-- 2. Add Log thông suốt chương trình
+3. Image Thump thêm thông tin ảnh có chữ ở dưới
 
---ok-- 3. Add Inspecting State
+4. Ấn vào khung ảnh nào hiển thị ảnh đó
 
---ok-- 4. Stop luồng
+5. Làm đẹp hơn Image Viewer:
 
-5. Pop up Error Image, hoặc click vào Image Pop Up lên (nên làm chung 1 form chờ)
+   + Background gradient, các cạnh control không bị cứng quá
+   + Image Thump đang được chọn ở trung tâm, chạy thump list khi chuyển selection
+
 
 6. Đổi lại logic bật đen khi debug, capture thì mới bật

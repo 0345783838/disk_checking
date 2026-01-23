@@ -204,9 +204,6 @@
     <Compile Include="Views\DebugWindows\ParamsWindow.xaml.cs">
       <DependentUpon>ParamsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ImageViewer.xaml.cs">
-      <DependentUpon>ImageViewer.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\ImageViewerWindow.xaml.cs">
       <DependentUpon>ImageViewerWindow.xaml</DependentUpon>
     </Compile>
@@ -238,10 +235,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\DebugWindows\DebugWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ImageViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -313,6 +306,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Icons\bad.png" />
+    <Resource Include="Resources\Icons\back.png" />
+    <Resource Include="Resources\Icons\next.png" />
     <Resource Include="Resources\Icons\lan.png" />
     <Resource Include="Resources\Icons\arrow-left.png" />
     <Resource Include="Resources\Icons\arrow-right.png" />

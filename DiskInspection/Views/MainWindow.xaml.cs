@@ -520,5 +520,10 @@ namespace DiskInspection
         }
         #endregion
 
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var window = new ImageViewerWindow();
+            window.Show();
+        }
     }
 }

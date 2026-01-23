@@ -7,219 +7,173 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:myControl="clr-namespace:Heal.MyControl;assembly=ImageCtlWPF"
     Title="Image Viewer"
-    Background="#F0F2F5"
+    Width="1000"
+    Height="800"
+  
+    ResizeMode="NoResize"
+    Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen">
-
-
     <Grid>
-        <!--  Centered card like the example  -->
-        <Grid
-            Width="900"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="47*" />
+            <RowDefinition Height="292*" />
+            <RowDefinition Height="53*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
             <Border
-                Padding="12"
-                Background="White"
-                CornerRadius="8"
-                Effect="{DynamicResource DropShadow}">
+                Margin="10"
+                Padding="2"
+                BorderThickness="3"
+                CornerRadius="10">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop x:Name="grdStartColor" Offset="0" Color="#d6cfc7" />
+                        <GradientStop x:Name="grdStopColor" Offset="1" Color="#d9dddc" />
+                    </LinearGradientBrush>
+                </Border.Background>
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <!--  Toolbar + error info  -->
-                        <RowDefinition Height="*" />
-                        <!--  Image area  -->
-                        <RowDefinition Height="Auto" />
-                        <!--  Pagination  -->
-                        <RowDefinition Height="140" />
-                        <!--  Thumbnails  -->
-                    </Grid.RowDefinitions>
-
-
-                    <!--  Toolbar  -->
-                    <DockPanel Grid.Row="0" Margin="0,0,0,8">
-                        <StackPanel
-                            VerticalAlignment="Center"
-                            DockPanel.Dock="Left"
-                            Orientation="Horizontal">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                FontSize="14"
-                                FontWeight="SemiBold"
-                                Foreground="#222"
-                                Text="{Binding FileName}" />
-                            <TextBlock Text=" " />
-                            <TextBlock
-                                Margin="6,0"
-                                VerticalAlignment="Center"
-                                Foreground="#CCC"
-                                Text="|" />
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Foreground="#666"
-                                Text="{Binding CameraName}" />
-                        </StackPanel>
-
-
-                        <StackPanel
-                            HorizontalAlignment="Right"
-                            DockPanel.Dock="Right"
-                            Orientation="Horizontal">
-                            <Button
-                                Margin="0,0,8,0"
-                                Padding="8,4"
-                                Command="{Binding DownloadCommand}"
-                                Content="Download" />
-                            <Button
-                                Width="28"
-                                Height="28"
-                                Command="{Binding CloseCommand}"
-                                Content="✕" />
-                        </StackPanel>
-                    </DockPanel>
-
-
-                    <!--  Error Code + Description (above image)  -->
-                    <Border
-                        Grid.Row="0"
-                        Margin="0,36,0,0"
-                        Padding="8"
-                        Background="#FFF8E1"
-                        BorderBrush="#FFE082"
-                        BorderThickness="1"
-                        CornerRadius="6">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock
-                                FontWeight="Bold"
-                                Foreground="#BF360C"
-                                Text="Error: " />
-                            <TextBlock
-                                Margin="6,0"
-                                FontWeight="Bold"
-                                Foreground="#D84315"
-                                Text="{Binding ErrorCode}" />
-                            <TextBlock
-                                Margin="8,0"
-                                Foreground="#999"
-                                Text=" · " />
-                            <TextBlock
-                                Width="560"
-                                Foreground="#333"
-                                Text="{Binding ErrorDescription}"
-                                TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                    </Border>
-
-
-                    <!--  Image area (4:3 centered)  -->
-                    <Grid
-                        Grid.Row="1"
-                        Margin="0,12"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center">
-                        <Border
-                            Width="720"
-                            Height="540"
-                            Padding="12"
-                            Background="#F7F7F7"
-                            CornerRadius="6">
-                            <Grid>
-                                <!--  Keep aspect 4:3 by fixed size box. Inside use custom control  -->
-                                <myControl:ImageBox
-                                    x:Name="imbOriginalImage"
-                                    Margin="5"
-                                    Background="LightGray" />
-                            </Grid>
-                        </Border>
-                    </Grid>
-
-
-                    <!--  Pagination controls  -->
                     <StackPanel
-                        Grid.Row="2"
-                        Margin="0,12"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Orientation="Horizontal">
-                        <Button
-                            Width="36"
-                            Height="28"
-                            Command="{Binding PrevCommand}"
-                            Content="◀" />
-                        <TextBlock
-                            Margin="12,0"
+                        <Image Margin="5" Source="/Resources/Icons/bad.png" />
+                        <Label
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Text="{Binding PageInfo}" />
-                        <Button
-                            Width="36"
-                            Height="28"
-                            Command="{Binding NextCommand}"
-                            Content="▶" />
+                            Content="Khay đĩa bất thường"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="DarkRed" />
                     </StackPanel>
 
-
-                    <!--  Thumbnail strip  -->
-                    <Border
-                        Grid.Row="3"
-                        Margin="-12,8,-12,-12"
-                        Background="#FAFAFA"
-                        CornerRadius="6">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                            <ItemsControl Margin="8" ItemsSource="{Binding Images}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-
-
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border
-                                            Width="120"
-                                            Height="100"
-                                            Margin="6"
-                                            BorderBrush="{Binding IsSelected, Converter={StaticResource BoolToBrushConverter}, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
-                                            BorderThickness="2"
-                                            CornerRadius="4">
-                                            <Button Command="{Binding DataContext.SelectImageCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}">
-                                                <Grid>
-                                                    <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
-                                                    <StackPanel
-                                                        Height="28"
-                                                        VerticalAlignment="Bottom"
-                                                        Background="#AAFFFFFF">
-                                                        <TextBlock
-                                                            Margin="6,0"
-                                                            FontSize="11"
-                                                            Foreground="#222"
-                                                            Text="{Binding Name}"
-                                                            TextTrimming="CharacterEllipsis" />
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Button>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Border>
                 </Grid>
             </Border>
         </Grid>
+        <Grid
+            x:Name="grView"
+            Grid.Row="1"
+            Margin="5"
+            MouseLeave="grView_MouseLeave"
+            MouseMove="grView_MouseMove">
+            <Border
+                x:Name="bdView"
+                Padding="10"
+                Background="#2A2A2A"
+                ClipToBounds="True"
+                CornerRadius="10">
+                <Image
+                    x:Name="imbImage"
+                    MouseDown="imbImage_MouseDown"
+                    MouseLeftButtonDown="imbImage_MouseLeftButtonDown"
+                    MouseLeftButtonUp="imbImage_MouseLeftButtonUp"
+                    MouseMove="imbImage_MouseMove"
+                    MouseWheel="imbImage_MouseWheel"
+                    RenderTransformOrigin="0.5,0.5"
+                    Stretch="Uniform">
+
+                    <Image.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="scaleTransform" ScaleX="1" ScaleY="1" />
+                            <TranslateTransform x:Name="translateTransform" X="0" Y="0" />
+                        </TransformGroup>
+                    </Image.RenderTransform>
+
+                </Image>
+            </Border>
+            <DockPanel LastChildFill="False">
+                <Button
+                    x:Name="btnBack"
+                    Width="20"
+                    Height="40"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Center"
+                    Background="#48494B"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    Click="btnBack_Click"
+                    DockPanel.Dock="Left"
+                    IsHitTestVisible="False"
+                    Style="{StaticResource RoundButtonStyle}">
+                    <Image
+                        Width="18"
+                        Margin="-2,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Source="/Resources/Icons/back.png" />
+                </Button>
+                <Button
+                    x:Name="btnNext"
+                    Width="20"
+                    Height="40"
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Background="#48494B"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    Click="btnNext_Click"
+                    DockPanel.Dock="Right"
+                    IsHitTestVisible="False"
+                    Style="{StaticResource RoundButtonStyle}">
+                    <Image
+                        Width="18"
+                        Margin="2,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Source="/Resources/Icons/next.png" />
+                </Button>
+            </DockPanel>
+        </Grid>
+        <Grid Grid.Row="2" Margin="5">
+            <ListBox
+                x:Name="lbThumbList"
+                Grid.Row="1"
+                Margin="10"
+                BorderThickness="0"
+                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                SelectionChanged="lbThumbList_SelectionChanged">
+                <ListBox.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Offset="0" Color="#d6cfc7" />
+                        <GradientStop Offset="1" Color="#d9dddc" />
+                    </LinearGradientBrush>
+                </ListBox.Background>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="5"
+                            BorderBrush="Transparent"
+                            BorderThickness="2">
+                            <Image
+                                Width="100"
+                                Height="100"
+                                Source="{Binding}"
+                                Stretch="UniformToFill" />
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="BorderBrush" Value="DodgerBlue" />
+                                <Setter Property="BorderThickness" Value="2" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+        </Grid>
     </Grid>
-
-
-    <!--  Resources  -->
-    <Window.Resources>
-        <DropShadowEffect
-            x:Key="DropShadow"
-            BlurRadius="12"
-            Opacity="0.12"
-            ShadowDepth="4"
-            Color="#444" />
-
-
-        <!--  Simple Bool->Brush converter placeholder; implement in VM or code-behind if needed  -->
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </Window.Resources>
 </Window>

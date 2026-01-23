@@ -244,6 +244,8 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
+                                Cursor="Hand"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown"
                                 BorderThickness="2">
                                 <Image x:Name="imbCam1WhiteOrigin" />
                             </Border>
