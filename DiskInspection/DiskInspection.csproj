@@ -197,6 +197,7 @@
     <Compile Include="Models\LogItem.cs" />
     <Compile Include="Models\MyEnum.cs" />
     <Compile Include="Models\InspectionResponse.cs" />
+    <Compile Include="Models\ThumbItem.cs" />
     <Compile Include="Services\ErrorService.cs" />
     <Compile Include="Utils\Converter.cs" />
     <Compile Include="Utils\DateTime.cs" />

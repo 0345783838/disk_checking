@@ -1,67 +1,126 @@
-﻿using System;
+﻿using DiskInspection.Models;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace DiskInspection.Views
 {
-    /// <summary>
-    /// Interaction logic for PopUpErrorWindow.xaml
-    /// </summary>
     public partial class ImageViewerWindow : Window
     {
         private Point _start;
         private Point _origin;
-        private List<BitmapImage> _imageList = new List<BitmapImage>();
+
+        private ObservableCollection<ThumbItem> _imageList
+            = new ObservableCollection<ThumbItem>();
+
         private int _currentIndex = -1;
         private const double EDGE_ZONE = 150;
+
         public ImageViewerWindow()
         {
             InitializeComponent();
-            var bm1 = new BitmapImage(new Uri(@"C:\Users\Admin\Downloads\591e0a63-ca0b-4202-9a02-1e7cbf8c14ca.jfif"));
-            var bm2 = new BitmapImage(new Uri(@"C:\Users\Admin\Downloads\95a90a7b-2723-4ff3-9514-b5f7d0dbd09b.jfif"));
-            var bm3 = new BitmapImage(new Uri(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\07_12\Image__2025-12-07__23-51-12.bmp"));
-            var bm4 = new BitmapImage(new Uri(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\07_12\Image__2025-12-07__23-56-47.bmp"));
-            var bm5 = new BitmapImage(new Uri(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\uv\Image__2025-12-04__21-43-09.bmp"));
-               
-            var list = new List<BitmapImage> { bm1, bm2, bm3, bm4, bm5 };
-            LoadImages(list);
-
-        }
-        public void LoadImages( List<BitmapImage> imageList, int errorIdx=0)
-        {
-            _imageList.Clear();
-            _imageList = imageList;
             lbThumbList.ItemsSource = _imageList;
-
-            if (_imageList.Count > 0 && errorIdx>0 && errorIdx < _imageList.Count)
-            {
-                _currentIndex = errorIdx;
-                LoadMainImage();
-            }
         }
+        private void InvokeUI(Action action)
+        {
+            if (Dispatcher.CheckAccess())
+                action();
+            else
+                Dispatcher.Invoke(action);
+        }
+
+        // ================= PUBLIC API =================
+
+        public void ClearImages()
+        {
+            InvokeUI(() =>
+            {
+                _imageList.Clear();
+                _currentIndex = -1;
+                imbImage.Source = null;
+
+                HideButton(btnBack);
+                HideButton(btnNext);
+            });
+        }
+
+
+        public void ShowViewer()
+        {
+            if (!IsVisible)
+                Show();
+
+            Activate();
+            WindowState = WindowState.Normal;
+        }
+        public void ShowByImage(BitmapSource img)
+        {
+            if (img == null) return;
+
+            InvokeUI(() =>
+            {
+                int index = _imageList
+                    .Select((item, i) => new { item, i })
+                    .FirstOrDefault(x => x.item.Image == img)?.i ?? -1;
+
+                if (index >= 0)
+                {
+                    _currentIndex = index;
+                    LoadMainImage();
+                    ShowViewer();
+                }
+            });
+        }
+        public void AddImage(BitmapSource img, string title, ThumbStatus thumbStatus, bool autoShow = false)
+        {
+            if (img == null) return;
+            InvokeUI(() =>
+            {
+                _imageList.Add(new ThumbItem(img, title, thumbStatus));
+
+                if (autoShow)
+                {
+                    _currentIndex = _imageList.Count - 1;
+                    LoadMainImage();
+                }
+            });
+        }
+        public void ShowImage(int index)
+        {
+            if (index < 0 || index >= _imageList.Count) return;
+
+            _currentIndex = index;
+            LoadMainImage();
+        }
+
+        // ================= INTERNAL =================
 
         private void LoadMainImage()
         {
             if (_currentIndex < 0 || _currentIndex >= _imageList.Count)
                 return;
 
-            imbImage.Source = _imageList[_currentIndex];
+            imbImage.Source = _imageList[_currentIndex].Image;
             ResetView();
 
-            lbThumbList.SelectedIndex = _currentIndex;
-            lbThumbList.ScrollIntoView(lbThumbList.SelectedItem);
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                lbThumbList.Focus();
+                lbThumbList.SelectedIndex = _currentIndex;
+                lbThumbList.ScrollIntoView(lbThumbList.SelectedItem);
+            }), System.Windows.Threading.DispatcherPriority.Background);
         }
+
+        // ================= IMAGE PAN + ZOOM =================
 
         private void imbImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -99,19 +158,15 @@ namespace DiskInspection.Views
             if (e.ClickCount == 2)
                 ResetView();
         }
-        private async  void ResetView()
+
+        private async void ResetView()
         {
             var duration = TimeSpan.FromMilliseconds(150);
 
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty,
-                new DoubleAnimation(1, duration));
-            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty,
-                new DoubleAnimation(1, duration));
-
-            translateTransform.BeginAnimation(TranslateTransform.XProperty,
-                new DoubleAnimation(0, duration));
-            translateTransform.BeginAnimation(TranslateTransform.YProperty,
-                new DoubleAnimation(0, duration));
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(1, duration));
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(1, duration));
+            translateTransform.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(0, duration));
+            translateTransform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(0, duration));
 
             await Task.Delay(duration);
 
@@ -121,12 +176,13 @@ namespace DiskInspection.Views
             translateTransform.BeginAnimation(TranslateTransform.XProperty, null);
             translateTransform.BeginAnimation(TranslateTransform.YProperty, null);
 
-            // Set giá trị thực
             scaleTransform.ScaleX = 1;
             scaleTransform.ScaleY = 1;
             translateTransform.X = 0;
             translateTransform.Y = 0;
         }
+
+        // ================= THUMB =================
 
         private void lbThumbList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -136,10 +192,11 @@ namespace DiskInspection.Views
             LoadMainImage();
         }
 
+        // ================= BUTTON =================
+
         private void btnBack_Click(object sender, RoutedEventArgs e)
         {
             if (_currentIndex <= 0) return;
-
             _currentIndex--;
             LoadMainImage();
         }
@@ -147,43 +204,22 @@ namespace DiskInspection.Views
         private void btnNext_Click(object sender, RoutedEventArgs e)
         {
             if (_currentIndex >= _imageList.Count - 1) return;
-
             _currentIndex++;
             LoadMainImage();
         }
 
         private void ShowButton(Button btn)
         {
-            if (btn.Visibility == Visibility.Visible && btn.Opacity == 1)
-                return;
-
             btn.Visibility = Visibility.Visible;
-            btn.IsHitTestVisible = true;
-
-            var anim = new DoubleAnimation(1, TimeSpan.FromMilliseconds(120))
-            {
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            btn.BeginAnimation(UIElement.OpacityProperty, anim);
+            btn.BeginAnimation(OpacityProperty,
+                new DoubleAnimation(1, TimeSpan.FromMilliseconds(120)));
         }
+
         private void HideButton(Button btn)
         {
-            if (btn.Visibility != Visibility.Visible)
-                return;
-
-            var anim = new DoubleAnimation(0, TimeSpan.FromMilliseconds(120))
-            {
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-
-            anim.Completed += (s, e) =>
-            {
-                btn.Visibility = Visibility.Collapsed;
-                btn.IsHitTestVisible = false;
-            };
-
-            btn.BeginAnimation(UIElement.OpacityProperty, anim);
+            var anim = new DoubleAnimation(0, TimeSpan.FromMilliseconds(120));
+            anim.Completed += (s, e) => btn.Visibility = Visibility.Collapsed;
+            btn.BeginAnimation(OpacityProperty, anim);
         }
 
         private void grView_MouseMove(object sender, MouseEventArgs e)
@@ -198,15 +234,12 @@ namespace DiskInspection.Views
             Point p = e.GetPosition(bdView);
             double w = bdView.ActualWidth;
 
-            bool nearLeft = p.X <= EDGE_ZONE;
-            bool nearRight = p.X >= w - EDGE_ZONE;
-
-            if (nearLeft && _currentIndex > 0)
+            if (p.X < EDGE_ZONE && _currentIndex > 0)
                 ShowButton(btnBack);
             else
                 HideButton(btnBack);
 
-            if (nearRight && _currentIndex < _imageList.Count - 1)
+            if (p.X > w - EDGE_ZONE && _currentIndex < _imageList.Count - 1)
                 ShowButton(btnNext);
             else
                 HideButton(btnNext);
@@ -216,6 +249,17 @@ namespace DiskInspection.Views
         {
             HideButton(btnBack);
             HideButton(btnNext);
+        }
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (Application.Current.ShutdownMode == ShutdownMode.OnExplicitShutdown)
+            {
+                base.OnClosing(e);
+                return;
+            }
+
+            e.Cancel = true;
+            Hide();
         }
     }
 }

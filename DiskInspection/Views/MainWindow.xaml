@@ -24,6 +24,7 @@
         <utils:MainResCamStatusConverter x:Key="MainResCamStatusConverter" />
         <utils:MainInspectionStatusConverter x:Key="MainInspectionStatusConverter" />
         <utils:TextColorConverter x:Key="TextColorConverter" />
+        <utils:NullToBoolConverter x:Key="NullToBoolConverter" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -244,9 +245,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
+                                BorderThickness="2"
                                 Cursor="Hand"
-                                MouseLeftButtonDown="Border_MouseLeftButtonDown"
-                                BorderThickness="2">
+                                IsEnabled="{Binding ElementName=imbCam1WhiteOrigin, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <Image x:Name="imbCam1WhiteOrigin" />
                             </Border>
                             <Border
@@ -254,7 +267,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
-                                BorderThickness="2">
+                                BorderThickness="2"
+                                IsEnabled="{Binding ElementName=imbCam1WhiteResult, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
                                 <Image x:Name="imbCam1WhiteResult" />
                             </Border>
                         </Grid>
@@ -274,7 +301,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
-                                BorderThickness="2">
+                                BorderThickness="2"
+                                IsEnabled="{Binding ElementName=imbCam1UvOrigin, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
                                 <Image x:Name="imbCam1UvOrigin" />
                             </Border>
                             <Border
@@ -282,7 +323,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
-                                BorderThickness="2">
+                                BorderThickness="2"
+                                IsEnabled="{Binding ElementName=imbCam1UvResult, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
                                 <Image x:Name="imbCam1UvResult" />
                             </Border>
                         </Grid>
@@ -316,7 +371,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
-                                BorderThickness="2">
+                                BorderThickness="2"
+                                IsEnabled="{Binding ElementName=imbCam2WhiteOrigin, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
                                 <Image x:Name="imbCam2WhiteOrigin" />
                             </Border>
                             <Border
@@ -324,7 +393,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
-                                BorderThickness="2">
+                                BorderThickness="2"
+                                IsEnabled="{Binding ElementName=imbCam2WhiteResult, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
                                 <Image x:Name="imbCam2WhiteResult" />
                             </Border>
                         </Grid>
@@ -344,7 +427,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
-                                BorderThickness="2">
+                                BorderThickness="2"
+                                IsEnabled="{Binding ElementName=imbCam2UvOrigin, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
                                 <Image x:Name="imbCam2UvOrigin" />
                             </Border>
                             <Border
@@ -352,7 +449,21 @@
                                 Margin="5,15,5,5"
                                 Background="LightGray"
                                 BorderBrush="DarkGray"
-                                BorderThickness="2">
+                                BorderThickness="2"
+                                IsEnabled="{Binding ElementName=imbCam2UvResult, Path=Source, Converter={StaticResource NullToBoolConverter}}"
+                                MouseLeftButtonDown="Border_MouseLeftButtonDown">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Cursor" Value="Arrow" />
+
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="True">
+                                                <Setter Property="Cursor" Value="Hand" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
                                 <Image x:Name="imbCam2UvResult" />
                             </Border>
                         </Grid>
@@ -462,8 +573,8 @@
                                     x:Name="bdInspectionStatus"
                                     Margin="85,0,85,0"
                                     Background="{Binding InspectionStatus, Converter={StaticResource MainStatusColorConverter}, FallbackValue='Gray'}"
-                                    BorderThickness="0.7"
                                     BorderBrush="Gray"
+                                    BorderThickness="0.7"
                                     CornerRadius="5"
                                     DockPanel.Dock="Left">
                                     <Label

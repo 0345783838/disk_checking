@@ -1,8 +1,8 @@
-1. Add logic add ảnh vào image list của Image Viewer
+--oke---1. Add logic add ảnh vào image list của Image Viewer
 
 2. Popup ảnh khi NG với error index truyền vào
 
-3. Image Thump thêm thông tin ảnh có chữ ở dưới
+3. Image Thump thêm thông tin ảnh có chữ ở dưới + màu text (xám - origin, đỏ - ng, xanh - ok)
 
 4. Ấn vào khung ảnh nào hiển thị ảnh đó
 

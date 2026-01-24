@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace DiskInspection.Models
 {
@@ -25,5 +26,11 @@ namespace DiskInspection.Models
         Success,
         Warning,
         Error
+    }
+    public enum ThumbStatus
+    {
+        Origin,
+        Ok,
+        Ng
     }
 }

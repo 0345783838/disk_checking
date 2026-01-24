@@ -26,6 +26,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Globalization;
+using Image = System.Windows.Controls.Image;
 
 namespace DiskInspection
 {
@@ -522,8 +523,11 @@ namespace DiskInspection
 
         private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            var window = new ImageViewerWindow();
-            window.Show();
+            if (sender is Border bd && bd.Child is Image img && img.Source != null)
+            {
+                var bmp = img.Source as BitmapSource;
+                App.ImageViewer.ShowByImage(bmp);
+            }
         }
     }
 }

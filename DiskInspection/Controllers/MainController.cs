@@ -217,6 +217,7 @@ namespace DiskInspection.Controllers
 
             // --- start inspection
             var token = _inspectCts.Token;
+            App.ImageViewer.ClearImages();
             try
             {
                 var results = await Task.WhenAll(
@@ -292,6 +293,7 @@ namespace DiskInspection.Controllers
                 lock (_cam1WhiteOriginLock)
                 {
                     _cam1LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
+                    App.ImageViewer.AddImage(_cam1LastWhiteBitmap, "1-White-Origin", ThumbStatus.Origin);
                 }
                 _mainWindow.UpdateCam1WhiteOrigin(_cam1LastWhiteBitmap);   // 🔥 update NGAY
 
@@ -319,11 +321,20 @@ namespace DiskInspection.Controllers
                     lock (_cam1WhiteResultLock)
                     {
                         _cam1LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
+                        
                     }
                     _mainWindow.UpdateCam1WhiteResult(_cam1LastWhiteResultBitmap); // 🔥 update NGAY
                     _mainWindow.UpdateCam1MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
-                    if(!resWhite.Result)
+                    if (!resWhite.Result)
+                    {
+                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ng);
                         totalStatus = false;
+                    }
+                    else
+                    {
+                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ok);
+                    }
+                        
 
                     AppLogger.Instance.Info("AI inspection for camera 1 with white light completed.", "CAM1 AI");
                 }
@@ -356,6 +367,7 @@ namespace DiskInspection.Controllers
                 lock (_cam1UvOriginLock)
                 {
                     _cam1LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
+                    App.ImageViewer.AddImage(_cam1LastUvBitmap, "1-UV-Origin", ThumbStatus.Origin);
                 }
 
                 // Update result to UI
@@ -392,7 +404,14 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam1UvResult(_cam1LastUvResultBitmap);
                     _mainWindow.UpdateCam1DiskUv(resUv.CountUvDisk);
                     if (!resUv.Result)
+                    {
+                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ng);
                         totalStatus = false;
+                    }
+                    else
+                    {
+                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ok);
+                    }
 
                     AppLogger.Instance.Info("AI inspection for camera 1 with UV light completed.", "CAM1 AI");
                 }
@@ -441,6 +460,7 @@ namespace DiskInspection.Controllers
                 lock (_cam2WhiteOriginLock)
                 {
                     _cam2LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
+                    App.ImageViewer.AddImage(_cam2LastWhiteBitmap, "2-White-Origin", ThumbStatus.Origin);
                 }
                 _mainWindow.UpdateCam2WhiteOrigin(_cam2LastWhiteBitmap);   // 🔥 update NGAY
 
@@ -473,7 +493,14 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam2WhiteResult(_cam2LastWhiteResultBitmap); // 🔥 update NGAY
                     _mainWindow.UpdateCam2MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
                     if (!resWhite.Result)
+                    {
+                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ng);
                         totalStatus = false;
+                    }
+                    else
+                    {
+                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ok);
+                    }
 
                     AppLogger.Instance.Info("AI inspection for camera 2 with white light completed.", "CAM2 AI");
                 }
@@ -505,6 +532,7 @@ namespace DiskInspection.Controllers
                 lock (_cam2UvOriginLock)
                 {
                     _cam2LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
+                    App.ImageViewer.AddImage(_cam2LastUvBitmap, "2-Uv-Origin", ThumbStatus.Origin);
                 }
                 _mainWindow.UpdateCam2UvOrigin(_cam2LastUvBitmap); // 🔥 update NGAY
 
@@ -539,7 +567,15 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam2UvResult(_cam2LastUvResultBitmap); // 🔥 update NGAY
                     _mainWindow.UpdateCam2DiskUv(resUv.CountUvDisk);
                     if (!resUv.Result)
+                    {
+                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ng);
                         totalStatus = false;
+                    }
+                    else
+                    {
+                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ok);
+                    }
+                        
 
                     AppLogger.Instance.Info("AI inspection for camera 2 with UV light completed.", "CAM2 AI");
                 }
@@ -839,6 +875,7 @@ namespace DiskInspection.Controllers
             if (!_isRunning)
                 return;
 
+            PlcController._firstTrigger = true;
             _isRunning = false;
 
             StopPlcTimer();

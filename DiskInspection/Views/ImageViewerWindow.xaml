@@ -9,7 +9,6 @@
     Title="Image Viewer"
     Width="1000"
     Height="800"
-  
     ResizeMode="NoResize"
     Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen">
@@ -21,7 +20,7 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Border
-                Margin="10"
+                Margin="10,5,10,5"
                 Padding="2"
                 BorderThickness="3"
                 CornerRadius="10">
@@ -52,7 +51,7 @@
         <Grid
             x:Name="grView"
             Grid.Row="1"
-            Margin="5"
+            Margin="5,0,5,0"
             MouseLeave="grView_MouseLeave"
             MouseMove="grView_MouseMove">
             <Border
@@ -92,7 +91,6 @@
                     BorderThickness="0"
                     Click="btnBack_Click"
                     DockPanel.Dock="Left"
-                    IsHitTestVisible="False"
                     Style="{StaticResource RoundButtonStyle}">
                     <Image
                         Width="18"
@@ -112,7 +110,6 @@
                     BorderThickness="0"
                     Click="btnNext_Click"
                     DockPanel.Dock="Right"
-                    IsHitTestVisible="False"
                     Style="{StaticResource RoundButtonStyle}">
                     <Image
                         Width="18"
@@ -127,7 +124,7 @@
             <ListBox
                 x:Name="lbThumbList"
                 Grid.Row="1"
-                Margin="10"
+                Margin="5,0,5,5"
                 BorderThickness="0"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -143,18 +140,25 @@
                         <StackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
-
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border
                             Margin="5"
                             BorderBrush="Transparent"
                             BorderThickness="2">
-                            <Image
-                                Width="100"
-                                Height="100"
-                                Source="{Binding}"
-                                Stretch="UniformToFill" />
+                            <StackPanel Width="100">
+                                <Image
+                                    Width="100"
+                                    Height="80"
+                                    Source="{Binding Image}"
+                                    Stretch="UniformToFill" />
+                                <Label
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Center"
+                                    Content="{Binding Text}"
+                                    FontSize="11"
+                                    Foreground="{Binding StatusColor}" />
+                            </StackPanel>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -164,7 +168,6 @@
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="BorderBrush" Value="DodgerBlue" />

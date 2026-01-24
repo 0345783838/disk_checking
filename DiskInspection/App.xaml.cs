@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DiskInspection.Views;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,14 @@ namespace DiskInspection
     /// </summary>
     public partial class App : Application
     {
+        public static ImageViewerWindow ImageViewer { get; private set; }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            ImageViewer = new ImageViewerWindow();
+            ImageViewer.Hide();   // chạy nền
+        }
     }
 }
