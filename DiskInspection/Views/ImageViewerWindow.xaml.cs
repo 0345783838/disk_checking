@@ -80,12 +80,12 @@ namespace DiskInspection.Views
                 }
             });
         }
-        public void AddImage(BitmapSource img, string title, ThumbStatus thumbStatus, bool autoShow = false)
+        public void AddImage(BitmapSource img, string title, ThumbStatus thumbStatus, string errorDescription, bool autoShow = false)
         {
             if (img == null) return;
             InvokeUI(() =>
             {
-                _imageList.Add(new ThumbItem(img, title, thumbStatus));
+                _imageList.Add(new ThumbItem(img, title, thumbStatus, errorDescription));
 
                 if (autoShow)
                 {
@@ -117,6 +117,7 @@ namespace DiskInspection.Views
                 lbThumbList.Focus();
                 lbThumbList.SelectedIndex = _currentIndex;
                 lbThumbList.ScrollIntoView(lbThumbList.SelectedItem);
+                lbErrorDescription.Content = _imageList[_currentIndex].ErrorDescription;
             }), System.Windows.Threading.DispatcherPriority.Background);
         }
 

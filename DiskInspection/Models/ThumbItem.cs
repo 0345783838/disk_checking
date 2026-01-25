@@ -13,8 +13,9 @@ namespace DiskInspection.Models
         public BitmapSource Image { get; set; }
         public string Text { get; set; }
         public Brush StatusColor { get; set; }
+        public string ErrorDescription { get; set; }
 
-        public ThumbItem(BitmapSource image, string text, ThumbStatus statusColor)
+        public ThumbItem(BitmapSource image, string text, ThumbStatus statusColor, string errorDescription)
         {
             Image = image;
             Text = text;
@@ -24,6 +25,7 @@ namespace DiskInspection.Models
                 StatusColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(249, 68, 73));
             else
                 StatusColor = Brushes.DarkGray;
+            ErrorDescription = errorDescription;
         }
     }
 }

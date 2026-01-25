@@ -8,15 +8,15 @@
     xmlns:myControl="clr-namespace:Heal.MyControl;assembly=ImageCtlWPF"
     Title="Image Viewer"
     Width="1000"
-    Height="800"
+    Height="850"
     ResizeMode="NoResize"
     Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="47*" />
-            <RowDefinition Height="292*" />
-            <RowDefinition Height="53*" />
+            <RowDefinition Height="80" />
+            <RowDefinition Height="600" />
+            <RowDefinition />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Border
@@ -37,6 +37,7 @@
                         Orientation="Horizontal">
                         <Image Margin="5" Source="/Resources/Icons/bad.png" />
                         <Label
+                            x:Name="lbErrorDescription"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Content="Khay đĩa bất thường"
@@ -143,7 +144,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border
-                            Margin="5"
+                            Margin="5,5,5,0"
                             BorderBrush="Transparent"
                             BorderThickness="2">
                             <StackPanel Width="100">
@@ -156,7 +157,8 @@
                                     Margin="0,0,0,0"
                                     HorizontalAlignment="Center"
                                     Content="{Binding Text}"
-                                    FontSize="11"
+                                    FontWeight="Bold"
+                                    FontSize="12"
                                     Foreground="{Binding StatusColor}" />
                             </StackPanel>
                         </Border>

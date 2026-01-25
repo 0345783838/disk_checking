@@ -285,7 +285,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam1Exposure + 10);
 
                 //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\07_12\Image__2025-12-07__23-59-13.bmp");
+                Bitmap frameWhite = new Bitmap(@"F:\working\disk_checking\APP\test_white.bmp");
                 AppLogger.Instance.Info("Captured image from camera 1 with white light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
@@ -293,7 +293,7 @@ namespace DiskInspection.Controllers
                 lock (_cam1WhiteOriginLock)
                 {
                     _cam1LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
-                    App.ImageViewer.AddImage(_cam1LastWhiteBitmap, "1-White-Origin", ThumbStatus.Origin);
+                    App.ImageViewer.AddImage(_cam1LastWhiteBitmap, "1-White-Origin", ThumbStatus.Origin, "Camera 1 - White Light - Original Image");
                 }
                 _mainWindow.UpdateCam1WhiteOrigin(_cam1LastWhiteBitmap);   // 🔥 update NGAY
 
@@ -327,12 +327,12 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam1MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
                     if (!resWhite.Result)
                     {
-                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ng);
+                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ng, resWhite.ErrorDesc);
                         totalStatus = false;
                     }
                     else
                     {
-                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ok);
+                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ok, resWhite.ErrorDesc);
                     }
                         
 
@@ -359,7 +359,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam1Exposure + 10);
 
                 //Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
-                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\uv\Image__2025-12-04__21-45-37 - Copy.bmp");
+                Bitmap frameUv = new Bitmap(@"F:\working\disk_checking\APP\test_uv.bmp");
                 AppLogger.Instance.Info("Captured image from camera 1 with UV light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
@@ -367,7 +367,7 @@ namespace DiskInspection.Controllers
                 lock (_cam1UvOriginLock)
                 {
                     _cam1LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
-                    App.ImageViewer.AddImage(_cam1LastUvBitmap, "1-UV-Origin", ThumbStatus.Origin);
+                    App.ImageViewer.AddImage(_cam1LastUvBitmap, "1-UV-Origin", ThumbStatus.Origin, "Camera 1 - UV Light - Original Image");
                 }
 
                 // Update result to UI
@@ -405,12 +405,12 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam1DiskUv(resUv.CountUvDisk);
                     if (!resUv.Result)
                     {
-                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ng);
+                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ng, resUv.ErrorDesc);
                         totalStatus = false;
                     }
                     else
                     {
-                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ok);
+                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ok, resUv.ErrorDesc);
                     }
 
                     AppLogger.Instance.Info("AI inspection for camera 1 with UV light completed.", "CAM1 AI");
@@ -452,7 +452,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam2Exposure + 10);
 
                 //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\07_12\Image__2025-12-07__23-59-13.bmp");
+                Bitmap frameWhite = new Bitmap(@"F:\working\disk_checking\APP\test_white.bmp");
                 AppLogger.Instance.Info("Captured image from camera 2 with white light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
@@ -460,7 +460,7 @@ namespace DiskInspection.Controllers
                 lock (_cam2WhiteOriginLock)
                 {
                     _cam2LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
-                    App.ImageViewer.AddImage(_cam2LastWhiteBitmap, "2-White-Origin", ThumbStatus.Origin);
+                    App.ImageViewer.AddImage(_cam2LastWhiteBitmap, "2-White-Origin", ThumbStatus.Origin, "Camera 2 - White Light - Original Image");
                 }
                 _mainWindow.UpdateCam2WhiteOrigin(_cam2LastWhiteBitmap);   // 🔥 update NGAY
 
@@ -494,12 +494,12 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam2MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
                     if (!resWhite.Result)
                     {
-                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ng);
+                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ng, resWhite.ErrorDesc);
                         totalStatus = false;
                     }
                     else
                     {
-                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ok);
+                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ok, resWhite.ErrorDesc);
                     }
 
                     AppLogger.Instance.Info("AI inspection for camera 2 with white light completed.", "CAM2 AI");
@@ -524,7 +524,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam2Exposure + 10);
 
                 //Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
-                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\uv\Image__2025-12-04__21-45-37 - Copy.bmp");
+                Bitmap frameUv = new Bitmap(@"F:\working\disk_checking\APP\test_uv.bmp");
                 AppLogger.Instance.Info("Captured image from camera 2 with UV light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
@@ -532,7 +532,7 @@ namespace DiskInspection.Controllers
                 lock (_cam2UvOriginLock)
                 {
                     _cam2LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
-                    App.ImageViewer.AddImage(_cam2LastUvBitmap, "2-Uv-Origin", ThumbStatus.Origin);
+                    App.ImageViewer.AddImage(_cam2LastUvBitmap, "2-Uv-Origin", ThumbStatus.Origin, "Camera 2 - UV Light - Original Image");
                 }
                 _mainWindow.UpdateCam2UvOrigin(_cam2LastUvBitmap); // 🔥 update NGAY
 
@@ -568,12 +568,12 @@ namespace DiskInspection.Controllers
                     _mainWindow.UpdateCam2DiskUv(resUv.CountUvDisk);
                     if (!resUv.Result)
                     {
-                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ng);
+                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ng, resUv.ErrorDesc);
                         totalStatus = false;
                     }
                     else
                     {
-                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ok);
+                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ok, resUv.ErrorDesc);
                     }
                         
 

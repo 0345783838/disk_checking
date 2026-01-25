@@ -1,15 +1,27 @@
---oke---1. Add logic add ảnh vào image list của Image Viewer
+1. Popup ảnh khi NG với error index truyền vào
 
-2. Popup ảnh khi NG với error index truyền vào
+2. Binding lại phần Selected Thumb để có thể đổi background của Error Description
 
-3. Image Thump thêm thông tin ảnh có chữ ở dưới + màu text (xám - origin, đỏ - ng, xanh - ok)
+3. Show error khi 2 luồng camera có lỗi bằng list<string> Error trả về
 
-4. Ấn vào khung ảnh nào hiển thị ảnh đó
+4. Đổi lại logic bật đen khi debug, capture thì mới bật
+ 
+5. Thêm debug với UV light
 
-5. Làm đẹp hơn Image Viewer:
+6. Làm đẹp hơn Image Viewer:
 
    + Background gradient, các cạnh control không bị cứng quá
    + Image Thump đang được chọn ở trung tâm, chạy thump list khi chuyển selection
 
+7. Train thử unet++ b0 hoặc unet b0 để test processing time
 
-6. Đổi lại logic bật đen khi debug, capture thì mới bật
+8. Test với 2 camera real, và chạy liên tục xem có dính tràn RAM không?
+
+9. Collect thêm ảnh disk mới + kết hợp background linh tinh để train cho chắc, ưu tiên đen
+
+10. Train lại bổ sung cả detect + classify + segmentation
+
+11. Last test với con miniPC 
+
+==>> đóng gói và lên đường
+
