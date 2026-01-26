@@ -3,6 +3,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace DiskInspection.Utils
 {
@@ -163,5 +164,76 @@ namespace DiskInspection.Utils
             throw new NotImplementedException();
         }
     }
+    public class StartErrorBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is ThumbStatus status)
+            {
+                if (status == ThumbStatus.Ok) return "#88E788";
+                else if (status == ThumbStatus.Origin) return "#787276";
+                else return "#ee6b6e";
+            }
+            return value;
+        }
 
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+    public class StopErrorBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is ThumbStatus status)
+            {
+                if (status == ThumbStatus.Ok) return "#cce7c9";
+                else if (status == ThumbStatus.Origin) return "#d9dddc";
+                else return "#ffcbd1";
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+    public class ErrorIconConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is ThumbStatus status)
+            {
+                if (status == ThumbStatus.Ok) return "/Resources/Icons/check.png";
+                else if (status == ThumbStatus.Origin) return "/Resources/Icons/camera_ic.png";
+                else return "/Resources/Icons/bad.png";
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
+    public class ErrorForegroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is ThumbStatus status)
+            {
+                if (status == ThumbStatus.Ok) return "#0F5132";
+                else if (status == ThumbStatus.Origin) return "#1F2937";
+                else return "#7A0000";
+            }
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+    }
 }

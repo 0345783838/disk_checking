@@ -6,12 +6,20 @@
     xmlns:local="clr-namespace:DiskInspection.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:myControl="clr-namespace:Heal.MyControl;assembly=ImageCtlWPF"
+    xmlns:utils="clr-namespace:DiskInspection.Utils"
     Title="Image Viewer"
     Width="1000"
     Height="850"
+    Icon="/Resources/Icons/photo-gallery.png"
     ResizeMode="NoResize"
     Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <utils:StartErrorBackgroundConverter x:Key="StartErrorBackgroundConverter" />
+        <utils:StopErrorBackgroundConverter x:Key="StopErrorBackgroundConverter" />
+        <utils:ErrorIconConverter x:Key="ErrorIconConverter" />
+        <utils:ErrorForegroundConverter x:Key="ErrorForegroundConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80" />
@@ -26,8 +34,8 @@
                 CornerRadius="10">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop x:Name="grdStartColor" Offset="0" Color="#d6cfc7" />
-                        <GradientStop x:Name="grdStopColor" Offset="1" Color="#d9dddc" />
+                        <GradientStop Offset="0" Color="{Binding SelectedThumb.StatusColor, Converter={StaticResource StartErrorBackgroundConverter}}" />
+                        <GradientStop Offset="1" Color="{Binding SelectedThumb.StatusColor, Converter={StaticResource StopErrorBackgroundConverter}}" />
                     </LinearGradientBrush>
                 </Border.Background>
                 <Grid>
@@ -35,15 +43,19 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Orientation="Horizontal">
-                        <Image Margin="5" Source="/Resources/Icons/bad.png" />
+                        <Image
+                            Width="45"
+                            Height="45"
+                            Margin="5"
+                            Source="{Binding SelectedThumb.StatusColor, Converter={StaticResource ErrorIconConverter}}" />
                         <Label
                             x:Name="lbErrorDescription"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Content="Khay đĩa bất thường"
+                            Content="{Binding SelectedThumb.ErrorDescription}"
                             FontSize="24"
                             FontWeight="Bold"
-                            Foreground="DarkRed" />
+                            Foreground="{Binding SelectedThumb.StatusColor, Converter={StaticResource ErrorForegroundConverter}}" />
                     </StackPanel>
 
                 </Grid>
@@ -127,9 +139,10 @@
                 Grid.Row="1"
                 Margin="5,0,5,5"
                 BorderThickness="0"
+                ItemsSource="{Binding ImageList}"
                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                SelectionChanged="lbThumbList_SelectionChanged">
+                SelectedItem="{Binding SelectedThumb}">
                 <ListBox.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                         <GradientStop Offset="0" Color="#d6cfc7" />
@@ -157,9 +170,9 @@
                                     Margin="0,0,0,0"
                                     HorizontalAlignment="Center"
                                     Content="{Binding Text}"
-                                    FontWeight="Bold"
                                     FontSize="12"
-                                    Foreground="{Binding StatusColor}" />
+                                    FontWeight="Bold"
+                                    Foreground="{Binding StatusColor, Converter={StaticResource ErrorForegroundConverter}}" />
                             </StackPanel>
                         </Border>
                     </DataTemplate>

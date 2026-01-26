@@ -30,21 +30,28 @@ namespace DiskInspection.Utils
         }
         public static BitmapSource Base64ToBitmapSource(string base64)
         {
-            if (base64.Contains(","))
-                base64 = base64.Substring(base64.IndexOf(",") + 1);
-
-            byte[] imageBytes = Convert.FromBase64String(base64);
-
-            using (var ms = new MemoryStream(imageBytes))
+            try
             {
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad; // rất quan trọng
-                bitmap.StreamSource = ms;
-                bitmap.EndInit();
-                bitmap.Freeze(); // cho phép dùng khác thread
+                if (base64.Contains(","))
+                    base64 = base64.Substring(base64.IndexOf(",") + 1);
 
-                return bitmap;
+                byte[] imageBytes = Convert.FromBase64String(base64);
+
+                using (var ms = new MemoryStream(imageBytes))
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad; // rất quan trọng
+                    bitmap.StreamSource = ms;
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // cho phép dùng khác thread
+
+                    return bitmap;
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
         public static BitmapSource BitmapToBitmapSource(Bitmap bitmap)

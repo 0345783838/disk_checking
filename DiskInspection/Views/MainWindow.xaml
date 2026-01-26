@@ -14,6 +14,7 @@
     MinWidth="1280"
     MinHeight="800"
     Closing="Window_Closing"
+    Icon="/Resources/Icons/disk.png"
     Loaded="Window_Loaded"
     Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen"

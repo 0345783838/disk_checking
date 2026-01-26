@@ -12,19 +12,20 @@ namespace DiskInspection.Models
     {
         public BitmapSource Image { get; set; }
         public string Text { get; set; }
-        public Brush StatusColor { get; set; }
+        public ThumbStatus StatusColor { get; set; }
         public string ErrorDescription { get; set; }
 
         public ThumbItem(BitmapSource image, string text, ThumbStatus statusColor, string errorDescription)
         {
             Image = image;
             Text = text;
-            if (statusColor == ThumbStatus.Ok)
-                StatusColor = Brushes.DarkGreen;
-            else if (statusColor == ThumbStatus.Ng)
-                StatusColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(249, 68, 73));
-            else
-                StatusColor = Brushes.DarkGray;
+            StatusColor = statusColor;
+            //if (statusColor == ThumbStatus.Ok)
+            //    StatusColor = Brushes.DarkGreen;
+            //else if (statusColor == ThumbStatus.Ng)
+            //    StatusColor = new SolidColorBrush(System.Windows.Media.Color.FromRgb(249, 68, 73));
+            //else
+            //    StatusColor = Brushes.DarkGray;
             ErrorDescription = errorDescription;
         }
     }

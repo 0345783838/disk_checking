@@ -1,4 +1,5 @@
 ﻿using DiskInspection.Models;
+using Emgu.CV.Plot;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,21 +15,65 @@ using System.Windows.Media.Imaging;
 
 namespace DiskInspection.Views
 {
-    public partial class ImageViewerWindow : Window
+    public partial class ImageViewerWindow : Window, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         private Point _start;
         private Point _origin;
 
-        private ObservableCollection<ThumbItem> _imageList
-            = new ObservableCollection<ThumbItem>();
-
-        private int _currentIndex = -1;
         private const double EDGE_ZONE = 150;
+
+        public ObservableCollection<ThumbItem> ImageList { get; set; } = new ObservableCollection<ThumbItem>();
+
+        private ThumbItem _selectedThumb;
+        public ThumbItem SelectedThumb
+        {
+            get { return _selectedThumb; }
+            set
+            {
+                if (_selectedThumb != value)
+                {
+                    _selectedThumb = value;
+                    OnPropertyChanged();
+                    ThumbSelectionChanged();
+                }
+            }
+        }
+
+        private void ThumbSelectionChanged()
+        {
+            if (SelectedThumb == null)
+            {
+                imbImage.Source = null;
+
+                HideButton(btnBack);
+                HideButton(btnNext);
+            }
+
+            else
+            {
+                imbImage.Source = SelectedThumb.Image;
+                ResetView();
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    lbThumbList.Focus();
+                    lbThumbList.SelectedItem = SelectedThumb;
+                    lbThumbList.ScrollIntoView(lbThumbList.SelectedItem);
+                }), System.Windows.Threading.DispatcherPriority.Background);
+
+            }
+        }
 
         public ImageViewerWindow()
         {
             InitializeComponent();
-            lbThumbList.ItemsSource = _imageList;
+            DataContext = this;
         }
         private void InvokeUI(Action action)
         {
@@ -44,12 +89,8 @@ namespace DiskInspection.Views
         {
             InvokeUI(() =>
             {
-                _imageList.Clear();
-                _currentIndex = -1;
-                imbImage.Source = null;
-
-                HideButton(btnBack);
-                HideButton(btnNext);
+                ImageList.Clear();
+                SelectedThumb = null;
             });
         }
 
@@ -68,57 +109,41 @@ namespace DiskInspection.Views
 
             InvokeUI(() =>
             {
-                int index = _imageList
+                int index = ImageList
                     .Select((item, i) => new { item, i })
                     .FirstOrDefault(x => x.item.Image == img)?.i ?? -1;
 
                 if (index >= 0)
                 {
-                    _currentIndex = index;
-                    LoadMainImage();
+                    SelectedThumb = ImageList[index];
                     ShowViewer();
                 }
             });
         }
-        public void AddImage(BitmapSource img, string title, ThumbStatus thumbStatus, string errorDescription, bool autoShow = false)
+        public void ShowFirstErrorImage()
         {
-            if (img == null) return;
             InvokeUI(() =>
             {
-                _imageList.Add(new ThumbItem(img, title, thumbStatus, errorDescription));
-
-                if (autoShow)
+                var firstError = ImageList.FirstOrDefault(x => x.StatusColor == ThumbStatus.Ng);
+                if (firstError != null)
                 {
-                    _currentIndex = _imageList.Count - 1;
-                    LoadMainImage();
+                    SelectedThumb = firstError;
+                    ShowViewer();
                 }
             });
         }
-        public void ShowImage(int index)
+
+        public void AddImage(BitmapSource img, string title, ThumbStatus thumbStatus, string errorDescription, bool autoShow = false)
         {
-            if (index < 0 || index >= _imageList.Count) return;
-
-            _currentIndex = index;
-            LoadMainImage();
-        }
-
-        // ================= INTERNAL =================
-
-        private void LoadMainImage()
-        {
-            if (_currentIndex < 0 || _currentIndex >= _imageList.Count)
-                return;
-
-            imbImage.Source = _imageList[_currentIndex].Image;
-            ResetView();
-
-            Dispatcher.BeginInvoke(new Action(() =>
+            InvokeUI(() =>
             {
-                lbThumbList.Focus();
-                lbThumbList.SelectedIndex = _currentIndex;
-                lbThumbList.ScrollIntoView(lbThumbList.SelectedItem);
-                lbErrorDescription.Content = _imageList[_currentIndex].ErrorDescription;
-            }), System.Windows.Threading.DispatcherPriority.Background);
+                ImageList.Add(new ThumbItem(img, title, thumbStatus, errorDescription));
+
+                if (autoShow)
+                {
+                    SelectedThumb = ImageList[ImageList.Count - 1];
+                }
+            });
         }
 
         // ================= IMAGE PAN + ZOOM =================
@@ -183,30 +208,20 @@ namespace DiskInspection.Views
             translateTransform.Y = 0;
         }
 
-        // ================= THUMB =================
-
-        private void lbThumbList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (lbThumbList.SelectedIndex < 0) return;
-
-            _currentIndex = lbThumbList.SelectedIndex;
-            LoadMainImage();
-        }
-
         // ================= BUTTON =================
 
         private void btnBack_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentIndex <= 0) return;
-            _currentIndex--;
-            LoadMainImage();
+            var curIndex = lbThumbList.SelectedIndex;
+            if (curIndex > 0)
+                SelectedThumb = ImageList[curIndex - 1];
         }
 
         private void btnNext_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentIndex >= _imageList.Count - 1) return;
-            _currentIndex++;
-            LoadMainImage();
+            var curIndex = lbThumbList.SelectedIndex;
+            if (curIndex < ImageList.Count - 1)
+                SelectedThumb = ImageList[curIndex + 1];
         }
 
         private void ShowButton(Button btn)
@@ -225,7 +240,7 @@ namespace DiskInspection.Views
 
         private void grView_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_imageList.Count <= 1)
+            if (ImageList.Count <= 1)
             {
                 HideButton(btnBack);
                 HideButton(btnNext);
@@ -235,12 +250,12 @@ namespace DiskInspection.Views
             Point p = e.GetPosition(bdView);
             double w = bdView.ActualWidth;
 
-            if (p.X < EDGE_ZONE && _currentIndex > 0)
+            if (p.X < EDGE_ZONE && lbThumbList.SelectedIndex > 0)
                 ShowButton(btnBack);
             else
                 HideButton(btnBack);
 
-            if (p.X > w - EDGE_ZONE && _currentIndex < _imageList.Count - 1)
+            if (p.X > w - EDGE_ZONE && lbThumbList.SelectedIndex < ImageList.Count - 1)
                 ShowButton(btnNext);
             else
                 HideButton(btnNext);
