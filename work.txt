@@ -2,9 +2,9 @@
 
 ---ok---2. Binding lại phần Selected Thumb để có thể đổi background của Error Description
 
-3. Show error khi 2 luồng camera có lỗi bằng list<string> Error trả về
+---ok---3. Show error khi 2 luồng camera có lỗi bằng list<string> Error trả về
 
-TEST VỚI YOLO XEM CHẤT LƯỢNG + TG
+---ok--- TEST VỚI YOLO XEM CHẤT LƯỢNG + TG ===> Yolo lại oke hơn, ko bị nhiễu 2 biên cục sắt
 
 4. Đổi lại logic bật đen khi debug, capture thì mới bật
  
