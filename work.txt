@@ -1,30 +1,18 @@
----ok---1. Popup ảnh khi NG với error index truyền vào
+1. Debug với UV ở đâu?
 
----ok---2. Binding lại phần Selected Thumb để có thể đổi background của Error Description
+2. Chế độ lưu ảnh?
 
----ok---3. Show error khi 2 luồng camera có lỗi bằng list<string> Error trả về
+3. Đổi lại logic bật đen khi debug, capture thì mới bật
 
----ok--- TEST VỚI YOLO XEM CHẤT LƯỢNG + TG ===> Yolo lại oke hơn, ko bị nhiễu 2 biên cục sắt
+4. Test với 2 camera real, và chạy liên tục xem có dính tràn RAM không?
 
-4. Đổi lại logic bật đen khi debug, capture thì mới bật
- 
-5. Thêm debug với UV light
+5. Collect thêm ảnh disk mới + kết hợp background linh tinh để train cho chắc, ưu tiên đen
 
----ok---6. Làm đẹp hơn Image Viewer:
----ok---      + Background gradient, các cạnh control không bị cứng quá
----ok---      + Image Thump đang được chọn ở trung tâm, chạy thump list khi chuyển selection
+6. Train lại bổ sung cả detect + classify + segmentation
 
----oke--- 7. Train thử unet++ b0 hoặc unet b0 để test processing time
+7. Cân nhắc chuyển sang shared memory service
 
-8. Test với 2 camera real, và chạy liên tục xem có dính tràn RAM không?
-
-9. Collect thêm ảnh disk mới + kết hợp background linh tinh để train cho chắc, ưu tiên đen
-
-10. Train lại bổ sung cả detect + classify + segmentation
-
-11. Cân nhắc chuyển sang shared memory service
-
-12. Last test với con miniPC 
+8. Last test với con miniPC 
 
 ==>> đóng gói và lên đường
 
