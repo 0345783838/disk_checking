@@ -1,8 +1,18 @@
+--ok--0. Bỏ khoảng cách ở ảnh kết quả UV 
+
+0. Thêm vị trí của đĩa UV
+(về xử lý mid_1 mid_2)
+
 1. Debug với UV ở đâu?
 
 2. Chế độ lưu ảnh?
 
 3. Đổi lại logic bật đen khi debug, capture thì mới bật
+
+
+
+Xong chụp thêm ảnh
+
 
 4. Test với 2 camera real, và chạy liên tục xem có dính tràn RAM không?
 
@@ -10,9 +20,7 @@
 
 6. Train lại bổ sung cả detect + classify + segmentation
 
-7. Cân nhắc chuyển sang shared memory service
-
-8. Last test với con miniPC 
+7. Last test với con miniPC 
 
 ==>> đóng gói và lên đường
 

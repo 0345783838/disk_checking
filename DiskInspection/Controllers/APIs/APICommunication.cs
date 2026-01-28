@@ -167,7 +167,7 @@ namespace DiskInspection.Controllers.APIs
                 return null;
             }
         }
-        internal static InspectionUvResponse InspectUvLight(string url, Mat image, string crop_box, string uv_box_1, string uv_box_2, int timeout = 10000)
+        internal static InspectionUvResponse InspectUvLight(string url, Mat image, string crop_box, string uv_box_1, string uv_box_2, string mid_1, string mid_2, int timeout = 10000)
         {
             dynamic obj = new InspectionUvResponse();
             var options = new RestClientOptions(url)
@@ -185,7 +185,9 @@ namespace DiskInspection.Controllers.APIs
             {
                 crop_box = crop_box,
                 uv_box_1 = uv_box_1,
-                uv_box_2 = uv_box_2
+                uv_box_2 = uv_box_2,
+                mid_1 = mid_1,
+                mid_2 = mid_2
             };
             string paramsJson = JsonConvert.SerializeObject(payload);
             request.AddParameter(
