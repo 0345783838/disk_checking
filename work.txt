@@ -1,7 +1,6 @@
 --ok--0. Bỏ khoảng cách ở ảnh kết quả UV 
 
-0. Thêm vị trí của đĩa UV
-(về xử lý mid_1 mid_2)
+--ok--0. Thêm vị trí của đĩa UV
 
 1. Debug với UV ở đâu?
 

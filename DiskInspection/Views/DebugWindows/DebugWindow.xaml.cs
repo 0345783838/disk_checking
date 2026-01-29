@@ -132,7 +132,7 @@ namespace DiskInspection.Views.DebugWindows
             _envConfig = new EnvironmentConfig(_envConfigRaw.GetFloat("DISK_POINT_DETECT_CONF_THRESH", (float) 0.2), _envConfigRaw.GetFloat("DISK_POINT_DETECT_IOU_THRESH", (float) 0.1),
                 _envConfigRaw.GetFloat("DISK_SEGMENT_CONF_THRESH", (float) 0.95), _envConfigRaw.GetFloat("CALIPER_MIN_EDGE_DISTANCE", 4), _envConfigRaw.GetFloat("CALIPER_MAX_EDGE_DISTANCE", 20),
                 _envConfigRaw.GetFloat("CALIPER_LENGTH_RATE", (float)0.95), _envConfigRaw.GetIntArray("CALIPER_THICKNESS_LIST"), _envConfigRaw.GetInt("NUM_DISK", 25), _envConfigRaw.GetFloat("MAX_DISK_DISTANCE", 86),
-                 _envConfigRaw.GetFloat("MIN_DISK_DISTANCE", 24), _envConfigRaw.GetFloat("MIN_DISK_AREA", 150));
+                 _envConfigRaw.GetFloat("MIN_DISK_DISTANCE", 24), _envConfigRaw.GetFloat("MIN_DISK_AREA", 150), _envConfigRaw.GetInt("UV_DISK_THRESHOLD", 10), _envConfigRaw.GetFloat("UV_MIN_DISK_AREA", 20));
 
         }
         private void btnLoadFolder_MouseDown(object sender, MouseButtonEventArgs e)
@@ -141,7 +141,7 @@ namespace DiskInspection.Views.DebugWindows
             var dialog = new CommonOpenFileDialog
             {
                 IsFolderPicker = true,
-                Title = "Chọn thư mục ảnh dùng để phân tích dữ liệu",
+                Title = "Chọn thư mục ảnh dùng để chạy debug offline",
                 Multiselect = false
             };
             WindowInteropHelper helper = new WindowInteropHelper(this);
@@ -199,15 +199,45 @@ namespace DiskInspection.Views.DebugWindows
                         ImagesInfoList.Add(newImageInfo);
                     }
                 }
-                StartCheckingThread();
+                StartCheckingThread(rbDebugWhiteLight.IsChecked == true);
             }
         }
 
-        private void StartCheckingThread()
+        private void StartCheckingThread(bool isWhiteLight)
         {
-            Task task = new Task(() => CheckingDisk(ImagesInfoList));
-            task.Start();
+            if (isWhiteLight)
+            {
+                Task task = new Task(() => CheckingDisk(ImagesInfoList));
+                task.Start();
+            }
+            else
+            {
+                Task task = new Task(() => CheckingDiskUv(ImagesInfoList));
+                task.Start();
+            }
+          
         }
+
+        private void CheckingDiskUv(ObservableCollection<ImageDebugInfo> imagesInfoList)
+        {
+            for (var i = 0; i < imagesInfoList.Count; i++)
+            {
+                var imageInfo = imagesInfoList[i];
+                Mat image = CvInvoke.Imread(imageInfo.FilePath);
+                var res = APICommunication.DebugUvImages(_param.ApiUrlAi, image, _envConfig);
+
+                var thresholdImg = Converter.Base64ToBitmap(res.DetectImg);
+                var finalImg = Converter.Base64ToBitmap(res.FinalImg);
+                imageInfo.Images.Add(new ImageList(0, "Original Image", image.Bitmap));
+                imageInfo.Images.Add(new ImageList(1, "Threshold Image", thresholdImg));
+                imageInfo.Images.Add(new ImageList(3, "Final Image", finalImg));
+                imageInfo.Status = res.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
+
+                OnPropertyChanged(nameof(ProcessingCount));
+                OnPropertyChanged(nameof(ProcessingRatio));
+            }
+        }
+
         private void CheckingDisk(ObservableCollection<ImageDebugInfo> imagesInfoList)
         {
             for (var i = 0; i < imagesInfoList.Count; i++)
@@ -381,6 +411,8 @@ namespace DiskInspection.Views.DebugWindows
                 _envConfigRaw.Set("MAX_DISK_DISTANCE", _envConfig.DiskMaxDistance.ToString());
                 _envConfigRaw.Set("MIN_DISK_DISTANCE", _envConfig.DiskMinDistance.ToString());
                 _envConfigRaw.Set("MIN_DISK_AREA", _envConfig.DiskMinArea.ToString());
+                _envConfigRaw.Set("UV_DISK_THRESHOLD", _envConfig.UvThreshold.ToString());
+                _envConfigRaw.Set("UV_MIN_DISK_AREA", _envConfig.UvMinArea.ToString());
 
                 _envConfigRaw.Save();
                 return true;

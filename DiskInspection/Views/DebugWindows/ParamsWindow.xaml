@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Parameters"
     Width="400"
-    Height="570"
+    Height="650"
     Closed="Window_Closed"
     Icon="/Resources/Icons/settings.png"
     ResizeMode="NoResize"
@@ -41,6 +41,7 @@
             <RowDefinition Height="153*" />
             <RowDefinition Height="200*" />
             <RowDefinition Height="201*" />
+            <RowDefinition Height="120*" />
         </Grid.RowDefinitions>
         <GroupBox
             Grid.Row="0"
@@ -202,6 +203,38 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-
+        <GroupBox
+            Grid.Row="3"
+            Margin="5,5,5,5"
+            BorderBrush="Gray"
+            BorderThickness="2"
+            Header="UV Disk Judgement Params">
+            <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+                <StackPanel Grid.Row="0" Style="{StaticResource stPanel}">
+                    <Label Content="UV Threshold:" Style="{StaticResource labelName}" />
+                    <TextBox
+                        x:Name="tbUvThreshold"
+                        PreviewTextInput="NumberValidationTextBox"
+                        Style="{StaticResource textBox}"
+                        Text="4" />
+                    <Label
+                        Content="(0 - 255)"
+                        FontSize="12"
+                        Style="{StaticResource labelName}" />
+                </StackPanel>
+                <StackPanel Grid.Row="0" Style="{StaticResource stPanel}">
+                    <Label Content="UV Disk Min Area:" Style="{StaticResource labelName}" />
+                    <TextBox
+                        x:Name="tbUvMinArea"
+                        PreviewTextInput="NumberValidationTextBox"
+                        Style="{StaticResource textBox}"
+                        Text="34" />
+                    <Label
+                        Content="(pixels)"
+                        FontSize="12"
+                        Style="{StaticResource labelName}" />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
     </Grid>
 </Window>

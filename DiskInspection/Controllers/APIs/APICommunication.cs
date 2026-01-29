@@ -76,9 +76,9 @@ namespace DiskInspection.Controllers.APIs
                 return null;
             }
         }
-        public static DebugImageResponse DebugUvImages(string url, Mat image, EnvironmentConfig envConfig, int timeout = 10000)
+        public static DebugUvImageResponse DebugUvImages(string url, Mat image, EnvironmentConfig envConfig, int timeout = 10000)
         {
-            dynamic obj = new DebugImageResponse();
+            dynamic obj = new DebugUvImageResponse();
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)

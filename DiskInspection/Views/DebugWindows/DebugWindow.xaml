@@ -46,39 +46,66 @@
                             Name="tabOffline"
                             Background="#EEEEEE"
                             Header="Offline">
-                            <StackPanel
-                                Margin="0,0,0,0"
-                                HorizontalAlignment="Center"
-                                Background="#EEEEEE"
-                                Orientation="Horizontal">
-                                <uc:CustomButton
-                                    x:Name="btnLoadFolder"
-                                    Title="Load"
-                                    Width="170"
-                                    Height="85"
-                                    Margin="5,5,5,5"
-                                    EndColor="#1e5b53"
-                                    IconHeight="45"
-                                    IconWidth="45"
-                                    IsEnabled="{Binding ConfirmEnable}"
-                                    LeftIcon="/Resources/Icons/folder-browser.png"
-                                    MouseDown="btnLoadFolder_MouseDown"
-                                    StartColor="#ccffaa"
-                                    Value="Folder" />
-                                <uc:CustomButton
-                                    x:Name="btnLoadImages"
-                                    Title="Load"
-                                    Width="170"
-                                    Height="85"
-                                    Margin="5,5,5,5"
-                                    EndColor="#18a5a7"
-                                    IconHeight="45"
-                                    IconWidth="45"
-                                    IsEnabled="{Binding ConfirmEnable}"
-                                    LeftIcon="/Resources/Icons/load_image.png"
-                                    MouseDown="btnLoadImages_MouseDown"
-                                    StartColor="#b6c0c5"
-                                    Value="Images" />
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel
+                                    Margin="5,10,5,15"
+                                    HorizontalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <RadioButton
+                                        Name="rbDebugWhiteLight"
+                                        Margin="-20,0,0,0"
+                                        VerticalAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Checked="rbLight_Checked"
+                                        Content="White Light"
+                                        FontSize="14"
+                                        GroupName="rbDebugLightType"
+                                        IsChecked="True" />
+                                    <RadioButton
+                                        Name="rbDebugUvLight"
+                                        Margin="40,0,0,0"
+                                        VerticalAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Checked="rbLight_Checked"
+                                        Content="UV Light"
+                                        FontSize="14"
+                                        GroupName="rbDebugLightType"
+                                        IsChecked="False" />
+                                </StackPanel>
+                                <StackPanel
+                                    Margin="0,0,0,0"
+                                    HorizontalAlignment="Center"
+                                    Background="#EEEEEE"
+                                    Orientation="Horizontal">
+                                    <uc:CustomButton
+                                        x:Name="btnLoadFolder"
+                                        Title="Load"
+                                        Width="170"
+                                        Height="85"
+                                        Margin="5,5,5,5"
+                                        EndColor="#1e5b53"
+                                        IconHeight="45"
+                                        IconWidth="45"
+                                        IsEnabled="{Binding ConfirmEnable}"
+                                        LeftIcon="/Resources/Icons/folder-browser.png"
+                                        MouseDown="btnLoadFolder_MouseDown"
+                                        StartColor="#ccffaa"
+                                        Value="Folder" />
+                                    <uc:CustomButton
+                                        x:Name="btnLoadImages"
+                                        Title="Load"
+                                        Width="170"
+                                        Height="85"
+                                        Margin="5,5,5,5"
+                                        EndColor="#18a5a7"
+                                        IconHeight="45"
+                                        IconWidth="45"
+                                        IsEnabled="{Binding ConfirmEnable}"
+                                        LeftIcon="/Resources/Icons/load_image.png"
+                                        MouseDown="btnLoadImages_MouseDown"
+                                        StartColor="#b6c0c5"
+                                        Value="Images" />
+                                </StackPanel>
                             </StackPanel>
                         </TabItem>
                         <TabItem

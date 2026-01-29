@@ -44,6 +44,7 @@ namespace DiskInspection.Views.DebugWindows
             tbDiskMaxDistance.Text = config.DiskMaxDistance.ToString();
             tbDiskMinDistance.Text = config.DiskMinDistance.ToString();
             tbDiskMinArea.Text = config.DiskMinArea.ToString();
+            tbUvThreshold.Text = config.UvThreshold.ToString();
         }
 
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
@@ -58,12 +59,13 @@ namespace DiskInspection.Views.DebugWindows
             var thicknessList = tbThicknessList.Text.Split(',').Select(x => int.Parse(x)).ToList();
             if (_config.DetectThreshold != float.Parse(tbDetectThreshold.Text) || _config.DetectIou != float.Parse(tbDetectIoU.Text) || _config.SegmentThreshold != float.Parse(tbSegmentThreshold.Text)
                 || _config.CaliperMinEdgeDistance != float.Parse(tbMinEdgeDistance.Text) || _config.CaliperMaxEdgeDistance != float.Parse(tbMaxEdgeDistance.Text) || !_config.CaliperThicknessList.SequenceEqual(thicknessList)
-                || _config.CaliperLengthRate != float.Parse(tbLengthRate.Text)|| _config.DiskNumber != int.Parse(tbTotalDisks.Text) || _config.DiskMaxDistance != float.Parse(tbDiskMaxDistance.Text)
-                || _config.DiskMinDistance != float.Parse(tbDiskMinDistance.Text) || _config.DiskMinArea != float.Parse(tbDiskMinArea.Text))
+                || _config.CaliperLengthRate != float.Parse(tbLengthRate.Text) || _config.DiskNumber != int.Parse(tbTotalDisks.Text) || _config.DiskMaxDistance != float.Parse(tbDiskMaxDistance.Text)
+                || _config.DiskMinDistance != float.Parse(tbDiskMinDistance.Text) || _config.DiskMinArea != float.Parse(tbDiskMinArea.Text) || _config.UvThreshold != float.Parse(tbUvThreshold.Text)
+                || _config.UvMinArea != float.Parse(tbUvMinArea.Text))
             {
                 var newConfig = new EnvironmentConfig(float.Parse(tbDetectThreshold.Text), float.Parse(tbDetectIoU.Text), float.Parse(tbSegmentThreshold.Text), float.Parse(tbMinEdgeDistance.Text),
                     float.Parse(tbMaxEdgeDistance.Text), float.Parse(tbLengthRate.Text), thicknessList, int.Parse(tbTotalDisks.Text), float.Parse(tbDiskMaxDistance.Text), 
-                    float.Parse(tbDiskMinDistance.Text), float.Parse(tbDiskMinArea.Text));
+                    float.Parse(tbDiskMinDistance.Text), float.Parse(tbDiskMinArea.Text), int.Parse(tbUvThreshold.Text), float.Parse(tbUvMinArea.Text));
 
                 _debugWindow.UpdateConfig(newConfig);
             }
