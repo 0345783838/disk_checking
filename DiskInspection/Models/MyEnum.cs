@@ -33,4 +33,15 @@ namespace DiskInspection.Models
         Ok,
         Ng
     }
+    public enum SaveType
+    {
+        ORIGINAL_RESULT = 0,
+        RESULT = 1,
+        ORIGINAL = 2
+    }
+    public static class CameraName
+    {
+        public static readonly string CAM_1 = "Camera 1";
+        public static readonly string CAM_2 = "Camera 2";
+    }
 }

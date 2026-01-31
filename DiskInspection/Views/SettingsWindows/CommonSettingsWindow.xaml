@@ -133,8 +133,8 @@
                     <TextBox
                         x:Name="tbPlcIp"
                         Width="120"
-                        Style="{StaticResource textBox}"
                         PreviewTextInput="tbPlcIp_PreviewTextInput"
+                        Style="{StaticResource textBox}"
                         Text="192.168.0.211" />
                     <Label
                         Width="115"
@@ -254,13 +254,6 @@
                             Margin="10,0,0,0"
                             VerticalAlignment="Center"
                             Content="Origin"
-                            GroupName="SaveOption"
-                            IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}" />
-                        <RadioButton
-                            x:Name="rbSaveOptionDebug"
-                            Margin="10,0,0,0"
-                            VerticalAlignment="Center"
-                            Content="Debug"
                             GroupName="SaveOption"
                             IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}" />
                     </StackPanel>

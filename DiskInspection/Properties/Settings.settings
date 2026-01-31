@@ -27,13 +27,13 @@
       <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="SaveEnable" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="SaveMode" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="SavePath" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\out_test</Value>
     </Setting>
     <Setting Name="PlcPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8000</Value>
@@ -60,7 +60,7 @@
       <Value Profile="(Default)">http://127.0.0.1:8386/communication</Value>
     </Setting>
     <Setting Name="EndPointDebugUv" Type="System.String" Scope="User">
-      <Value Profile="(Default)">check_disk_debug_uv</Value>
+      <Value Profile="(Default)">check_disk_uv_debug</Value>
     </Setting>
     <Setting Name="EndpointReadTrigger" Type="System.String" Scope="User">
       <Value Profile="(Default)">read_trigger</Value>

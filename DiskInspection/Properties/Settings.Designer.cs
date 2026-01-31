@@ -121,7 +121,7 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool SaveEnable {
             get {
                 return ((bool)(this["SaveEnable"]));
@@ -133,7 +133,7 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int SaveMode {
             get {
                 return ((int)(this["SaveMode"]));
@@ -145,7 +145,7 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("D:\\huynhvc\\OTHERS\\disk_checking\\disk_checking\\APP\\out_test")]
         public string SavePath {
             get {
                 return ((string)(this["SavePath"]));
@@ -253,7 +253,7 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("check_disk_debug_uv")]
+        [global::System.Configuration.DefaultSettingValueAttribute("check_disk_uv_debug")]
         public string EndPointDebugUv {
             get {
                 return ((string)(this["EndPointDebugUv"]));

@@ -46,32 +46,7 @@
                             Name="tabOffline"
                             Background="#EEEEEE"
                             Header="Offline">
-                            <StackPanel Orientation="Vertical">
-                                <StackPanel
-                                    Margin="5,10,5,15"
-                                    HorizontalAlignment="Center"
-                                    Orientation="Horizontal">
-                                    <RadioButton
-                                        Name="rbDebugWhiteLight"
-                                        Margin="-20,0,0,0"
-                                        VerticalAlignment="Center"
-                                        VerticalContentAlignment="Center"
-                                        Checked="rbLight_Checked"
-                                        Content="White Light"
-                                        FontSize="14"
-                                        GroupName="rbDebugLightType"
-                                        IsChecked="True" />
-                                    <RadioButton
-                                        Name="rbDebugUvLight"
-                                        Margin="40,0,0,0"
-                                        VerticalAlignment="Center"
-                                        VerticalContentAlignment="Center"
-                                        Checked="rbLight_Checked"
-                                        Content="UV Light"
-                                        FontSize="14"
-                                        GroupName="rbDebugLightType"
-                                        IsChecked="False" />
-                                </StackPanel>
+                            <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                                 <StackPanel
                                     Margin="0,0,0,0"
                                     HorizontalAlignment="Center"
@@ -106,38 +81,17 @@
                                         StartColor="#b6c0c5"
                                         Value="Images" />
                                 </StackPanel>
+                                <Label Content="Load ảnh ảnh gốc kèm ảnh UV, tên 2 ảnh giống nhau phân biệt bằng Origin và UV"
+                                       Foreground="DarkRed"
+                                       FontStyle="Italic"
+                                       HorizontalAlignment="Center"/>
                             </StackPanel>
                         </TabItem>
                         <TabItem
                             Name="tabOnline"
                             Background="#EEEEEE"
                             Header="Online">
-                            <StackPanel Orientation="Vertical">
-                                <StackPanel
-                                    Margin="5,10,5,15"
-                                    HorizontalAlignment="Center"
-                                    Orientation="Horizontal">
-                                    <RadioButton
-                                        Name="rbWhiteLight"
-                                        Margin="-20,0,0,0"
-                                        VerticalAlignment="Center"
-                                        VerticalContentAlignment="Center"
-                                        Checked="rbLight_Checked"
-                                        Content="White Light"
-                                        FontSize="14"
-                                        GroupName="rbLightType"
-                                        IsChecked="True" />
-                                    <RadioButton
-                                        Name="rbUvLight"
-                                        Margin="40,0,0,0"
-                                        VerticalAlignment="Center"
-                                        VerticalContentAlignment="Center"
-                                        Checked="rbLight_Checked"
-                                        Content="UV Light"
-                                        FontSize="14"
-                                        GroupName="rbLightType"
-                                        IsChecked="False" />
-                                </StackPanel>
+                            <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                                 <StackPanel
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"

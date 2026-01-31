@@ -190,6 +190,7 @@
     <Compile Include="Controllers\APIs\AIServiceController.cs" />
     <Compile Include="Controllers\APIs\APICommunication.cs" />
     <Compile Include="Controllers\AppLogger.cs" />
+    <Compile Include="Controllers\ImageSaver.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\PLC\PlcController.cs" />
     <Compile Include="Models\DebugUvImageResponse.cs" />

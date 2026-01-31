@@ -76,7 +76,7 @@ namespace DiskInspection.Controllers.APIs
                 return null;
             }
         }
-        public static DebugUvImageResponse DebugUvImages(string url, Mat image, EnvironmentConfig envConfig, int timeout = 10000)
+        public static DebugUvImageResponse DebugUvImages(string url, Mat image, string crop_box, string uv_box_1, string uv_box_2, string mid_1, string mid_2, EnvironmentConfig envConfig, int timeout = 10000)
         {
             dynamic obj = new DebugUvImageResponse();
             var options = new RestClientOptions(url)
@@ -94,17 +94,13 @@ namespace DiskInspection.Controllers.APIs
             // Tạo payload JSON
             var payload = new
             {
-                segment_threshold = envConfig.SegmentThreshold,
-                detect_threshold = envConfig.DetectThreshold,
-                detect_iou = envConfig.DetectIou,
-                caliper_min_edge_distance = envConfig.CaliperMinEdgeDistance,
-                caliper_max_edge_distance = envConfig.CaliperMaxEdgeDistance,
-                caliper_length_rate = envConfig.CaliperLengthRate,
-                caliper_thickness_list = envConfig.CaliperThicknessList,
-                disk_num = envConfig.DiskNumber,
-                disk_max_distance = envConfig.DiskMaxDistance,
-                disk_min_distance = envConfig.DiskMinDistance,
-                disk_min_area = envConfig.DiskMinArea
+                uv_disk_threshold = envConfig.UvThreshold,
+                uv_disk_min_area = envConfig.UvMinArea,
+                crop_box = crop_box,
+                uv_box_1 = uv_box_1,
+                uv_box_2 = uv_box_2,
+                mid_1 = mid_1,
+                mid_2 = mid_2
             };
             string paramsJson = JsonConvert.SerializeObject(payload);
             request.AddParameter(
@@ -119,7 +115,7 @@ namespace DiskInspection.Controllers.APIs
                 try
                 {
 
-                    obj = JsonConvert.DeserializeObject<DebugImageResponse>(response.Content);
+                    obj = JsonConvert.DeserializeObject<DebugUvImageResponse>(response.Content);
                     return obj;
                 }
                 catch (Exception ex)

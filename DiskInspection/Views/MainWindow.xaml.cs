@@ -385,12 +385,14 @@ namespace DiskInspection
 
         #region Update Statistic
 
-        internal void UpdateTimeStamp()
+        internal DateTime UpdateTimeStamp()
         {
+            var time = DateTime.Now;
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                lbTimestamp.Content = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                lbTimestamp.Content = time.ToString("yyyy-MM-dd HH:mm:ss");
             }));
+            return time;
         }
 
         internal void UpdateCurrentShiftTime(string curShiftTime)

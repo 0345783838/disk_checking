@@ -239,7 +239,7 @@ namespace DiskInspection.Controllers
                 var totalStatus = cam1Result.status && cam2Result.status;
                 _mainWindow.UpdateInspectionStatus(totalStatus);
                 _mainWindow.UpdateStatistics(totalStatus);
-                _mainWindow.UpdateTimeStamp();
+                var timeStamp = _mainWindow.UpdateTimeStamp();
 
                 if (!totalStatus)
                 {
@@ -249,6 +249,12 @@ namespace DiskInspection.Controllers
                 }
 
                 AppLogger.Instance.Info("Inspection completed. Waiting for trigger...", "SYSTEM");
+
+                // Save images if enabled
+                if (_param.SaveEnable)
+                {
+                    Task task = Task.Run(() => SaveImage(timeStamp));
+                }
             }
             catch (OperationCanceledException)
             {
@@ -364,7 +370,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam1Exposure + 10);
 
                 //Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
-                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv.bmp");
+                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv_ok.bmp");
                 AppLogger.Instance.Info("Captured image from camera 1 with UV light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
@@ -459,7 +465,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam2Exposure + 10);
 
                 //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white.bmp");
+                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white_ok.bmp");
                 AppLogger.Instance.Info("Captured image from camera 2 with white light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
@@ -531,7 +537,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam2Exposure + 10);
 
                 //Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
-                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv.bmp");
+                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv_ok.bmp");
                 AppLogger.Instance.Info("Captured image from camera 2 with UV light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
@@ -585,8 +591,8 @@ namespace DiskInspection.Controllers
                         App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ok, $"CAM 2 - UV Light - OK: {resUv.ErrorDesc}");
                     }
                         
-
                     AppLogger.Instance.Info("AI inspection for camera 2 with UV light completed.", "CAM2 AI");
+
                 }
 
                 frameUv.Dispose();
@@ -837,6 +843,55 @@ namespace DiskInspection.Controllers
                 _plcTimer.AutoReset = false;
                 _plcTimer.Dispose();
                 _plcTimer = null;
+            }
+        }
+
+        private void SaveImage(DateTime timeStamp)
+        {
+            AppLogger.Instance.Info("Saving images...", "SYSTEM");
+            try
+            {
+                var saveResult = true;
+                if (_param.SaveMode == (int)SaveType.ORIGINAL)
+                {
+                    var res_1 = ImageSaver.SaveImage(_cam1LastWhiteBitmap, _param.SavePath, timeStamp, "Cam1_White_Original");
+                    var res_2 = ImageSaver.SaveImage(_cam2LastWhiteBitmap, _param.SavePath, timeStamp, "Cam2_White_Original");
+                    var res_3 = ImageSaver.SaveImage(_cam1LastUvBitmap, _param.SavePath, timeStamp, "Cam1_UV_Original");
+                    var res_4 = ImageSaver.SaveImage(_cam2LastUvBitmap, _param.SavePath, timeStamp, "Cam2_UV_Original");
+
+                    saveResult = res_1 && res_2 && res_3 && res_4;
+                }
+                else if (_param.SaveMode == (int)SaveType.RESULT)
+                {
+                    var res_1 = ImageSaver.SaveImage(_cam1LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam1_White_Result");
+                    var res_2 = ImageSaver.SaveImage(_cam2LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam2_White_Result");
+                    var res_3 = ImageSaver.SaveImage(_cam1LastUvResultBitmap, _param.SavePath, timeStamp, "Cam1_UV_Result");
+                    var res_4 = ImageSaver.SaveImage(_cam2LastUvResultBitmap, _param.SavePath, timeStamp, "Cam2_UV_Result");
+
+                    saveResult = res_1 && res_2 && res_3 && res_4;
+                }
+                else
+                {
+                    var res_1 = ImageSaver.SaveImage(_cam1LastWhiteBitmap, _param.SavePath, timeStamp, "Cam1_White_Original");
+                    var res_2 = ImageSaver.SaveImage(_cam2LastWhiteBitmap, _param.SavePath, timeStamp, "Cam2_White_Original");
+                    var res_3 = ImageSaver.SaveImage(_cam1LastUvBitmap, _param.SavePath, timeStamp, "Cam1_UV_Original");
+                    var res_4 = ImageSaver.SaveImage(_cam2LastUvBitmap, _param.SavePath, timeStamp, "Cam2_UV_Original");
+
+                    var res_5 = ImageSaver.SaveImage(_cam1LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam1_White_Result");
+                    var res_6 = ImageSaver.SaveImage(_cam2LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam2_White_Result");
+                    var res_7 = ImageSaver.SaveImage(_cam1LastUvResultBitmap, _param.SavePath, timeStamp, "Cam1_UV_Result");
+                    var res_8 = ImageSaver.SaveImage(_cam2LastUvResultBitmap, _param.SavePath, timeStamp, "Cam2_UV_Result");
+
+                    saveResult = res_1 && res_2 && res_3 && res_4 && res_5 && res_6 && res_7 && res_8;
+                }
+                if (saveResult)
+                    AppLogger.Instance.Info("Saved images successfuly!", "SYSTEM");
+                else 
+                    AppLogger.Instance.Error("Save images failed!: Images are empty or save path is not valid!", "SYSTEM");
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Instance.Error(@"Save images failed: " + ex.Message, "SYSTEM");
             }
         }
 

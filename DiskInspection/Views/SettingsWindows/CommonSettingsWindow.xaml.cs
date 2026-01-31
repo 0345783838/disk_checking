@@ -2,6 +2,7 @@
 using DiskInspection.Controllers.APIs;
 using DiskInspection.Controllers.Camera;
 using DiskInspection.Controllers.PLC;
+using DiskInspection.Models;
 using DiskInspection.Views.UtilitiesWindows;
 using Emgu.CV;
 using LiveCharts.Wpf;
@@ -29,13 +30,6 @@ namespace DiskInspection.Views.SettingsWindows
     /// <summary>
     /// Interaction logic for CommonSettingsWindow.xaml
     /// </summary>
-    enum SaveType
-    {
-        ORIGINAL_RESULT = 0,
-        RESULT = 1,
-        ORIGINAL = 2,
-        DEBUG = 3
-    }
     public partial class CommonSettingsWindow : Window
     {
         private Properties.Settings _param = Properties.Settings.Default;
@@ -82,8 +76,6 @@ namespace DiskInspection.Views.SettingsWindows
                     rbSaveOptionResult.IsChecked = true;
                 else if (_param.SaveMode == (int)SaveType.ORIGINAL)
                     rbSaveOptionOrigin.IsChecked = true;
-                else if (_param.SaveMode == (int)SaveType.DEBUG)
-                    rbSaveOptionDebug.IsChecked = true;
                 tbSavePath.Text = _param.SavePath;
             }
             else
@@ -92,7 +84,6 @@ namespace DiskInspection.Views.SettingsWindows
                 rbSaveOptionResultOrigin.IsChecked = false;
                 rbSaveOptionResult.IsChecked = false;
                 rbSaveOptionOrigin.IsChecked = false;
-                rbSaveOptionDebug.IsChecked = false;
             }
         }
 
@@ -184,7 +175,7 @@ namespace DiskInspection.Views.SettingsWindows
                     error.ShowDialog();
                     return;
                 }
-                if (rbSaveOptionDebug.IsChecked == false && rbSaveOptionOrigin.IsChecked == false && rbSaveOptionResult.IsChecked == false && rbSaveOptionResultOrigin.IsChecked == false)
+                if (rbSaveOptionOrigin.IsChecked == false && rbSaveOptionResult.IsChecked == false && rbSaveOptionResultOrigin.IsChecked == false)
                 {
                     var error = new ErrorWindow("Please select save option!\rHãy chọn mode lưu ảnh!");
                     error.ShowDialog();
@@ -193,9 +184,7 @@ namespace DiskInspection.Views.SettingsWindows
 
                 // Save Settings
                 int saveMode = 1;
-                if (rbSaveOptionDebug.IsChecked == true)
-                    saveMode = (int)SaveType.DEBUG;
-                else if (rbSaveOptionOrigin.IsChecked == true)
+                if (rbSaveOptionOrigin.IsChecked == true)
                     saveMode = (int)SaveType.ORIGINAL;
                 else if (rbSaveOptionResult.IsChecked == true)
                     saveMode = (int)SaveType.RESULT;

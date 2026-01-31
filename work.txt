@@ -1,23 +1,19 @@
---ok--0. Bỏ khoảng cách ở ảnh kết quả UV 
+--ok--0. Thêm khoảng cách ở ảnh kết quả UV 
 
 --ok--0. Thêm vị trí của đĩa UV
 
-1. Debug với UV ở đâu?
+1. Debug Folder và Images Loading
 
-2. Chế độ lưu ảnh?
+## ĐỂ Ý ĐOẠN TRIGGER SOFTWARE ĐỂ DELAY CHUẨN EXPOSURE TIME
 
-3. Đổi lại logic bật đen khi debug, capture thì mới bật
+2. Xong chụp thêm ảnh
 
-
-
-Xong chụp thêm ảnh
-
+6. Train lại bổ sung cả detect + classify + segmentation
 
 4. Test với 2 camera real, và chạy liên tục xem có dính tràn RAM không?
 
 5. Collect thêm ảnh disk mới + kết hợp background linh tinh để train cho chắc, ưu tiên đen
 
-6. Train lại bổ sung cả detect + classify + segmentation
 
 7. Last test với con miniPC 
 
