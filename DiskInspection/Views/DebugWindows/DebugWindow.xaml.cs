@@ -19,6 +19,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -163,12 +164,55 @@ namespace DiskInspection.Views.DebugWindows
 
             ImagesInfoList.Clear();
 
-            for (var i = 0; i < imageFilesList.Count; i++)
+            // Đoạn này check xem các cặp White và UV rồi sort lại 1 cặp để sau chạy Checking theo thứ tự
+            var allImages = imageFilesList
+            .Select((path, idx) => new ImageDebugInfo(idx, path))
+            .ToList();
+
+            ImagesInfoList.Clear();
+
+            ReorderImages(allImages, ImagesInfoList);
+            StartCheckingThread();
+        }
+        bool IsWhite(string name) => name.IndexOf("White", StringComparison.OrdinalIgnoreCase) >= 0;
+
+        bool IsUV(string name) => name.IndexOf("UV", StringComparison.OrdinalIgnoreCase) >= 0;
+
+        string GetBaseKey(string filePath)
+        {
+            var name = System.IO.Path.GetFileNameWithoutExtension(filePath);
+
+            name = Regex.Replace(name, "White", "", RegexOptions.IgnoreCase);
+            name = Regex.Replace(name, "UV", "", RegexOptions.IgnoreCase);
+
+            return name;
+        }
+        void ReorderImages(IList<ImageDebugInfo> source,
+                   ObservableCollection<ImageDebugInfo> ImagesInfoList)
+        {
+            ImagesInfoList.Clear();
+
+            var groups = source.GroupBy(x => GetBaseKey(x.FilePath));
+
+            foreach (var g in groups)
             {
-                var imageInfo = new ImageDebugInfo(i, imageFilesList[i]);
-                ImagesInfoList.Add(imageInfo);
+                var white = g.FirstOrDefault(x => IsWhite(x.FilePath));
+                var uv = g.FirstOrDefault(x => IsUV(x.FilePath));
+
+                // ❌ chỉ UV → skip
+                if (white == null && uv != null)
+                    continue;
+
+                // ✅ add White
+                if (white != null)
+                {
+                    ImagesInfoList.Add(white);
+
+                    // add UV liền sau nếu có
+                    if (uv != null)
+                        ImagesInfoList.Add(uv);
+                }
             }
-            //StartCheckingThread();
         }
 
         private void btnLoadImages_MouseDown(object sender, MouseButtonEventArgs e)
@@ -205,48 +249,66 @@ namespace DiskInspection.Views.DebugWindows
 
         private void StartCheckingThread()
         {
-          
-        }
-
-        private void CheckingDiskUv(ObservableCollection<ImageDebugInfo> imagesInfoList)
-        {
-            //for (var i = 0; i < imagesInfoList.Count; i++)
-            //{
-            //    var imageInfo = imagesInfoList[i];
-            //    Mat image = CvInvoke.Imread(imageInfo.FilePath);
-            //    var res = APICommunication.DebugUvImages(_param.ApiUrlAi, image, _envConfig);
-
-            //    var thresholdImg = Converter.Base64ToBitmap(res.ThresholdImg);
-            //    var finalImg = Converter.Base64ToBitmap(res.FinalImg);
-            //    imageInfo.Images.Add(new ImageList(0, "Original Image", image.Bitmap));
-            //    imageInfo.Images.Add(new ImageList(1, "Threshold Image", thresholdImg));
-            //    imageInfo.Images.Add(new ImageList(3, "Final Image", finalImg));
-            //    imageInfo.Status = res.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
-
-            //    OnPropertyChanged(nameof(ProcessingCount));
-            //    OnPropertyChanged(nameof(ProcessingRatio));
-            //}
+            Task task = new Task(() => CheckingDisk(ImagesInfoList));
+            task.Start();
         }
 
         private void CheckingDisk(ObservableCollection<ImageDebugInfo> imagesInfoList)
         {
             for (var i = 0; i < imagesInfoList.Count; i++)
             {
-                var imageInfo = imagesInfoList[i];
-                Mat image = CvInvoke.Imread(imageInfo.FilePath);
-                var res = APICommunication.DebugImages(_param.ApiUrlAi, image, _envConfig);
+                var current = imagesInfoList[i];
 
-                var dctectImg = Converter.Base64ToBitmap(res.DetectImg);
-                var segmentImg = Converter.Base64ToBitmap(res.SegmentImg);
-                var finalImg = Converter.Base64ToBitmap(res.FinalImg);
-                imageInfo.Images.Add(new ImageList(0, "Original Image", image.Bitmap));
-                imageInfo.Images.Add(new ImageList(1, "Detect Image", dctectImg));
-                imageInfo.Images.Add(new ImageList(2, "Segment Image", segmentImg));
-                imageInfo.Images.Add(new ImageList(3, "Final Image", finalImg));
-                imageInfo.Status = res.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
+                if (IsWhite(current.FilePath))
+                {
+                    // Run white inspection
+                    Mat image = CvInvoke.Imread(current.FilePath);
+                    var resWhite = APICommunication.DebugImages(_param.ApiUrlAi, image, _envConfig);
+                    var dctectImg = Converter.Base64ToBitmap(resWhite.DetectImg);
+                    var segmentImg = Converter.Base64ToBitmap(resWhite.SegmentImg);
+                    var finalImg = Converter.Base64ToBitmap(resWhite.FinalImg);
 
-                OnPropertyChanged(nameof(ProcessingCount));
-                OnPropertyChanged(nameof(ProcessingRatio));
+                    // Update UI 
+                    current.Images.Add(new ImageList(0, "Original Image", image.Bitmap));
+                    current.Images.Add(new ImageList(1, "Detect Image", dctectImg));
+                    current.Images.Add(new ImageList(2, "Segment Image", segmentImg));
+                    current.Images.Add(new ImageList(3, "Final Image", finalImg));
+                    current.Status = resWhite.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
+
+                    OnPropertyChanged(nameof(ProcessingCount));
+                    OnPropertyChanged(nameof(ProcessingRatio));
+
+                    // check xem ảnh sau có phải UV cùng cặp không
+                    if (i + 1 < ImagesInfoList.Count)
+                    {
+                        var next = ImagesInfoList[i + 1];
+                        if (IsUV(next.FilePath) && GetBaseKey(next.FilePath) == GetBaseKey(current.FilePath))
+                        {
+                            // chạy UV, dùng kết quả White
+                            Mat uvImage = CvInvoke.Imread(next.FilePath);
+                            var resUv = APICommunication.DebugUvImages(_param.ApiUrlAi, uvImage, resWhite.CropBox, resWhite.UvBox1, resWhite.UvBox2, resWhite.Mid1, resWhite.Mid2, _envConfig);
+                            var uvThresholdImg = Converter.Base64ToBitmap(resUv.ThresholdImg);
+                            var uvFinalImg = Converter.Base64ToBitmap(resUv.FinalImg);
+
+                            // Update UI 
+                            next.Images.Add(new ImageList(0, "Original UV Image", uvImage.Bitmap));
+                            next.Images.Add(new ImageList(1, "Threshold UV Image", uvThresholdImg));
+                            next.Images.Add(new ImageList(2, "Final UV Image", finalImg));
+                            next.Status = resWhite.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
+
+                            OnPropertyChanged(nameof(ProcessingCount));
+                            OnPropertyChanged(nameof(ProcessingRatio));
+
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        // ❌ UV mà không có White trước → bỏ
+                        continue;
+                    }
+
+                }
             }
         }
 
@@ -496,14 +558,16 @@ namespace DiskInspection.Views.DebugWindows
                 }
                 else if (imbImage.Source == null)
                 {
- 
-                    _curImageScale = GetFittedZoomScale(imbImage, image.Width, image.Height);
-                    imbImage.SourceFromBitmap = image;
+
+                    var clone = (Bitmap)image.Clone();
+                    _curImageScale = GetFittedZoomScale(imbImage, clone.Width, clone.Height);
+                    imbImage.SourceFromBitmap = clone;
                     imbImage.SetZoomScale(_curImageScale);
                 }
                 else
                 {
-                    imbImage.SourceFromBitmap = image;
+                    var clone = (Bitmap)image.Clone();
+                    imbImage.SourceFromBitmap = clone;
                 }
 
             }));

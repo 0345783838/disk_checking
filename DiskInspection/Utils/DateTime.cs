@@ -30,7 +30,7 @@ namespace DiskInspection.Utils
                 }
                 else
                 {
-                    startTime = new DateTime(curTime.Year, curTime.Month, curTime.AddDays(-1).Day, 19, 30, 0);
+                    startTime = curTime.AddDays(-1).Date.AddHours(19).AddMinutes(30);
                 }
 
             }
