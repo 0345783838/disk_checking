@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Parameters"
     Width="400"
-    Height="650"
+    Height="700"
     Closed="Window_Closed"
     Icon="/Resources/Icons/settings.png"
     ResizeMode="NoResize"
@@ -38,10 +38,10 @@
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="153*" />
-            <RowDefinition Height="200*" />
-            <RowDefinition Height="201*" />
-            <RowDefinition Height="120*" />
+            <RowDefinition Height="189" />
+            <RowDefinition Height="192*" />
+            <RowDefinition Height="187*" />
+            <RowDefinition Height="116*" />
         </Grid.RowDefinitions>
         <GroupBox
             Grid.Row="0"
@@ -81,6 +81,18 @@
                         PreviewTextInput="NumberValidationTextBox"
                         Style="{StaticResource textBox}"
                         Text="0.9" />
+                    <Label
+                        Content="(0.00 - 1.00)"
+                        FontSize="12"
+                        Style="{StaticResource labelName}" />
+                </StackPanel>
+                <StackPanel Grid.Row="0" Style="{StaticResource stPanel}">
+                    <Label Content="Segment IoU:" Style="{StaticResource labelName}" />
+                    <TextBox
+                        x:Name="tbSegmentIou"
+                        PreviewTextInput="NumberValidationTextBox"
+                        Style="{StaticResource textBox}"
+                        Text="0.5" />
                     <Label
                         Content="(0.00 - 1.00)"
                         FontSize="12"

@@ -11,6 +11,7 @@ namespace DiskInspection.Models
         public float DetectThreshold { get; set; }
         public float DetectIou { get; set; }
         public float SegmentThreshold { get; set; }
+        public float SegmentIou { get; set; }
 
         public float CaliperMinEdgeDistance { get; set; }
         public float CaliperMaxEdgeDistance { get; set; }
@@ -26,13 +27,14 @@ namespace DiskInspection.Models
         public float UvMinArea { get; set; }
 
         public EnvironmentConfig() { }
-        public EnvironmentConfig(float detectThreshold, float detectIoU, float segmentThreshold, 
-            float caliperMinEdgeDistance, float caliperMaxEdgeDistance, float caliperLengthRate,
-            List<int> caliperThicknessList, int diskNumber, float diskMaxDistance, float diskMinDistance, float diskMinArea, int uvThreshold, float uvMinArea)
+        public EnvironmentConfig(float detectThreshold, float detectIoU, float segmentThreshold, float segmentIoU, float caliperMinEdgeDistance, 
+            float caliperMaxEdgeDistance, float caliperLengthRate, List<int> caliperThicknessList, int diskNumber, float diskMaxDistance, 
+            float diskMinDistance, float diskMinArea, int uvThreshold, float uvMinArea)
         {
             DetectThreshold = detectThreshold;
             DetectIou = detectIoU;
             SegmentThreshold = segmentThreshold;
+            SegmentIou = segmentIoU;
             CaliperMinEdgeDistance = caliperMinEdgeDistance;
             CaliperMaxEdgeDistance = caliperMaxEdgeDistance;
             CaliperLengthRate = caliperLengthRate;

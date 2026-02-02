@@ -2,7 +2,7 @@
 
 --ok--0. Thêm vị trí của đĩa UV
 
-1. Debug Folder và Images Loading
+--ok-- 1. Debug Folder và Images Loading
 
 ## ĐỂ Ý ĐOẠN TRIGGER SOFTWARE ĐỂ DELAY CHUẨN EXPOSURE TIME
 

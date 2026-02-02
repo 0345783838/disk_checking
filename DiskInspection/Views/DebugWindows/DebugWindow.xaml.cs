@@ -133,9 +133,10 @@ namespace DiskInspection.Views.DebugWindows
             _backupConfig = _envConfigRaw.Clone();
 
             _envConfig = new EnvironmentConfig(_envConfigRaw.GetFloat("DISK_POINT_DETECT_CONF_THRESH", (float) 0.2), _envConfigRaw.GetFloat("DISK_POINT_DETECT_IOU_THRESH", (float) 0.1),
-                _envConfigRaw.GetFloat("DISK_SEGMENT_CONF_THRESH", (float) 0.95), _envConfigRaw.GetFloat("CALIPER_MIN_EDGE_DISTANCE", 4), _envConfigRaw.GetFloat("CALIPER_MAX_EDGE_DISTANCE", 20),
-                _envConfigRaw.GetFloat("CALIPER_LENGTH_RATE", (float)0.95), _envConfigRaw.GetIntArray("CALIPER_THICKNESS_LIST"), _envConfigRaw.GetInt("NUM_DISK", 25), _envConfigRaw.GetFloat("MAX_DISK_DISTANCE", 86),
-                 _envConfigRaw.GetFloat("MIN_DISK_DISTANCE", 24), _envConfigRaw.GetFloat("MIN_DISK_AREA", 150), _envConfigRaw.GetInt("UV_DISK_THRESHOLD", 10), _envConfigRaw.GetFloat("UV_MIN_DISK_AREA", 20));
+                _envConfigRaw.GetFloat("DISK_SEGMENT_CONF_THRESH", (float) 0.5), _envConfigRaw.GetFloat("DISK_SEGMENT_IOU_THRESH", (float)0.5), _envConfigRaw.GetFloat("CALIPER_MIN_EDGE_DISTANCE", 4), 
+                _envConfigRaw.GetFloat("CALIPER_MAX_EDGE_DISTANCE", 20), _envConfigRaw.GetFloat("CALIPER_LENGTH_RATE", (float)0.95), _envConfigRaw.GetIntArray("CALIPER_THICKNESS_LIST"), 
+                _envConfigRaw.GetInt("NUM_DISK", 25), _envConfigRaw.GetFloat("MAX_DISK_DISTANCE", 86), _envConfigRaw.GetFloat("MIN_DISK_DISTANCE", 24), _envConfigRaw.GetFloat("MIN_DISK_AREA", 150), 
+                _envConfigRaw.GetInt("UV_DISK_THRESHOLD", 10), _envConfigRaw.GetFloat("UV_MIN_DISK_AREA", 20));
 
         }
         private void btnLoadFolder_MouseDown(object sender, MouseButtonEventArgs e)
@@ -213,6 +214,11 @@ namespace DiskInspection.Views.DebugWindows
                         ImagesInfoList.Add(uv);
                 }
             }
+
+            for (var i = 0; i < ImagesInfoList.Count; i++)
+            {
+                ImagesInfoList[i].ID = i + 1;
+            }
         }
 
         private void btnLoadImages_MouseDown(object sender, MouseButtonEventArgs e)
@@ -230,19 +236,15 @@ namespace DiskInspection.Views.DebugWindows
                     ShowError("Image paths is empty!\rĐường dẫn ảnh rỗng!");
                     return;
                 }
+
+                // Đoạn này check xem các cặp White và UV rồi sort lại 1 cặp để sau chạy Checking theo thứ tự
+                var allImages = fileName
+                .Select((path, idx) => new ImageDebugInfo(idx, path))
+                .ToList();
+
                 ImagesInfoList.Clear();
-                foreach (var path in fileName)
-                {
-                    if (ImagesInfoList.Select(obj => obj.FilePath).ToList().Contains(path))
-                    {
-                        ShowError($"{IO.GetFileName(path)} is already existed in list!\r{IO.GetFileName(path)} ảnh đã tồn tại trong danh sách!");
-                    }
-                    else
-                    {
-                        var newImageInfo = new ImageDebugInfo(ImagesInfoList.Count + 1, path);
-                        ImagesInfoList.Add(newImageInfo);
-                    }
-                }
+
+                ReorderImages(allImages, ImagesInfoList);
                 StartCheckingThread();
             }
         }
@@ -252,9 +254,22 @@ namespace DiskInspection.Views.DebugWindows
             Task task = new Task(() => CheckingDisk(ImagesInfoList));
             task.Start();
         }
+        private void SetProgressActive(bool isActive)
+        {
+            this.Dispatcher.Invoke(() => { pgbProgress.IsIndeterminate = isActive; });
+        }
 
         private void CheckingDisk(ObservableCollection<ImageDebugInfo> imagesInfoList)
         {
+            if (imagesInfoList.Count == 0)
+            {
+                SetProgressActive(false);
+                return;
+            }
+            OnPropertyChanged(nameof(ProcessingCount));
+            OnPropertyChanged(nameof(ProcessingRatio));
+            SetProgressActive(true);
+            var firstActive = true;
             for (var i = 0; i < imagesInfoList.Count; i++)
             {
                 var current = imagesInfoList[i];
@@ -263,18 +278,20 @@ namespace DiskInspection.Views.DebugWindows
                 {
                     // Run white inspection
                     Mat image = CvInvoke.Imread(current.FilePath);
+                    var whiteOriginal = SafeBitmapFromMat(image);
+
                     var resWhite = APICommunication.DebugImages(_param.ApiUrlAi, image, _envConfig);
                     var dctectImg = Converter.Base64ToBitmap(resWhite.DetectImg);
                     var segmentImg = Converter.Base64ToBitmap(resWhite.SegmentImg);
                     var finalImg = Converter.Base64ToBitmap(resWhite.FinalImg);
 
                     // Update UI 
-                    current.Images.Add(new ImageList(0, "Original Image", image.Bitmap));
+                    current.Images.Add(new ImageList(0, "Original Image", whiteOriginal));
                     current.Images.Add(new ImageList(1, "Detect Image", dctectImg));
                     current.Images.Add(new ImageList(2, "Segment Image", segmentImg));
                     current.Images.Add(new ImageList(3, "Final Image", finalImg));
                     current.Status = resWhite.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
-
+                    
                     OnPropertyChanged(nameof(ProcessingCount));
                     OnPropertyChanged(nameof(ProcessingRatio));
 
@@ -286,15 +303,16 @@ namespace DiskInspection.Views.DebugWindows
                         {
                             // chạy UV, dùng kết quả White
                             Mat uvImage = CvInvoke.Imread(next.FilePath);
+                            var uvOriginal = SafeBitmapFromMat(uvImage);
                             var resUv = APICommunication.DebugUvImages(_param.ApiUrlAi, uvImage, resWhite.CropBox, resWhite.UvBox1, resWhite.UvBox2, resWhite.Mid1, resWhite.Mid2, _envConfig);
                             var uvThresholdImg = Converter.Base64ToBitmap(resUv.ThresholdImg);
                             var uvFinalImg = Converter.Base64ToBitmap(resUv.FinalImg);
 
                             // Update UI 
-                            next.Images.Add(new ImageList(0, "Original UV Image", uvImage.Bitmap));
+                            next.Images.Add(new ImageList(0, "Original UV Image", uvOriginal));
                             next.Images.Add(new ImageList(1, "Threshold UV Image", uvThresholdImg));
-                            next.Images.Add(new ImageList(2, "Final UV Image", finalImg));
-                            next.Status = resWhite.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
+                            next.Images.Add(new ImageList(2, "Final UV Image", uvFinalImg));
+                            next.Status = resUv.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
 
                             OnPropertyChanged(nameof(ProcessingCount));
                             OnPropertyChanged(nameof(ProcessingRatio));
@@ -310,6 +328,12 @@ namespace DiskInspection.Views.DebugWindows
 
                 }
             }
+            SetProgressActive(false);
+        }
+        Bitmap SafeBitmapFromMat(Mat mat)
+        {
+            using (var bmp = mat.Bitmap)
+                return new Bitmap(bmp); // deep copy, độc lập bộ nhớ
         }
 
         private async void btnTriggerSoftware_MouseDown(object sender, MouseButtonEventArgs e)
@@ -480,6 +504,8 @@ namespace DiskInspection.Views.DebugWindows
             if (resSaveConfig && resRestart)
             {
                 ShowInfo("Save params successfully!\rLưu params thành công!");
+                CanSave = false;
+                OnPropertyChanged(nameof(CanSave));
             }
             else if (!resSaveConfig)
             {
@@ -499,6 +525,7 @@ namespace DiskInspection.Views.DebugWindows
                 _envConfigRaw.Set("DISK_POINT_DETECT_CONF_THRESH", _envConfig.DetectThreshold.ToString());
                 _envConfigRaw.Set("DISK_POINT_DETECT_IOU_THRESH", _envConfig.DetectIou.ToString());
                 _envConfigRaw.Set("DISK_SEGMENT_CONF_THRESH", _envConfig.SegmentThreshold.ToString());
+                _envConfigRaw.Set("DISK_SEGMENT_IOU_THRESH", _envConfig.SegmentIou.ToString());
                 _envConfigRaw.Set("CALIPER_MIN_EDGE_DISTANCE", _envConfig.CaliperMinEdgeDistance.ToString());
                 _envConfigRaw.Set("CALIPER_MAX_EDGE_DISTANCE", _envConfig.CaliperMaxEdgeDistance.ToString());
                 _envConfigRaw.Set("CALIPER_LENGTH_RATE", _envConfig.CaliperLengthRate.ToString());
@@ -559,15 +586,13 @@ namespace DiskInspection.Views.DebugWindows
                 else if (imbImage.Source == null)
                 {
 
-                    var clone = (Bitmap)image.Clone();
-                    _curImageScale = GetFittedZoomScale(imbImage, clone.Width, clone.Height);
-                    imbImage.SourceFromBitmap = clone;
+                    _curImageScale = GetFittedZoomScale(imbImage, image.Width, image.Height);
+                    imbImage.SourceFromBitmap = image;
                     imbImage.SetZoomScale(_curImageScale);
                 }
                 else
                 {
-                    var clone = (Bitmap)image.Clone();
-                    imbImage.SourceFromBitmap = clone;
+                    imbImage.SourceFromBitmap = image;
                 }
 
             }));

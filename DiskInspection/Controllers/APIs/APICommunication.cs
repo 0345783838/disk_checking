@@ -38,6 +38,7 @@ namespace DiskInspection.Controllers.APIs
             var payload = new
             {
                 segment_threshold = envConfig.SegmentThreshold,
+                segment_iou = envConfig.SegmentIou,
                 detect_threshold = envConfig.DetectThreshold,
                 detect_iou = envConfig.DetectIou,
                 caliper_min_edge_distance = envConfig.CaliperMinEdgeDistance,

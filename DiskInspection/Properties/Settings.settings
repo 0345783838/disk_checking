@@ -30,10 +30,10 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="SaveMode" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">2</Value>
     </Setting>
     <Setting Name="SavePath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">F:\working\disk_checking\APP\test_output</Value>
+      <Value Profile="(Default)">D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\out_test</Value>
     </Setting>
     <Setting Name="PlcPort" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">8000</Value>

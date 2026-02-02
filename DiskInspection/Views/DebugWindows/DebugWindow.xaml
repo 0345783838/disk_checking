@@ -81,10 +81,17 @@
                                         StartColor="#b6c0c5"
                                         Value="Images" />
                                 </StackPanel>
-                                <Label Content="Load ảnh ảnh gốc kèm ảnh UV, tên 2 ảnh giống nhau phân biệt bằng Origin và UV"
-                                       Foreground="DarkRed"
-                                       FontStyle="Italic"
-                                       HorizontalAlignment="Center"/>
+                                <Label
+                                    HorizontalAlignment="Center"
+                                    Content="Load ảnh chụp đèn trắng và ảnh UV, tên ảnh giống nhau phân biệt bằng White và UV"
+                                    FontStyle="Italic"
+                                    Foreground="DarkRed" />
+                                <Label
+                                    HorizontalAlignment="Center"
+                                    Margin="0,-10,0,0"
+                                    Content="Mọi ảnh UV không có ảnh White đi kèm sẽ bị bỏ qua!"
+                                    FontStyle="Italic"
+                                    Foreground="DarkRed" />
                             </StackPanel>
                         </TabItem>
                         <TabItem
