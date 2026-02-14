@@ -293,7 +293,7 @@ namespace DiskInspection.Controllers
                 await Task.Delay(_param.Cam1Exposure + 10);
 
                 //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white_ok.bmp");
+                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_01\Image_20260111234114403.bmp");
                 AppLogger.Instance.Info("Captured image from camera 1 with white light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));

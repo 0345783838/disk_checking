@@ -6,13 +6,15 @@
 
 ## ĐỂ Ý ĐOẠN TRIGGER SOFTWARE ĐỂ DELAY CHUẨN EXPOSURE TIME
 
-2. Xong chụp thêm ảnh
+--ok-- Thêm đoạn login cho phép setting
 
-6. Train lại bổ sung cả detect + classify + segmentation
+--ok-- 2. Xong chụp thêm ảnh
+
+--ok-- 6. Train lại bổ sung cả detect + classify + segmentation
 
 4. Test với 2 camera real, và chạy liên tục xem có dính tràn RAM không?
 
-5. Collect thêm ảnh disk mới + kết hợp background linh tinh để train cho chắc, ưu tiên đen
+--ok-- 5. Collect thêm ảnh disk mới + kết hợp background linh tinh để train cho chắc, ưu tiên đen
 
 
 7. Last test với con miniPC 

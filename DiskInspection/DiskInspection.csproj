@@ -213,6 +213,15 @@
     <Compile Include="Views\ImageViewerWindow.xaml.cs">
       <DependentUpon>ImageViewerWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\LoginWindows\ChangePassWindow.xaml.cs">
+      <DependentUpon>ChangePassWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LoginWindows\LoginWindow.xaml.cs">
+      <DependentUpon>LoginWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LoginWindows\RegisterWindow.xaml.cs">
+      <DependentUpon>RegisterWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SettingsWindows\CommonSettingsWindow.xaml.cs">
       <DependentUpon>CommonSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -243,6 +252,18 @@
     <Page Include="Views\DebugWindows\DebugWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LoginWindows\ChangePassWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LoginWindows\LoginWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LoginWindows\RegisterWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -312,6 +333,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Icons\user.png" />
     <Resource Include="Resources\Icons\check.png" />
     <Resource Include="Resources\Icons\camera_ic.png" />
     <Resource Include="Resources\Icons\bad.png" />

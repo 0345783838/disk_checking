@@ -27,6 +27,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Globalization;
 using Image = System.Windows.Controls.Image;
+using DiskInspection.Views.LoginWindows;
 
 namespace DiskInspection
 {
@@ -83,17 +84,35 @@ namespace DiskInspection
                 }),
                 System.Windows.Threading.DispatcherPriority.Background);
         }
+        private UserType Login()
+        {
+            LoginWindow loginWD = new LoginWindow();
+            loginWD.ShowDialog();
+            return loginWD.UserType;
+        }
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            var window = new CommonSettingsWindow();
-            window.Show();
+            var userType = Login();
+            if (userType == UserType.Admin ||
+                userType == UserType.Worker ||
+                userType == UserType.Engineer)
+            {
+                var window = new CommonSettingsWindow();
+                window.Show();
+            }
         }
 
         private void btnDebug_Click(object sender, RoutedEventArgs e)
         {
-            var debugWindow = new DebugWindow();
-            debugWindow.Show();
+            var userType = Login();
+            if (userType == UserType.Admin ||
+                userType == UserType.Worker ||
+                userType == UserType.Engineer)
+            {
+                var debugWindow = new DebugWindow();
+                debugWindow.Show();
+            }
         }
 
         private void btnStart_Click(object sender, RoutedEventArgs e)
