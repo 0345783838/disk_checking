@@ -292,8 +292,8 @@ namespace DiskInspection.Controllers
 
                 await Task.Delay(_param.Cam1Exposure + 10);
 
-                //Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\11_01\Image_20260111234114403.bmp");
+                Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
+                //Bitmap frameWhite = new Bitmap(@"C:\Vision\test_white_ok.bmp");
                 AppLogger.Instance.Info("Captured image from camera 1 with white light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
@@ -369,8 +369,8 @@ namespace DiskInspection.Controllers
 
                 await Task.Delay(_param.Cam1Exposure + 10);
 
-                //Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
-                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv.bmp");
+                Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
+                //Bitmap frameUv = new Bitmap(@"C:\Vision\test_uv.bmp");
                 AppLogger.Instance.Info("Captured image from camera 1 with UV light.", "CAM1");
 
                 await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
@@ -464,8 +464,8 @@ namespace DiskInspection.Controllers
 
                 await Task.Delay(_param.Cam2Exposure + 10);
 
-                //Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
-                Bitmap frameWhite = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white_ok.bmp");
+                Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
+                //Bitmap frameWhite = new Bitmap(@"C:\Vision\test_white.bmp");
                 AppLogger.Instance.Info("Captured image from camera 2 with white light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
@@ -536,8 +536,8 @@ namespace DiskInspection.Controllers
 
                 await Task.Delay(_param.Cam2Exposure + 10);
 
-                //Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
-                Bitmap frameUv = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv.bmp");
+                Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
+                //Bitmap frameUv = new Bitmap(@"C:\Vision\test_uv.bmp");
                 AppLogger.Instance.Info("Captured image from camera 2 with UV light.", "CAM2");
 
                 await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));

@@ -39,9 +39,9 @@ namespace DiskInspection.Controllers
                 var filePath = Path.Combine(saveDir, imageFile);
                 using (FileStream fs = new FileStream(filePath, FileMode.Create))
                 {
-                    BitmapEncoder encoder = new PngBitmapEncoder();
+                    //BitmapEncoder encoder = new PngBitmapEncoder();
                     // Nếu cần JPEG:
-                    // BitmapEncoder encoder = new JpegBitmapEncoder { QualityLevel = 90 };
+                    BitmapEncoder encoder = new JpegBitmapEncoder { QualityLevel = 90 };
 
                     encoder.Frames.Add(BitmapFrame.Create(cloned));
                     encoder.Save(fs);
