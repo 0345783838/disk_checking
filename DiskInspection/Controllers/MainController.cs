@@ -19,6 +19,9 @@ using DiskInspection.Controllers.PLC;
 using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 using Emgu.CV.UI;
+using System.IO;
+using DiskInspection.Security;
+using DiskInspection.Views.ActivationWindows;
 
 namespace DiskInspection.Controllers
 {
@@ -989,6 +992,70 @@ namespace DiskInspection.Controllers
             PlcController.ControlUv1(_param.ApiUrlCom, false);
             PlcController.ControlUv2(_param.ApiUrlCom, false);
 
+        }
+
+        internal bool CheckLicense()
+        {
+            string licensePath = @"plugin\license.dat";
+            var error = "License is not valid, contact with vendor to active!\rLicense không hợp lệ, liên hệ với vendor để active!";
+            var info = "Activation key is valid, continue to use!\rActivation key hợp lệ, hãy tiếp tục sử dụng chương trình!";
+            var res = false;
+            if (!File.Exists(licensePath))
+            {
+                _mainWindow.Dispatcher.Invoke(() =>
+                {
+                    var win = new ActivationWindow();
+                    win.Topmost = true;
+
+                    if (win.ShowDialog() != true)
+                    {
+                        AppLogger.Instance.Error("License is not valid!", "SYSTEM");
+                        _mainWindow.ShowError(error);
+                    }
+                    else
+                    {
+                        AppLogger.Instance.Info("License is valid!", "SYSTEM");
+                        _mainWindow.ShowInfo(info);
+                        res = true;
+                    }
+                });
+            }
+            else
+            {
+                string key = File.ReadAllText(licensePath);
+                (bool isValid, string message) = LicenseManager.ValidateActivationKey(key);
+                if (!isValid)
+                {
+                    AppLogger.Instance.Error(message, "SYSTEM");
+                    _mainWindow.ShowError(error);
+
+                    AppLogger.Instance.Info("Processing creating new activation key!", "SYSTEM");
+
+                    _mainWindow.Dispatcher.Invoke(() =>
+                    {
+                        var win = new ActivationWindow();
+                        win.Topmost = true;
+                        if (win.ShowDialog() != true)
+                        {
+                            AppLogger.Instance.Error("License is not valid!", "SYSTEM");
+                            _mainWindow.ShowError(error);
+                        }
+
+                        else
+                        {
+                            AppLogger.Instance.Info("License is valid!", "SYSTEM");
+                            _mainWindow.ShowInfo(info);
+                            res = true;
+                        }
+                    });
+                }
+                else
+                {
+                    AppLogger.Instance.Info("License is valid!", "SYSTEM");
+                    res = true;
+                }
+            }
+            return res;
         }
         #endregion
     }

@@ -128,11 +128,15 @@ namespace DiskInspection
 
             if (startOK)
             {
+                btnDebug.IsEnabled = false;
+                btnSettings.IsEnabled = false;
                 btnStart.IsEnabled = false;
                 btnStop.IsEnabled = true;
             }
             else
             {
+                btnDebug.IsEnabled = true;
+                btnSettings.IsEnabled = true;
                 btnStart.IsEnabled = true;
                 btnStop.IsEnabled = false;
             }
@@ -161,13 +165,52 @@ namespace DiskInspection
             OnPropertyChanged(nameof(InspectionStatusCam1));
             OnPropertyChanged(nameof(InspectionStatusCam2));
         }
+        private void DisableWindows()
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                btnSettings.IsEnabled = false;
+                btnDebug.IsEnabled = false;
+                btnStart.IsEnabled = false;
+                btnStop.IsEnabled = false;
+            }));
+        }
+        private void EnableWindows()
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                btnSettings.IsEnabled = true;
+                btnDebug.IsEnabled = true;
+                btnStop.IsEnabled = false;
+                btnStart.IsEnabled = true;
+            }));
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            new Task(new Action(() =>
+            DisableWindows();
+            var waiting = new WaitingWindow("Checking machine license...");
+            waiting.Topmost = false;
+            bool resLicense = false;
+            new Task(() =>
             {
-                var res = _mainController.RunServiceAsync(20000, "Program is loading...");
-            })).Start();
+                resLicense = _mainController.CheckLicense();
+                waiting.KillMe = true;
+            }).Start();
+            waiting.ShowDialog();
+
+            if (resLicense)
+            {
+                bool res = false;
+                new Task(new Action(() =>
+                {
+                    res = _mainController.RunServiceAsync(20000, "Loading program...");
+                })).Start();
+            }
+            else
+            {
+                AppLogger.Instance.Error("Machine license is not valid! Please contact vendor!", "SYSTEM");
+            }
         }
 
         internal void SetLoadingService(string content)

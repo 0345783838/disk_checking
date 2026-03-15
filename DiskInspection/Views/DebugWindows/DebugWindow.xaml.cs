@@ -338,11 +338,11 @@ namespace DiskInspection.Views.DebugWindows
 
         private async void btnTriggerSoftware_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            //if (!_selectedCamera.IsOpen())
-            //{
-            //    ShowError("Can't capture image, please check the Camera connection settings!\rKhông thể chụp ảnh, hãy kiểm tra setting kết nối Camera!");
-            //    return;
-            //}
+            if (!_selectedCamera.IsOpen())
+            {
+                ShowError("Can't capture image, please check the Camera connection settings!\rKhông thể chụp ảnh, hãy kiểm tra setting kết nối Camera!");
+                return;
+            }
 
             // Capture White Light
 
@@ -371,8 +371,8 @@ namespace DiskInspection.Views.DebugWindows
                 await Task.Delay(_param.Cam2Exposure + 10);
             }
 
-            Bitmap bitmapImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white_ok.bmp");
-            //Bitmap bitmapImage = _selectedCamera.GetBitmap();
+            //Bitmap bitmapImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white_ok.bmp");
+            Bitmap bitmapImage = _selectedCamera.GetBitmap();
             await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
             await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
             Image<Bgr, byte> img = new Image<Bgr, byte>(bitmapImage);
@@ -651,11 +651,11 @@ namespace DiskInspection.Views.DebugWindows
         private void cbbCamera_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Debug
-            {
-                CanCapture = true;
-                OnPropertyChanged(nameof(CanCapture));
-                return;
-            }
+            //{
+            //    CanCapture = true;
+            //    OnPropertyChanged(nameof(CanCapture));
+            //    return;
+            //}
 
 
             var cameraName = cbbCamera.SelectedValue.ToString();
@@ -718,5 +718,13 @@ namespace DiskInspection.Views.DebugWindows
             }));
         }
         #endregion
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (_selectedCamera != null && _selectedCamera.IsOpen())
+            {
+                _selectedCamera.Stop();
+            }
+        }
     }
 }

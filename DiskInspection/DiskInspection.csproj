@@ -107,6 +107,9 @@
     <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.CodeDom, Version=10.0.0.5, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.CodeDom.10.0.5\lib\net462\System.CodeDom.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -119,6 +122,7 @@
     <Reference Include="System.IO.Pipelines, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Pipelines.10.0.0\lib\net462\System.IO.Pipelines.dll</HintPath>
     </Reference>
+    <Reference Include="System.Management" />
     <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
     </Reference>
@@ -203,10 +207,18 @@
     <Compile Include="Models\MyEnum.cs" />
     <Compile Include="Models\InspectionResponse.cs" />
     <Compile Include="Models\ThumbItem.cs" />
+    <Compile Include="Security\LicenseKey.cs" />
+    <Compile Include="Security\LicenseManager.cs" />
+    <Compile Include="Security\LicensePayload.cs" />
+    <Compile Include="Security\MachineInfo.cs" />
+    <Compile Include="Security\RsaVerifier.cs" />
     <Compile Include="Services\ErrorService.cs" />
     <Compile Include="Utils\Converter.cs" />
     <Compile Include="Utils\DateTime.cs" />
     <Compile Include="Utils\EnvReader.cs" />
+    <Compile Include="Views\ActivationWindows\ActivationWindow.xaml.cs">
+      <DependentUpon>ActivationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\DebugWindows\ParamsWindow.xaml.cs">
       <DependentUpon>ParamsWindow.xaml</DependentUpon>
     </Compile>
@@ -248,6 +260,10 @@
     <Page Include="Resources\Styles\Window.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ActivationWindows\ActivationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DebugWindows\DebugWindow.xaml">
       <SubType>Designer</SubType>

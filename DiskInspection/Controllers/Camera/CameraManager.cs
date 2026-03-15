@@ -50,7 +50,6 @@ namespace DiskInspection.Controllers.Camera
             var cam = new LincolnCamera(SN);
             if (cam.IsOpen())
             {
-                cam.Close();
                 return cam.IsOpen();
             }
             return false;
