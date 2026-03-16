@@ -133,7 +133,6 @@ namespace DiskInspection.Controllers
 
         private bool CheckAndStartCamera()
         {
-            return true;
             _cameraManager = CameraManager.GetInstance();
             _camera1 = _cameraManager.GetCamera1();
             _camera2 = _cameraManager.GetCamera2();
@@ -155,7 +154,6 @@ namespace DiskInspection.Controllers
         }
         private bool CheckAndStartPLC()
         {
-            return true;
             if (!PlcController.CheckPlcConnection(_param.ApiUrlCom))
             {
                 var resConnection = PlcController.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
@@ -977,10 +975,12 @@ namespace DiskInspection.Controllers
         {
             if (_camera1 != null && _camera1.IsOpen())
             {
+                _camera1.Stop();
                 _camera1.Close();
             }
             if (_camera2 != null && _camera2.IsOpen())
             {
+                _camera2.Stop();
                 _camera2.Close();
             }
         }
