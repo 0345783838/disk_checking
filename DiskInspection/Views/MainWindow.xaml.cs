@@ -233,7 +233,6 @@ namespace DiskInspection
                             }
                         }
                         wait.KillMe = true;
-                        UpdateAIStatus(true);
                         if (!_mainController._serviceIsRun)
                         {
                             this.Dispatcher.Invoke(new Action(() =>
@@ -242,6 +241,11 @@ namespace DiskInspection
                                 var box = new ErrorWindow("Cannot start AI service! Please contact IT!\rKhông khởi động được AI, Hãy liên hệ bộ phận PI");
                                 box.ShowDialog();
                             }));
+                        }
+                        else
+                        {
+                            UpdateAIStatus(true);
+                            EnableWindows();
                         }
                     }).Start();
                     wait.ShowDialog();
