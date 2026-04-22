@@ -597,5 +597,10 @@ namespace DiskInspection
                 App.ImageViewer.ShowByImage(bmp);
             }
         }
+
+        private void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

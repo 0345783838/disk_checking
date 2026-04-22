@@ -169,6 +169,7 @@ namespace DiskInspection.Controllers
         #endregion
 
         #region PLC Timer
+        #region ---Start/Stop PLC Timer---
         private void StartPlcTimer()
         {
             if (_plcTimer != null) return;
@@ -177,7 +178,19 @@ namespace DiskInspection.Controllers
             _plcTimer.AutoReset = true;
             _plcTimer.Enabled = true;
         }
-
+        private void StopPlcTimer()
+        {
+            if (_plcTimer != null)
+            {
+                _plcTimer.Stop();
+                _plcTimer.Elapsed -= PlcTimer_Elapsed;
+                _plcTimer.AutoReset = false;
+                _plcTimer.Dispose();
+                _plcTimer = null;
+            }
+        }
+        #endregion
+        #region ---PLC Timer Main Workflow---
         private async void PlcTimer_Elapsed(object sender, EventArgs e)
         {
             if (!_isRunning || _inspectCts.IsCancellationRequested)
@@ -223,8 +236,8 @@ namespace DiskInspection.Controllers
             try
             {
                 var results = await Task.WhenAll(
-               InpsectCamera1Async(token),
-               InpsectCamera2Async(token));
+                InpsectCamera1Async(token),
+                InpsectCamera2Async(token));
 
                 if (token.IsCancellationRequested)
                     return;
@@ -267,6 +280,8 @@ namespace DiskInspection.Controllers
                     StartPlcTimer();
             }
         }
+        #endregion
+
 
         private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera1Async(CancellationToken token)
         {
@@ -603,247 +618,6 @@ namespace DiskInspection.Controllers
             finally
             {
                 sw.Stop();
-            }
-        }
-
-        //private (bool status, List<string> errors) InpsectCamera1()
-        //{
-        //    bool totalStatus = true;
-        //    List<string> errors = new List<string>();
-
-        //    #region White Light
-        //    // Turn on LED 1
-        //    var resLed1 = APICommunication.ControlLed1(_param.ApiUrlCom, true, 1000);
-        //    if (!resLed1)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot turn on LED 1! Please check the PLC connection\r" +
-        //            "Không bật được đèn LED 1, hãy kiểm tra kết nối PLC!");
-        //        return (false, null);
-        //    }
-
-        //    // Capture image
-        //    Thread.Sleep(_param.Cam1Exposure + 10);
-        //    Bitmap frame = _camera1.GetBitmap();
-        //    // Turn off LED 1
-        //    APICommunication.ControlLed1(_param.ApiUrlCom, false, 1000);
-
-        //    // Keep origin image
-        //    lock (_cam1WhiteOriginLock)
-        //    {
-        //        _cam1LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frame.Clone()); 
-        //    }
-        //    // Update cam 1 white origin image
-        //    _mainWindow.UpdateCam1WhiteOrigin(_cam1LastWhiteBitmap);
-
-        //    // Call API
-        //    Image<Bgr, byte> openCvImg = new Image<Bgr, byte>(frame);
-        //    var resWlInspect = APICommunication.InspectWhiteLight(_param.ApiUrlAi, openCvImg.Mat, 1000);
-        //    if (resWlInspect == null)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot run AI inspection! Please check the AI engine\r" +
-        //            "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-        //        return (false, null);
-        //    }
-
-        //    // Check response
-        //    if (!resWlInspect.Result)
-        //    {
-        //        totalStatus = false;
-        //        errors.Add(resWlInspect.ErrorDesc);
-        //    }
-        //    else
-        //    {
-        //        lock (_cam1WhiteResultLock)
-        //        {
-        //            _cam1LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWlInspect.ResImg);
-        //        }
-        //        _mainWindow.UpdateCam1WhiteResult(_cam1LastWhiteResultBitmap);
-        //    }
-
-        //    // Dispose temp image
-        //    frame.Dispose();
-        //    #endregion
-
-        //    // Turn on UV light
-        //    var resUv = APICommunication.ControlUv(_param.ApiUrlCom, true, 1000);
-        //    if (!resUv)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot turn on UV light! Please check the PLC connection\r" +
-        //            "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
-        //        return (false, null);
-        //    }
-
-        //    // Capture image
-        //    Thread.Sleep(_param.Cam1Exposure + 10);
-        //    Bitmap frame2 = _camera1.GetBitmap();
-        //    // Turn off UV light
-        //    APICommunication.ControlUv(_param.ApiUrlCom, false, 1000);
-
-        //    // Keep origin image
-        //    lock (_cam1UvOriginLock)
-        //    {
-        //        _cam1LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frame2.Clone());
-        //    }
-        //    // Update cam 1 UV origin image
-        //    _mainWindow.UpdateCam1UvOrigin(_cam1LastUvBitmap);
-
-        //    // Call API
-        //    Image<Bgr, byte> openCvImg2 = new Image<Bgr, byte>(frame2);
-        //    var resUvInspect = APICommunication.InspectUvLight(_param.ApiUrlAi, openCvImg2.Mat, 1000);
-        //    if (resUvInspect == null)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot run AI inspection! Please check the AI engine\r" +
-        //            "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-        //        return (false, null);
-        //    }
-        //    if (!resUvInspect.Result)
-        //    {
-        //        totalStatus = false;
-        //        errors.Add(resWlInspect.ErrorDesc);
-        //    }
-        //    else
-        //    {
-        //        lock (_cam1UvResultLock)
-        //        {
-        //            _cam1LastUvResultBitmap = Converter.Base64ToBitmapSource(resUvInspect.ResImg);
-        //        }
-        //        _mainWindow.UpdateCam1UvResult(_cam1LastUvResultBitmap);
-        //    }
-        //    // Dispose temp image
-        //    frame2.Dispose();
-
-
-        //    return (totalStatus, errors);
-        //}
-
-        //private (bool status, List<string> errors) InpsectCamera2()
-        //{
-        //    bool totalStatus = true;
-        //    List<string> errors = new List<string>();
-
-        //    #region White Light
-        //    // Turn on LED 2
-        //    var resLed2 = APICommunication.ControlLed2(_param.ApiUrlCom, true, 1000);
-        //    if (!resLed2)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot turn on LED 2! Please check the PLC connection\r" +
-        //            "Không bật được đèn LED 2, hãy kiểm tra kết nối PLC!");
-        //        return (false, null);
-        //    }
-
-        //    // Capture image
-        //    Thread.Sleep(_param.Cam2Exposure + 10);
-        //    Bitmap frame = _camera2.GetBitmap();
-        //    // Turn off LED 2
-        //    APICommunication.ControlLed2(_param.ApiUrlCom, false, 1000);
-
-        //    // Keep origin image
-        //    lock (_cam2WhiteOriginLock)
-        //    {
-        //        _cam2LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frame.Clone());
-        //    }
-        //    // Update cam 2 white origin image
-        //    _mainWindow.UpdateCam2WhiteOrigin(_cam2LastWhiteBitmap);
-
-        //    // Call API
-        //    Image<Bgr, byte> openCvImg = new Image<Bgr, byte>(frame);
-        //    var resWlInspect = APICommunication.InspectWhiteLight(_param.ApiUrlAi, openCvImg.Mat, 1000);
-        //    if (resWlInspect == null)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot run AI inspection! Please check the AI engine\r" +
-        //            "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-        //        return (false, null);
-        //    }
-
-        //    // Check response
-        //    if (!resWlInspect.Result)
-        //    {
-        //        totalStatus = false;
-        //        errors.Add(resWlInspect.ErrorDesc);
-        //    }
-        //    else
-        //    {
-        //        lock (_cam2WhiteResultLock)
-        //        {
-        //            _cam2LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWlInspect.ResImg);
-        //        }
-        //        _mainWindow.UpdateCam2WhiteResult(_cam2LastWhiteResultBitmap);
-        //    }
-
-        //    // Dispose temp image
-        //    frame.Dispose();
-        //    #endregion
-
-        //    // Turn on UV light
-        //    var resUv = APICommunication.ControlUv(_param.ApiUrlCom, true, 1000);
-        //    if (!resUv)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot turn on UV light! Please check the PLC connection\r" +
-        //            "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
-        //        return (false, null);
-        //    }
-
-        //    // Capture image
-        //    Thread.Sleep(_param.Cam2Exposure + 10);
-        //    Bitmap frame2 = _camera2.GetBitmap();
-        //    // Turn off UV light
-        //    APICommunication.ControlUv(_param.ApiUrlCom, false, 1000);
-
-        //    // Keep origin image
-        //    lock (_cam2UvOriginLock)
-        //    {
-        //        _cam2LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frame2.Clone());
-        //    }
-        //    // Update cam 2 UV origin image
-        //    _mainWindow.UpdateCam2UvOrigin(_cam2LastUvBitmap);
-
-        //    // Call API
-        //    Image<Bgr, byte> openCvImg2 = new Image<Bgr, byte>(frame2);
-        //    var resUvInspect = APICommunication.InspectUvLight(_param.ApiUrlAi, openCvImg2.Mat, 1000);
-        //    if (resUvInspect == null)
-        //    {
-        //        _mainWindow.ShowError(
-        //            "Cannot run AI inspection! Please check the AI engine\r" +
-        //            "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-        //        return (false, null);
-        //    }
-        //    if (!resUvInspect.Result)
-        //    {
-        //        totalStatus = false;
-        //        errors.Add(resWlInspect.ErrorDesc);
-        //    }
-        //    else
-        //    {
-        //        lock (_cam2UvResultLock)
-        //        {
-        //            _cam2LastUvResultBitmap = Converter.Base64ToBitmapSource(resUvInspect.ResImg);
-        //        }
-        //        _mainWindow.UpdateCam2UvResult(_cam2LastUvResultBitmap);
-        //    }
-        //    // Dispose temp image
-        //    frame2.Dispose();
-
-
-        //    return (totalStatus, errors);
-        //}
-
-
-        private void StopPlcTimer()
-        {
-            if (_plcTimer != null)
-            {
-                _plcTimer.Stop();
-                _plcTimer.Elapsed -= PlcTimer_Elapsed;
-                _plcTimer.AutoReset = false;
-                _plcTimer.Dispose();
-                _plcTimer = null;
             }
         }
 
