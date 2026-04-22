@@ -95,7 +95,8 @@ namespace DiskInspection.Controllers.APIs
             // Tạo payload JSON
             var payload = new
             {
-                uv_disk_threshold = envConfig.UvThreshold,
+                uv_disk_lower_threshold = envConfig.UvLowerThreshold,
+                uv_disk_upper_threshold = envConfig.UvUpperThreshold,
                 uv_disk_min_area = envConfig.UvMinArea,
                 crop_box = crop_box,
                 uv_box_1 = uv_box_1,

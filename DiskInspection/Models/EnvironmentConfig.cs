@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK.Graphics.ES11;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,13 +24,14 @@ namespace DiskInspection.Models
         public float DiskMinDistance { get; set; }
         public float DiskMinArea { get; set; }
 
-        public int UvThreshold { get; set; }
+        public List<int> UvLowerThreshold { get; set; }
+        public List<int> UvUpperThreshold { get; set; }
         public float UvMinArea { get; set; }
 
         public EnvironmentConfig() { }
         public EnvironmentConfig(float detectThreshold, float detectIoU, float segmentThreshold, float segmentIoU, float caliperMinEdgeDistance, 
             float caliperMaxEdgeDistance, float caliperLengthRate, List<int> caliperThicknessList, int diskNumber, float diskMaxDistance, 
-            float diskMinDistance, float diskMinArea, int uvThreshold, float uvMinArea)
+            float diskMinDistance, float diskMinArea, List<int> uvLowerThreshold, List<int> uvUpperThreshold, float uvMinArea)
         {
             DetectThreshold = detectThreshold;
             DetectIou = detectIoU;
@@ -43,7 +45,8 @@ namespace DiskInspection.Models
             DiskMaxDistance = diskMaxDistance;
             DiskMinDistance = diskMinDistance;
             DiskMinArea = diskMinArea;
-            UvThreshold = uvThreshold;
+            UvLowerThreshold = uvLowerThreshold;
+            UvUpperThreshold = uvUpperThreshold;
             UvMinArea = uvMinArea;
         }
     }
