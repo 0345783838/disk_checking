@@ -44,11 +44,11 @@
     <Setting Name="EndpointDisconnectPlc" Type="System.String" Scope="User">
       <Value Profile="(Default)">disconnect_plc</Value>
     </Setting>
-    <Setting Name="EndpointControlUv1" Type="System.String" Scope="User">
-      <Value Profile="(Default)">control_uv_1</Value>
+    <Setting Name="EndpointControlUvLight" Type="System.String" Scope="User">
+      <Value Profile="(Default)">control_uv_light</Value>
     </Setting>
-    <Setting Name="EndpointControlLed1" Type="System.String" Scope="User">
-      <Value Profile="(Default)">control_led_1</Value>
+    <Setting Name="EndpointControlWhiteLight" Type="System.String" Scope="User">
+      <Value Profile="(Default)">control_white_light</Value>
     </Setting>
     <Setting Name="EndpointCheckConnection" Type="System.String" Scope="User">
       <Value Profile="(Default)">check_connection</Value>
@@ -68,9 +68,6 @@
     <Setting Name="EndpointResetTrigger" Type="System.String" Scope="User">
       <Value Profile="(Default)">reset_trigger</Value>
     </Setting>
-    <Setting Name="EndpointControlLed2" Type="System.String" Scope="User">
-      <Value Profile="(Default)">control_led_2</Value>
-    </Setting>
     <Setting Name="EndpointInspectWhiteLight" Type="System.String" Scope="User">
       <Value Profile="(Default)">check_disk_white</Value>
     </Setting>
@@ -86,8 +83,17 @@
     <Setting Name="CurrentNG" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="EndpointControlUv2" Type="System.String" Scope="User">
-      <Value Profile="(Default)">control_uv_2</Value>
+    <Setting Name="WaitWhiteLightOn" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="WaitWhiteLightOff" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5000</Value>
+    </Setting>
+    <Setting Name="WaitUvLightOn" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2000</Value>
+    </Setting>
+    <Setting Name="WaitUvLightOff" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">5000</Value>
     </Setting>
   </Settings>
 </SettingsFile>

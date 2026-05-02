@@ -1,836 +1,881 @@
 ﻿using DiskInspection.Controllers.APIs;
 using DiskInspection.Controllers.Camera;
+using DiskInspection.Controllers.PLC;
 using DiskInspection.Models;
+using DiskInspection.Security;
 using DiskInspection.Utils;
-using Emgu.CV.Structure;
+using DiskInspection.Views.ActivationWindows;
 using Emgu.CV;
+using Emgu.CV.Structure;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Threading;
-using DiskInspection.Controllers.PLC;
-using System.Diagnostics;
-using Newtonsoft.Json.Linq;
-using Emgu.CV.UI;
-using System.IO;
-using DiskInspection.Security;
-using DiskInspection.Views.ActivationWindows;
 
 namespace DiskInspection.Controllers
 {
+    /// <summary>
+    /// Điều phối toàn bộ luồng kiểm tra: PLC trigger → chụp ảnh → AI → kết quả.
+    /// </summary>
     class MainController
     {
-        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-        private Properties.Settings _param = Properties.Settings.Default;
-        private MainWindow _mainWindow;
-        public bool _serviceIsRun = false;
-        private bool _ForceStopProcess;
+        // ─── Dependencies ────────────────────────────────────────────────────────
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly Properties.Settings _param = Properties.Settings.Default;
+        private readonly MainWindow _mainWindow;
+
+        // ─── Camera ──────────────────────────────────────────────────────────────
         private CameraManager _cameraManager;
         private LincolnCamera _camera1;
         private LincolnCamera _camera2;
-        private System.Timers.Timer _statusTimer;
+
+        // ─── Timers ───────────────────────────────────────────────────────────────
         private System.Timers.Timer _plcTimer;
-        private readonly object _cam1WhiteOriginLock = new object();
-        private readonly object _cam1WhiteResultLock = new object();
-        private readonly object _cam1UvOriginLock = new object();
-        private readonly object _cam1UvResultLock = new object();
-        private readonly object _cam2WhiteOriginLock = new object();
-        private readonly object _cam2WhiteResultLock = new object();
-        private readonly object _cam2UvOriginLock = new object();
-        private readonly object _cam2UvResultLock = new object();
+        private System.Timers.Timer _statusTimer;
 
-        private readonly object _statusLock = new object();
-        private readonly object _plcLock = new object();
-
-        private BitmapSource _cam1LastWhiteBitmap;
-        private BitmapSource _cam1LastWhiteResultBitmap;
-        private BitmapSource _cam1LastUvBitmap;
-        private BitmapSource _cam1LastUvResultBitmap;
-        private BitmapSource _cam2LastWhiteBitmap;
-        private BitmapSource _cam2LastWhiteResultBitmap;
-        private BitmapSource _cam2LastUvBitmap;
-        private BitmapSource _cam2LastUvResultBitmap;
-
+        // ─── State ────────────────────────────────────────────────────────────────
+        private bool _isRunning;
         private CancellationTokenSource _inspectCts;
-        private bool _isRunning = false;
+        public bool ServiceIsRunning { get; private set; }
+
+        // ─── Last captured frames (dùng để update UI và lưu ảnh) ─────────────────
+        // Mỗi cặp (origin, result) được bảo vệ bởi 1 lock duy nhất
+        private readonly object _cam1Lock = new object();
+        private readonly object _cam2Lock = new object();
+
+        private BitmapSource _cam1WhiteOrigin, _cam1WhiteResult;
+        private BitmapSource _cam1UvOrigin, _cam1UvResult;
+        private BitmapSource _cam2WhiteOrigin, _cam2WhiteResult;
+        private BitmapSource _cam2UvOrigin, _cam2UvResult;
+
+        // ─── Constants ───────────────────────────────────────────────────────────
+        private const int PlcPollIntervalMs = 50;
+        private const int StatusPollIntervalMs = 2000;
+        private const string LicensePath = @"plugin\license.dat";
+
+        // ─────────────────────────────────────────────────────────────────────────
 
         public MainController(MainWindow window)
         {
             _mainWindow = window;
         }
-        #region Initialize Program
-        public bool RunServiceAsync(int timeout, string content)
+
+        // ═════════════════════════════════════════════════════════════════════════
+        // 1. KHỞI ĐỘNG CHƯƠNG TRÌNH
+        // ═════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Khởi động AI engine và chờ nó sẵn sàng trong khoảng thời gian timeout.
+        /// </summary>
+        public bool StartAIService(int timeoutMs, string loadingMessage)
         {
-            _mainWindow.SetLoadingService(content);
-            _logger.Info("Start Service");
+            _mainWindow.SetLoadingService(loadingMessage);
+            _logger.Info("Starting AI service...");
             AppLogger.Instance.Info("Loading Program...", "SYSTEM");
+
             AIServiceController.CloseProcessExisting();
             AIServiceController.Start();
 
-            var timeStep = timeout / 1000;
-            for (int i = 0; i < timeStep; i++)
+            int steps = timeoutMs / 1000;
+            for (int i = 0; i < steps; i++)
             {
                 Thread.Sleep(1000);
                 if (APICommunication.CheckAPIStatus(_param.ApiUrlAi, 200))
                 {
-                    _logger.Info("Start AI Engine Successfuly!");
-                    AppLogger.Instance.Info("Loaded Program Successfuly!", "SYSTEM");
-                    _serviceIsRun = true;
+                    _logger.Info("AI service started successfully.");
+                    AppLogger.Instance.Info("Loaded Program Successfully!", "SYSTEM");
+                    ServiceIsRunning = true;
                     return true;
                 }
             }
+
+            _logger.Error("AI service failed to start within timeout.");
             return false;
         }
 
-        #endregion
+        // ═════════════════════════════════════════════════════════════════════════
+        // 2. BẮT ĐẦU KIỂM TRA
+        // ═════════════════════════════════════════════════════════════════════════
 
-        #region Start Program
+        /// <summary>
+        /// Kiểm tra điều kiện và bắt đầu vòng lặp kiểm tra.
+        /// </summary>
         public bool Start()
         {
-            _logger.Info("Starting inspection...");
-            _ForceStopProcess = false;
-            if (CheckAndStartCamera() && CheckAndStartPLC() && CheckAndStartAI())
+            _logger.Info("Starting inspection system...");
+
+            if (!CheckAndStartCamera() || !CheckAndStartPLC() || !CheckAndStartAI())
             {
-                _logger.Debug("Cameras, PLC and AI are ready, Ready for inspection...");
-                AppLogger.Instance.Info("Cameras, PLC and AI are ready, Ready for inspection...", "SYSTEM");
-                _isRunning = true;
-                _inspectCts = new CancellationTokenSource();
-                StartStatusTimer();
-                StartPlcTimer();
-                return true;
-            }
-            else
-            {
-                _logger.Error("Cameras, PLC and AI are not ready, Stop inspection...");
-                AppLogger.Instance.Error("Cameras, PLC and AI are not ready, Stop inspection...", "SYSTEM");
+                _logger.Error("System startup failed — cameras, PLC, or AI not ready.");
+                AppLogger.Instance.Error("Cameras, PLC and AI are not ready. Stopping.", "SYSTEM");
                 return false;
             }
-        }
-        #endregion
 
-        #region Check Condition + Initialize
+            _logger.Debug("All systems ready. Starting inspection loop.");
+            AppLogger.Instance.Info("Cameras, PLC and AI are ready.", "SYSTEM");
+
+            _isRunning = true;
+            _inspectCts = new CancellationTokenSource();
+            StartStatusTimer();
+            StartPlcTimer();
+            return true;
+        }
+
+        // ─── Kiểm tra từng hệ thống con ──────────────────────────────────────────
+
         private bool CheckAndStartAI()
         {
-            if (!APICommunication.CheckAPIStatus(_param.ApiUrlAi))
-            {
-                var res = _mainWindow.ShowWarning($"AI engine is not running, proceed to restart?\nAI engine đang không chạy, bạn muốn khởi động lại AI engine?!");
-                var resRestart = RunServiceAsync(20000, "Restarting AI engine...");
-                if (!resRestart)
-                {
-                    _mainWindow.ShowError("Restart AI engine fail, please contact the vendor!\r AI engine khởi động thất bại, hãy liên hệ với vendor!");
-                    return false;
-                }
-            }
-            return true;
+            if (APICommunication.CheckAPIStatus(_param.ApiUrlAi))
+                return true;
+
+            _mainWindow.ShowWarning("AI engine is not running. Restart?");
+            bool restarted = StartAIService(timeoutMs: 20000, "Restarting AI engine...");
+
+            if (!restarted)
+                _mainWindow.ShowError("Failed to restart AI engine. Please contact vendor.");
+
+            return restarted;
         }
 
         private bool CheckAndStartCamera()
         {
+            return true;
             _cameraManager = CameraManager.GetInstance();
             _camera1 = _cameraManager.GetCamera1();
             _camera2 = _cameraManager.GetCamera2();
+
             if (!_camera1.IsOpen())
             {
-                _mainWindow.ShowError(string.Format("Không mở được camera 1 với SN {0}\nCan't open 1 camera with SN:{0}", _param.Cam1Sn));
+                _mainWindow.ShowError($"Cannot open Camera 1 (SN: {_param.Cam1Sn})");
                 return false;
             }
             if (!_camera2.IsOpen())
             {
-                _mainWindow.ShowError(string.Format("Không mở được camera 2 với SN {0}\nCan't open 2 camera with SN:{0}", _param.Cam2Sn));
-                return true;
+                _mainWindow.ShowError($"Cannot open Camera 2 (SN: {_param.Cam2Sn})");
+                return false;
             }
+
             _camera1.SetExposureTime(_param.Cam1Exposure);
             _camera2.SetExposureTime(_param.Cam2Exposure);
             _camera1.Start();
             _camera2.Start();
             return true;
         }
+
         private bool CheckAndStartPLC()
         {
-            if (!PlcController.CheckPlcConnection(_param.ApiUrlCom))
-            {
-                var resConnection = PlcController.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
-                if (!resConnection)
-                {
-                    _mainWindow.ShowError("Không kết nối được với PLC, hãy kiểm tra kết nối\nCannot connect to PLC! Please check the connection");
-                    return false;
-                }
-            }
             return true;
+            if (PlcController.CheckPlcConnection(_param.ApiUrlCom))
+                return true;
+
+            bool connected = PlcController.ConnectPlc(_param.ApiUrlCom, _param.PlcIp, _param.PlcPort);
+            if (!connected)
+                _mainWindow.ShowError("Cannot connect to PLC. Please check the connection.");
+
+            return connected;
         }
 
-        #endregion
+        // ═════════════════════════════════════════════════════════════════════════
+        // 3. VÒNG LẶP PLC TIMER — đây là "nhịp tim" của hệ thống
+        // ═════════════════════════════════════════════════════════════════════════
 
-        #region PLC Timer
-        #region ---Start/Stop PLC Timer---
         private void StartPlcTimer()
         {
             if (_plcTimer != null) return;
-            _plcTimer = new System.Timers.Timer(50);
-            _plcTimer.Elapsed += PlcTimer_Elapsed;
-            _plcTimer.AutoReset = true;
-            _plcTimer.Enabled = true;
+            _plcTimer = new System.Timers.Timer(PlcPollIntervalMs) { AutoReset = true };
+            _plcTimer.Elapsed += OnPlcTimerElapsed;
+            _plcTimer.Start();
         }
+
         private void StopPlcTimer()
         {
-            if (_plcTimer != null)
-            {
-                _plcTimer.Stop();
-                _plcTimer.Elapsed -= PlcTimer_Elapsed;
-                _plcTimer.AutoReset = false;
-                _plcTimer.Dispose();
-                _plcTimer = null;
-            }
+            if (_plcTimer == null) return;
+            _plcTimer.Stop();
+            _plcTimer.Elapsed -= OnPlcTimerElapsed;
+            _plcTimer.Dispose();
+            _plcTimer = null;
         }
-        #endregion
-        #region ---PLC Timer Main Workflow---
-        private async void PlcTimer_Elapsed(object sender, EventArgs e)
+
+        /// <summary>
+        /// Xử lý mỗi tick của PLC timer: kiểm tra trigger → chụp ảnh → AI → kết quả.
+        ///
+        /// Dùng "stop-and-restart" pattern thay vì AutoReset để đảm bảo
+        /// không có 2 vòng kiểm tra chạy đồng thời.
+        /// </summary>
+        private async void OnPlcTimerElapsed(object sender, EventArgs e)
         {
-            if (!_isRunning || _inspectCts.IsCancellationRequested)
-                return;
+            if (!_isRunning || _inspectCts.IsCancellationRequested) return;
 
             StopPlcTimer();
 
-            var (resTrigger, status) = PlcController.CheckTrigger(_param.ApiUrlCom, 1000);
-            if (resTrigger == TriggerState.Error)
-            {
-                _mainWindow.ShowError(
-                    "Cannot connect to PLC to read trigger! Please check the connection\r " +
-                    "Không kết nối được với PLC để đọc trigger, hãy kiểm tra kết nối!");
-                AppLogger.Instance.Error(
-                    "Cannot connect to PLC to read trigger! Please check the connection\r " +
-                    "Không kết nối được với PLC để đọc trigger, hãy kiểm tra kết nối!", "PLC");
-                return;
-
-            }
-            if (resTrigger == TriggerState.Ok && !status)
-            {
-                return;
-            }
-            AppLogger.Instance.Info("Trigger received, start inspection...", "PLC");
-            _mainWindow.UpdateInspectingMode();
-            // Trigger OK
-            // --- reset trigger first
-            var resResetTg = PlcController.ResetTrigger(_param.ApiUrlCom, 1000);
-            if (!resResetTg)
-            {
-                _mainWindow.ShowError(
-                    "Cannot reset trigger! Please check the PLC connection\r" +
-                    "Không reset được trigger, hãy kiểm tra kết nối PLC!");
-                AppLogger.Instance.Error(
-                    "Cannot reset trigger! Please check the PLC connection\r" +
-                    "Không reset được trigger, hãy kiểm tra kết nối PLC!", "PLC");
-                return;
-            }
-
-            // --- start inspection
-            var token = _inspectCts.Token;
-            App.ImageViewer.ClearImages();
             try
             {
-                var results = await Task.WhenAll(
-                InpsectCamera1Async(token),
-                InpsectCamera2Async(token));
+                var (triggerState, triggered) = PlcController.CheckTrigger(_param.ApiUrlCom, 1000);
 
-                if (token.IsCancellationRequested)
-                    return;
+                if (triggerState == TriggerState.Error)
+                {
+                    ShowAndLogError("Cannot connect to PLC to read trigger!", "PLC");
+                    return; // timer sẽ không được restart → hệ thống dừng an toàn
+                }
 
-                var cam1Result = results[0];
-                var cam2Result = results[1];
+                if (!triggered) return; // chưa có trigger, chờ tick tiếp theo
 
-                _mainWindow.UpdateInspectionStatusCam1(cam1Result.status);
-                _mainWindow.UpdateCam1ProcessedTime(cam1Result.time);
-                _mainWindow.UpdateInspectionStatusCam2(cam2Result.status);
-                _mainWindow.UpdateCam2ProcessedTime(cam2Result.time);
+                await RunInspectionCycleAsync(_inspectCts.Token);
+            }
+            finally
+            {
+                // Chỉ restart timer nếu hệ thống vẫn đang chạy
+                if (_isRunning)
+                    StartPlcTimer();
+            }
+        }
 
-                var totalStatus = cam1Result.status && cam2Result.status;
-                _mainWindow.UpdateInspectionStatus(totalStatus);
-                _mainWindow.UpdateStatistics(totalStatus);
+        // ═════════════════════════════════════════════════════════════════════════
+        // 4. MỘT CHU KỲ KIỂM TRA ĐẦY ĐỦ
+        // ═════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Thực hiện 1 chu kỳ kiểm tra hoàn chỉnh:
+        ///   1. Reset trigger
+        ///   2. Chụp ảnh (White → UV) — tuần tự theo đèn
+        ///   3. Gửi AI — 2 camera song song
+        ///   4. Cập nhật UI và PLC
+        /// </summary>
+        private async Task RunInspectionCycleAsync(CancellationToken token)
+        {
+            AppLogger.Instance.Info("Trigger received. Starting inspection cycle.", "PLC");
+            _mainWindow.UpdateInspectingMode();
+            App.ImageViewer.ClearImages();
+
+            // Reset trigger ngay lập tức để PLC có thể gửi trigger tiếp theo
+            if (!PlcController.ResetTrigger(_param.ApiUrlCom, 1000))
+            {
+                ShowAndLogError("Cannot reset PLC trigger!", "PLC");
+                return;
+            }
+
+            try
+            {
+                // ── Bước 1: Bật đèn White → đợi ổn định → chụp ảnh ──────────────
+                var (whiteFrame1, whiteFrame2) = await CaptureWhiteFramesAsync(token);
+                if (whiteFrame1 == null) return;
+
+                // ── Bước 2: AI White + delay tắt đèn chạy song song ─────────────
+                // Có ảnh rồi → AI chạy ngay, đồng thời đèn vẫn giữ sáng đủ thời gian
+                // Cả 2 task phải xong hết thì mới được bật đèn UV
+                var whiteAiTask = RunWhiteAIAsync(whiteFrame1, whiteFrame2, token);
+                var whiteLightOffTask = TurnOffWhiteLightAsync(token);
+
+                await Task.WhenAll(whiteAiTask, whiteLightOffTask);
+
+                var (whiteResult1, whiteResult2) = whiteAiTask.Result;
+                if (whiteResult1 == null || whiteResult2 == null) return;
+
+                // ── Bước 3: Bật đèn UV → đợi ổn định → chụp ảnh ─────────────────
+                var (uvFrame1, uvFrame2) = await CaptureUvFramesAsync(token);
+                if (uvFrame1 == null) return;
+
+                // ── Bước 4: AI UV + delay tắt đèn chạy song song ────────────────
+                var uvAiTask = RunUVAIAsync(uvFrame1, uvFrame2, whiteResult1, whiteResult2, token);
+                var uvLightOffTask = TurnOffUvLightAsync(token);
+
+                await Task.WhenAll(uvAiTask, uvLightOffTask);
+
+                var (cam1Result, cam2Result) = uvAiTask.Result;
+
+                if (token.IsCancellationRequested) return;
+
+                // ── Bước 5: Cập nhật UI ──────────────────────────────────────────
+                UpdateUIWithResults(cam1Result, cam2Result);
+
+                // ── Bước 6: Xử lý kết quả tổng ──────────────────────────────────
+                bool passed = cam1Result.Passed && cam2Result.Passed;
+                _mainWindow.UpdateInspectionStatus(passed);
+                _mainWindow.UpdateStatistics(passed);
                 var timeStamp = _mainWindow.UpdateTimeStamp();
 
-                if (!totalStatus)
+                if (!passed)
                 {
                     PlcController.OnError(_param.ApiUrlCom);
-                    AppLogger.Instance.Info("Inspection NG, sent NG signal", "PLC");
                     App.ImageViewer.ShowFirstErrorImage();
+                    AppLogger.Instance.Info("Inspection NG — sent NG signal to PLC.", "PLC");
                 }
 
-                AppLogger.Instance.Info("Inspection completed. Waiting for trigger...", "SYSTEM");
+                AppLogger.Instance.Info("Inspection complete. Waiting for next trigger.", "SYSTEM");
 
-                // Save images if enabled
+                // ── Bước 7: Lưu ảnh (fire-and-forget, không block chu kỳ) ────────
                 if (_param.SaveEnable)
-                {
-                    Task task = Task.Run(() => SaveImage(timeStamp));
-                }
+                    _ = Task.Run(() => SaveImages(timeStamp));
             }
             catch (OperationCanceledException)
             {
                 AppLogger.Instance.Info("Inspection cancelled.", "SYSTEM");
             }
-            finally
-            {
-                if (_isRunning)
-                    StartPlcTimer();
-            }
         }
-        #endregion
 
+        // ═════════════════════════════════════════════════════════════════════════
+        // 5. CHỤP ẢNH — tuần tự theo đèn, 2 camera song song trong cùng 1 đèn
+        // ═════════════════════════════════════════════════════════════════════════
 
-        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera1Async(CancellationToken token)
+        /// <summary>
+        /// Bật đèn White → đợi WaitWhiteLightOn → chụp 2 camera → trả về ảnh ngay.
+        /// KHÔNG tắt đèn ở đây — đèn được tắt riêng bởi TurnOffWhiteLightAsync.
+        /// </summary>
+        private async Task<(Bitmap cam1, Bitmap cam2)> CaptureWhiteFramesAsync(CancellationToken token)
         {
-            var sw = Stopwatch.StartNew();
-            AppLogger.Instance.Info("Start inspecting camera 1...", "CAM1");
-            try
+            if (!await ControlLightAsync(LightType.White, on: true))
             {
-                bool totalStatus = true;
-
-                token.ThrowIfCancellationRequested();
-                List<string> errors = new List<string>();
-
-                // ================= WHITE LIGHT =================
-                if (!await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, true, 1000)))
-                {
-                    _mainWindow.ShowError(
-                        "Cannot turn on LED 1! Please check the PLC connection\r" +
-                        "Không bật được đèn LED 1, hãy kiểm tra kết nối PLC!");
-                    AppLogger.Instance.Error(
-                        "Cannot turn on LED 1! Please check the PLC connection\r" +
-                        "Không bật được đèn LED 1, hãy kiểm tra kết nối PLC!", "PLC");
-                    return (false, null, sw.Elapsed);
-                }
-
-                await Task.Delay(_param.Cam1Exposure + 10);
-
-                Bitmap frameWhite = await Task.Run(() => _camera1.GetBitmap());
-                //Bitmap frameWhite = new Bitmap(@"C:\Vision\test_white_ok.bmp");
-                AppLogger.Instance.Info("Captured image from camera 1 with white light.", "CAM1");
-
-                await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
-
-                lock (_cam1WhiteOriginLock)
-                {
-                    _cam1LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
-                    App.ImageViewer.AddImage(_cam1LastWhiteBitmap, "1-White-Origin", ThumbStatus.Origin, "Camera 1 - White Light - Original Image");
-                }
-                _mainWindow.UpdateCam1WhiteOrigin(_cam1LastWhiteBitmap);   // 🔥 update NGAY
-
-                var sw2 = Stopwatch.StartNew();
-
-                token.ThrowIfCancellationRequested();
-                var resWhite = await Task.Run(() =>
-                    APICommunication.InspectWhiteLight(
-                        _param.ApiUrlAi,
-                        new Image<Bgr, byte>(frameWhite).Mat,
-                        10000));
-
-                AppLogger.Instance.Info("Call API inspection: " + sw2.ElapsedMilliseconds + "ms", "CAM1");
-
-                if (resWhite == null)
-                {
-                    totalStatus = false;
-                    _mainWindow.ShowError(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                    AppLogger.Instance.Error(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM1 AI");
-                    return (false, null,  sw.Elapsed);
-                }
-                else
-                {
-                    token.ThrowIfCancellationRequested();
-                    lock (_cam1WhiteResultLock)
-                    {
-                        _cam1LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
-                        
-                    }
-                    _mainWindow.UpdateCam1WhiteResult(_cam1LastWhiteResultBitmap); // 🔥 update NGAY
-                    _mainWindow.UpdateCam1MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
-                    if (!resWhite.Result)
-                    {
-                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ng, $"CAM 1 - White Light - NG: {resWhite.ErrorDesc}");
-                        totalStatus = false;
-                    }
-                    else
-                    {
-                        App.ImageViewer.AddImage(_cam1LastWhiteResultBitmap, "1-White-Result", ThumbStatus.Ok, $"CAM 1 - White Light - OK: {resWhite.ErrorDesc}");
-                    }
-                        
-                    AppLogger.Instance.Info("AI inspection for camera 1 with white light completed.", "CAM1 AI");
-                }
-
-                frameWhite.Dispose();
-                await Task.Yield(); // 👈 nhường UI render
-
-                // ================= UV LIGHT =================
-
-                token.ThrowIfCancellationRequested();
-                if (!await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, true, 1000)))
-                {
-                    _mainWindow.ShowError(
-                        "Cannot turn on UV light! Please check the PLC connection\r" +
-                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
-                    AppLogger.Instance.Error(
-                        "Cannot turn on UV light! Please check the PLC connection\r" +
-                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!", "PLC");
-                    return (false, null, sw.Elapsed);
-                }
-
-                await Task.Delay(_param.Cam1Exposure + 10);
-
-                Bitmap frameUv = await Task.Run(() => _camera1.GetBitmap());
-                //Bitmap frameUv = new Bitmap(@"C:\Vision\test_uv.bmp");
-                AppLogger.Instance.Info("Captured image from camera 1 with UV light.", "CAM1");
-
-                await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
-
-                lock (_cam1UvOriginLock)
-                {
-                    _cam1LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
-                    App.ImageViewer.AddImage(_cam1LastUvBitmap, "1-UV-Origin", ThumbStatus.Origin, "Camera 1 - UV Light - Original Image");
-                }
-
-                // Update result to UI
-                _mainWindow.UpdateCam1UvOrigin(_cam1LastUvBitmap); // 🔥 update NGAY
-
-                token.ThrowIfCancellationRequested();
-                var resUv = await Task.Run(() =>
-                    APICommunication.InspectUvLight(
-                        _param.ApiUrlAi,
-                        new Image<Bgr, byte>(frameUv).Mat,
-                        resWhite.CropBox,
-                        resWhite.UvBox1,
-                        resWhite.UvBox2,
-                        resWhite.Mid1,
-                        resWhite.Mid2,
-                        10000));
-
-                if (resUv == null)
-                {
-                    totalStatus = false;
-                    _mainWindow.ShowError(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                    AppLogger.Instance.Error(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM1 AI");
-                    return (false, null, sw.Elapsed);
-                }
-                else
-                {
-                    token.ThrowIfCancellationRequested();
-                    lock (_cam1UvResultLock)
-                    {
-                        _cam1LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
-                    }
-                    _mainWindow.UpdateCam1UvResult(_cam1LastUvResultBitmap);
-                    _mainWindow.UpdateCam1DiskUv(resUv.CountUvDisk);
-                    if (!resUv.Result)
-                    {
-                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ng, $"CAM 1 - UV Light - NG: {resUv.ErrorDesc}");
-                        totalStatus = false;
-                    }
-                    else
-                    {
-                        App.ImageViewer.AddImage(_cam1LastUvResultBitmap, "1-UV-Result", ThumbStatus.Ok, $"CAM 1 - UV Light - OK: {resUv.ErrorDesc}");
-                    }
-
-                    AppLogger.Instance.Info("AI inspection for camera 1 with UV light completed.", "CAM1 AI");
-                }
-
-                frameUv.Dispose();
-                return (totalStatus, errors, sw.Elapsed);
-
+                ShowAndLogError("Cannot turn on White light!", "PLC");
+                return (null, null);
             }
-            finally
-            {
-                sw.Stop();
-            }
+
+            // Đợi đèn ổn định rồi mới chụp
+            await Task.Delay(_param.WaitWhiteLightOn, token);
+
+            var (frame1, frame2) = await CaptureFromBothCamerasAsync(token);
+            UpdateCapturedFrameUI(frame1, frame2, LightType.White);
+            AppLogger.Instance.Info("White frames captured.", "CAM");
+
+            // Trả về ảnh ngay — đèn vẫn còn sáng, sẽ được tắt sau bởi TurnOffWhiteLightAsync
+            return (frame1, frame2);
         }
-        private async Task<(bool status, List<string> errors, TimeSpan time)> InpsectCamera2Async(CancellationToken token)
+
+        /// <summary>
+        /// Giữ đèn White sáng thêm WaitWhiteLightOff rồi mới tắt.
+        /// Chạy song song với RunWhiteAIAsync để tận dụng thời gian chờ.
+        /// </summary>
+        private async Task TurnOffWhiteLightAsync(CancellationToken token)
         {
-            var sw = Stopwatch.StartNew();
-            AppLogger.Instance.Info("Start inspecting camera 2...", "CAM2");
-            try
+            await Task.Delay(_param.WaitWhiteLightOff, token);
+            await ControlLightAsync(LightType.White, on: false);
+            AppLogger.Instance.Info("White light off.", "PLC");
+        }
+
+        /// <summary>
+        /// Bật đèn UV → đợi WaitUvLightOn → chụp 2 camera → trả về ảnh ngay.
+        /// KHÔNG tắt đèn ở đây — đèn được tắt riêng bởi TurnOffUvLightAsync.
+        /// </summary>
+        private async Task<(Bitmap cam1, Bitmap cam2)> CaptureUvFramesAsync(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (!await ControlLightAsync(LightType.Uv, on: true))
             {
-                bool totalStatus = true;
-
-                token.ThrowIfCancellationRequested();
-
-                List<string> errors = new List<string>();
-
-                // ================= WHITE LIGHT =================
-                if (!await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, true, 1000)))
-                {
-                    _mainWindow.ShowError(
-                        "Cannot turn on LED 2! Please check the PLC connection\r" +
-                        "Không bật được đèn LED 2, hãy kiểm tra kết nối PLC!");
-                    AppLogger.Instance.Error(
-                        "Cannot turn on LED 2! Please check the PLC connection\r" +
-                        "Không bật được đèn LED 2, hãy kiểm tra kết nối PLC!", "PLC");
-                    return (false, null, sw.Elapsed);
-                }
-
-                await Task.Delay(_param.Cam2Exposure + 10);
-
-                Bitmap frameWhite = await Task.Run(() => _camera2.GetBitmap());
-                //Bitmap frameWhite = new Bitmap(@"C:\Vision\test_white.bmp");
-                AppLogger.Instance.Info("Captured image from camera 2 with white light.", "CAM2");
-
-                await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
-
-                lock (_cam2WhiteOriginLock)
-                {
-                    _cam2LastWhiteBitmap = Converter.BitmapToBitmapSource((Bitmap)frameWhite.Clone());
-                    App.ImageViewer.AddImage(_cam2LastWhiteBitmap, "2-White-Origin", ThumbStatus.Origin, "Camera 2 - White Light - Original Image");
-                }
-                _mainWindow.UpdateCam2WhiteOrigin(_cam2LastWhiteBitmap);   // 🔥 update NGAY
-
-                token.ThrowIfCancellationRequested();
-                var resWhite = await Task.Run(() =>
-                    APICommunication.InspectWhiteLight(
-                        _param.ApiUrlAi,
-                        new Image<Bgr, byte>(frameWhite).Mat,
-                        10000));
-
-
-                if (resWhite == null)
-                {
-                    totalStatus = false;
-                    _mainWindow.ShowError(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                    AppLogger.Instance.Error(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM2 AI");
-                    return (false, null, sw.Elapsed);
-                }
-                else
-                {
-                    token.ThrowIfCancellationRequested();
-                    lock (_cam2WhiteResultLock)
-                    {
-                        _cam2LastWhiteResultBitmap = Converter.Base64ToBitmapSource(resWhite.ResImg);
-                    }
-                    _mainWindow.UpdateCam2WhiteResult(_cam2LastWhiteResultBitmap); // 🔥 update NGAY
-                    _mainWindow.UpdateCam2MinMaxDis(resWhite.MinDiskDistance, resWhite.MaxDiskDistance);
-                    if (!resWhite.Result)
-                    {
-                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ng, $"CAM 2 - White Light - NG: {resWhite.ErrorDesc}");
-                        totalStatus = false;
-                    }
-                    else
-                    {
-                        App.ImageViewer.AddImage(_cam2LastWhiteResultBitmap, "2-White-Result", ThumbStatus.Ok, $"CAM 2 - White Light - OK: {resWhite.ErrorDesc}");
-                    }
-
-                    AppLogger.Instance.Info("AI inspection for camera 2 with white light completed.", "CAM2 AI");
-                }
-
-                frameWhite.Dispose();
-                await Task.Yield(); // 👈 nhường UI render
-
-                // ================= UV LIGHT =================
-                token.ThrowIfCancellationRequested();
-                if (!await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, true, 1000)))
-                {
-                    _mainWindow.ShowError(
-                        "Cannot turn on UV light! Please check the PLC connection\r" +
-                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!");
-                    AppLogger.Instance.Error(
-                        "Cannot turn on UV light! Please check the PLC connection\r" +
-                        "Không bật được đèn UV, hãy kiểm tra kết nối PLC!", "PLC");
-                    return (false, null, sw.Elapsed);
-                }
-
-                await Task.Delay(_param.Cam2Exposure + 10);
-
-                Bitmap frameUv = await Task.Run(() => _camera2.GetBitmap());
-                //Bitmap frameUv = new Bitmap(@"C:\Vision\test_uv.bmp");
-                AppLogger.Instance.Info("Captured image from camera 2 with UV light.", "CAM2");
-
-                await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
-
-                lock (_cam2UvOriginLock)
-                {
-                    _cam2LastUvBitmap = Converter.BitmapToBitmapSource((Bitmap)frameUv.Clone());
-                    App.ImageViewer.AddImage(_cam2LastUvBitmap, "2-Uv-Origin", ThumbStatus.Origin, "Camera 2 - UV Light - Original Image");
-                }
-                _mainWindow.UpdateCam2UvOrigin(_cam2LastUvBitmap); // 🔥 update NGAY
-
-                token.ThrowIfCancellationRequested();
-                var resUv = await Task.Run(() =>
-                    APICommunication.InspectUvLight(
-                        _param.ApiUrlAi,
-                        new Image<Bgr, byte>(frameUv).Mat,
-                        resWhite.CropBox,
-                        resWhite.UvBox1,
-                        resWhite.UvBox2,
-                        resWhite.Mid1,
-                        resWhite.Mid2,
-                        10000));
-
-                if (resUv == null)
-                {
-                    totalStatus = false;
-                    _mainWindow.ShowError(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!");
-                    AppLogger.Instance.Error(
-                        "Cannot run AI inspection! Please check the AI engine\r" +
-                        "Không chạy được kiểm tra AI, hãy kiểm tra kết nối AI!", "CAM2 AI");
-                    return (false, null, sw.Elapsed);
-                }
-                else
-                {
-                    token.ThrowIfCancellationRequested();
-                    lock (_cam2UvResultLock)
-                    {
-                        _cam2LastUvResultBitmap = Converter.Base64ToBitmapSource(resUv.ResImg);
-                    }
-                    _mainWindow.UpdateCam2UvResult(_cam2LastUvResultBitmap); // 🔥 update NGAY
-                    _mainWindow.UpdateCam2DiskUv(resUv.CountUvDisk);
-                    if (!resUv.Result)
-                    {
-                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ng, $"CAM 2 - UV Light - NG: {resUv.ErrorDesc}");
-                        totalStatus = false;
-                    }
-                    else
-                    {
-                        App.ImageViewer.AddImage(_cam2LastUvResultBitmap, "2-Uv-Result", ThumbStatus.Ok, $"CAM 2 - UV Light - OK: {resUv.ErrorDesc}");
-                    }
-                        
-                    AppLogger.Instance.Info("AI inspection for camera 2 with UV light completed.", "CAM2 AI");
-
-                }
-
-                frameUv.Dispose();
-
-                return (totalStatus, errors, sw.Elapsed);
+                ShowAndLogError("Cannot turn on UV light!", "PLC");
+                return (null, null);
             }
-            finally
+
+            // Đợi đèn ổn định rồi mới chụp
+            await Task.Delay(_param.WaitUvLightOn, token);
+
+            var (frame1, frame2) = await CaptureFromBothCamerasAsync(token);
+            UpdateCapturedFrameUI(frame1, frame2, LightType.Uv);
+            AppLogger.Instance.Info("UV frames captured.", "CAM");
+
+            // Trả về ảnh ngay — đèn vẫn còn sáng, sẽ được tắt sau bởi TurnOffUvLightAsync
+            return (frame1, frame2);
+        }
+
+        /// <summary>
+        /// Giữ đèn UV sáng thêm WaitUvLightOff rồi mới tắt.
+        /// Chạy song song với RunUVAIAsync để tận dụng thời gian chờ.
+        /// </summary>
+        private async Task TurnOffUvLightAsync(CancellationToken token)
+        {
+            await Task.Delay(_param.WaitUvLightOff, token);
+            await ControlLightAsync(LightType.Uv, on: false);
+            AppLogger.Instance.Info("UV light off.", "PLC");
+        }
+
+        /// <summary>
+        /// Chụp ảnh từ cả 2 camera cùng lúc.
+        /// </summary>
+        private async Task<(Bitmap cam1, Bitmap cam2)> CaptureFromBothCamerasAsync(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            //var results = await Task.WhenAll(
+            //    Task.Run(() => _camera1.GetBitmap(), token),
+            //    Task.Run(() => _camera2.GetBitmap(), token));
+
+            var results = await Task.WhenAll(
+                Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260416115305956_White.bmp"), token),
+                Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260414164713482_White.bmp"), token));
+
+            return (results[0], results[1]);
+        }
+
+        /// <summary>
+        /// Điều khiển đèn theo loại (White/UV). 1 call bật/tắt cả 2 đèn cùng loại.
+        /// </summary>
+        private async Task<bool> ControlLightAsync(LightType light, bool on)
+        {
+            return await Task.Run(() =>
+                light == LightType.White
+                    ? PlcController.ControlWhiteLight(_param.ApiUrlCom, on, 1000)
+                    : PlcController.ControlUvLight(_param.ApiUrlCom, on, 1000));
+        }
+
+        private enum LightType { White, Uv }
+
+        // ═════════════════════════════════════════════════════════════════════════
+        // 6. XỬ LÝ AI
+        // ═════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Kết quả kiểm tra của 1 camera (gộp White + UV).
+        /// </summary>
+        private class CameraInspectionResult
+        {
+            public bool Passed { get; set; }
+            public TimeSpan Duration { get; set; }
+
+            public BitmapSource WhiteResultBitmap { get; set; }
+            public BitmapSource UvResultBitmap { get; set; }
+
+            public double MinDiskDistance { get; set; }
+            public double MaxDiskDistance { get; set; }
+            public int UvDiskCount { get; set; }
+
+            public string WhiteErrorDesc { get; set; }
+            public string UvErrorDesc { get; set; }
+            public bool WhitePassed { get; set; }
+            public bool UvPassed { get; set; }
+        }
+
+        /// <summary>
+        /// Gửi AI White cho cả 2 camera song song.
+        /// Chạy đồng thời với việc chụp UV để tiết kiệm thời gian.
+        /// Trả về (null, null) nếu 1 trong 2 thất bại.
+        /// </summary>
+        private async Task<(InspectionResponse cam1, InspectionResponse cam2)>
+            RunWhiteAIAsync(Bitmap whiteFrame1, Bitmap whiteFrame2, CancellationToken token)
+        {
+            AppLogger.Instance.Info("Running White AI for both cameras...", "AI");
+
+            var results = await Task.WhenAll(
+                Task.Run(() => APICommunication.InspectWhiteLight(
+                    _param.ApiUrlAi,
+                    new Image<Bgr, byte>(whiteFrame1).Mat,
+                    timeout: 10000), token),
+                Task.Run(() => APICommunication.InspectWhiteLight(
+                    _param.ApiUrlAi,
+                    new Image<Bgr, byte>(whiteFrame2).Mat,
+                    timeout: 10000), token));
+
+            whiteFrame1.Dispose();
+            whiteFrame2.Dispose();
+
+            if (results[0] == null)
             {
-                sw.Stop();
+                ShowAndLogError("AI White inspection failed for Camera 1.", "CAM1 AI");
+                return (null, null);
+            }
+            if (results[1] == null)
+            {
+                ShowAndLogError("AI White inspection failed for Camera 2.", "CAM2 AI");
+                return (null, null);
+            }
+
+
+
+            AppLogger.Instance.Info("White AI complete for both cameras.", "AI");
+            return (results[0], results[1]);
+        }
+
+        /// <summary>
+        /// Gửi AI UV cho cả 2 camera song song.
+        /// Dùng tọa độ cropbox từ kết quả White để xác định vùng kiểm tra.
+        /// </summary>
+        private async Task<(CameraInspectionResult cam1, CameraInspectionResult cam2)>
+            RunUVAIAsync(
+                Bitmap uvFrame1, Bitmap uvFrame2,
+                InspectionResponse whiteResult1, InspectionResponse whiteResult2,
+                CancellationToken token)
+        {
+            AppLogger.Instance.Info("Running UV AI for both cameras...", "AI");
+
+            var results = await Task.WhenAll(
+                Task.Run(() => APICommunication.InspectUvLight(
+                    _param.ApiUrlAi,
+                    new Image<Bgr, byte>(uvFrame1).Mat,
+                    whiteResult1.CropBox, whiteResult1.UvBox1, whiteResult1.UvBox2,
+                    whiteResult1.Mid1, whiteResult1.Mid2,
+                    timeout: 10000), token),
+                Task.Run(() => APICommunication.InspectUvLight(
+                    _param.ApiUrlAi,
+                    new Image<Bgr, byte>(uvFrame2).Mat,
+                    whiteResult2.CropBox, whiteResult2.UvBox1, whiteResult2.UvBox2,
+                    whiteResult2.Mid1, whiteResult2.Mid2,
+                    timeout: 10000), token));
+
+            uvFrame1.Dispose();
+            uvFrame2.Dispose();
+
+            AppLogger.Instance.Info("UV AI complete for both cameras.", "AI");
+
+            // Ghép kết quả White + UV thành CameraInspectionResult
+            return (
+                BuildResult(whiteResult1, results[0]),
+                BuildResult(whiteResult2, results[1]));
+        }
+
+        /// <summary>
+        /// Ghép kết quả White và UV thành 1 object kết quả hoàn chỉnh cho 1 camera.
+        /// </summary>
+        private static CameraInspectionResult BuildResult(
+            InspectionResponse white, InspectionUvResponse uv)
+        {
+            if (uv == null)
+                return new CameraInspectionResult { Passed = false };
+
+            return new CameraInspectionResult
+            {
+                Passed = white.Result && uv.Result,
+                //Duration = 
+                WhiteResultBitmap = Converter.Base64ToBitmapSource(white.ResImg),
+                UvResultBitmap = Converter.Base64ToBitmapSource(uv.ResImg),
+                MinDiskDistance = white.MinDiskDistance,
+                MaxDiskDistance = white.MaxDiskDistance,
+                UvDiskCount = uv.CountUvDisk,
+                WhitePassed = white.Result,
+                WhiteErrorDesc = white.ErrorDesc,
+                UvPassed = uv.Result,
+                UvErrorDesc = uv.ErrorDesc,
+            };
+        }
+
+        // ═════════════════════════════════════════════════════════════════════════
+        // 7. CẬP NHẬT UI
+        // ═════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Cập nhật UI ảnh gốc ngay sau khi chụp.
+        /// </summary>
+        private void UpdateCapturedFrameUI(Bitmap frame1, Bitmap frame2, LightType light)
+        {
+            if (light == LightType.White)
+            {
+                lock (_cam1Lock)
+                {
+                    _cam1WhiteOrigin = Converter.BitmapToBitmapSource((Bitmap)frame1.Clone());
+                    App.ImageViewer.AddImage(_cam1WhiteOrigin, "1-White-Origin", ThumbStatus.Origin, "Camera 1 - White - Original");
+                }
+                lock (_cam2Lock)
+                {
+                    _cam2WhiteOrigin = Converter.BitmapToBitmapSource((Bitmap)frame2.Clone());
+                    App.ImageViewer.AddImage(_cam2WhiteOrigin, "2-White-Origin", ThumbStatus.Origin, "Camera 2 - White - Original");
+                }
+                _mainWindow.UpdateCam1WhiteOrigin(_cam1WhiteOrigin);
+                _mainWindow.UpdateCam2WhiteOrigin(_cam2WhiteOrigin);
+            }
+            else
+            {
+                lock (_cam1Lock)
+                {
+                    _cam1UvOrigin = Converter.BitmapToBitmapSource((Bitmap)frame1.Clone());
+                    App.ImageViewer.AddImage(_cam1UvOrigin, "1-UV-Origin", ThumbStatus.Origin, "Camera 1 - UV - Original");
+                }
+                lock (_cam2Lock)
+                {
+                    _cam2UvOrigin = Converter.BitmapToBitmapSource((Bitmap)frame2.Clone());
+                    App.ImageViewer.AddImage(_cam2UvOrigin, "2-UV-Origin", ThumbStatus.Origin, "Camera 2 - UV - Original");
+                }
+                _mainWindow.UpdateCam1UvOrigin(_cam1UvOrigin);
+                _mainWindow.UpdateCam2UvOrigin(_cam2UvOrigin);
             }
         }
 
-        private void SaveImage(DateTime timeStamp)
+        /// <summary>
+        /// Cập nhật UI kết quả AI sau khi xử lý xong.
+        /// </summary>
+        private void UpdateUIWithWhiteResults(CameraInspectionResult cam1, CameraInspectionResult cam2)
+        {
+            // Camera 1
+            if (cam1.WhiteResultBitmap != null)
+            {
+                lock (_cam1Lock)
+                {
+                    _cam1WhiteResult = cam1.WhiteResultBitmap;
+                    _cam1UvResult = cam1.UvResultBitmap;
+                }
+                _mainWindow.UpdateCam1WhiteResult(_cam1WhiteResult);
+                _mainWindow.UpdateCam1UvResult(_cam1UvResult);
+                _mainWindow.UpdateCam1MinMaxDis(cam1.MinDiskDistance, cam1.MaxDiskDistance);
+                _mainWindow.UpdateCam1DiskUv(cam1.UvDiskCount);
+                _mainWindow.UpdateInspectionStatusCam1(cam1.Passed);
+                _mainWindow.UpdateCam1ProcessedTime(cam1.Duration);
+
+                var status1 = cam1.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam1WhiteResult, "1-White-Result", status1, $"CAM1 White: {cam1.WhiteErrorDesc}");
+                App.ImageViewer.AddImage(_cam1UvResult, "1-UV-Result", cam1.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM1 UV: {cam1.UvErrorDesc}");
+            }
+
+            // Camera 2
+            if (cam2.WhiteResultBitmap != null)
+            {
+                lock (_cam2Lock)
+                {
+                    _cam2WhiteResult = cam2.WhiteResultBitmap;
+                    _cam2UvResult = cam2.UvResultBitmap;
+                }
+                _mainWindow.UpdateCam2WhiteResult(_cam2WhiteResult);
+                _mainWindow.UpdateCam2UvResult(_cam2UvResult);
+                _mainWindow.UpdateCam2MinMaxDis(cam2.MinDiskDistance, cam2.MaxDiskDistance);
+                _mainWindow.UpdateCam2DiskUv(cam2.UvDiskCount);
+                _mainWindow.UpdateInspectionStatusCam2(cam2.Passed);
+                _mainWindow.UpdateCam2ProcessedTime(cam2.Duration);
+
+                var status2 = cam2.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam2WhiteResult, "2-White-Result", status2, $"CAM2 White: {cam2.WhiteErrorDesc}");
+                App.ImageViewer.AddImage(_cam2UvResult, "2-UV-Result", cam2.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM2 UV: {cam2.UvErrorDesc}");
+            }
+        }
+
+        private void UpdateUIWithResults(CameraInspectionResult cam1, CameraInspectionResult cam2)
+        {
+            // Camera 1
+            if (cam1.WhiteResultBitmap != null)
+            {
+                lock (_cam1Lock)
+                {
+                    _cam1WhiteResult = cam1.WhiteResultBitmap;
+                    _cam1UvResult = cam1.UvResultBitmap;
+                }
+                _mainWindow.UpdateCam1WhiteResult(_cam1WhiteResult);
+                _mainWindow.UpdateCam1UvResult(_cam1UvResult);
+                _mainWindow.UpdateCam1MinMaxDis(cam1.MinDiskDistance, cam1.MaxDiskDistance);
+                _mainWindow.UpdateCam1DiskUv(cam1.UvDiskCount);
+                _mainWindow.UpdateInspectionStatusCam1(cam1.Passed);
+                _mainWindow.UpdateCam1ProcessedTime(cam1.Duration);
+
+                var status1 = cam1.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam1WhiteResult, "1-White-Result", status1, $"CAM1 White: {cam1.WhiteErrorDesc}");
+                App.ImageViewer.AddImage(_cam1UvResult, "1-UV-Result", cam1.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM1 UV: {cam1.UvErrorDesc}");
+            }
+
+            // Camera 2
+            if (cam2.WhiteResultBitmap != null)
+            {
+                lock (_cam2Lock)
+                {
+                    _cam2WhiteResult = cam2.WhiteResultBitmap;
+                    _cam2UvResult = cam2.UvResultBitmap;
+                }
+                _mainWindow.UpdateCam2WhiteResult(_cam2WhiteResult);
+                _mainWindow.UpdateCam2UvResult(_cam2UvResult);
+                _mainWindow.UpdateCam2MinMaxDis(cam2.MinDiskDistance, cam2.MaxDiskDistance);
+                _mainWindow.UpdateCam2DiskUv(cam2.UvDiskCount);
+                _mainWindow.UpdateInspectionStatusCam2(cam2.Passed);
+                _mainWindow.UpdateCam2ProcessedTime(cam2.Duration);
+
+                var status2 = cam2.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam2WhiteResult, "2-White-Result", status2, $"CAM2 White: {cam2.WhiteErrorDesc}");
+                App.ImageViewer.AddImage(_cam2UvResult, "2-UV-Result", cam2.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM2 UV: {cam2.UvErrorDesc}");
+            }
+        }
+
+        // ═════════════════════════════════════════════════════════════════════════
+        // 8. LƯU ẢNH
+        // ═════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Lưu ảnh theo SaveMode. Chạy trong background thread, không block UI.
+        /// </summary>
+        private void SaveImages(DateTime timeStamp)
         {
             AppLogger.Instance.Info("Saving images...", "SYSTEM");
             try
             {
-                var saveResult = true;
-                if (_param.SaveMode == (int)SaveType.ORIGINAL)
-                {
-                    var res_1 = ImageSaver.SaveImage(_cam1LastWhiteBitmap, _param.SavePath, timeStamp, "Cam1_White_Original");
-                    var res_2 = ImageSaver.SaveImage(_cam2LastWhiteBitmap, _param.SavePath, timeStamp, "Cam2_White_Original");
-                    var res_3 = ImageSaver.SaveImage(_cam1LastUvBitmap, _param.SavePath, timeStamp, "Cam1_UV_Original");
-                    var res_4 = ImageSaver.SaveImage(_cam2LastUvBitmap, _param.SavePath, timeStamp, "Cam2_UV_Original");
+                var saveMode = (SaveType)_param.SaveMode;
+                bool success;
 
-                    saveResult = res_1 && res_2 && res_3 && res_4;
-                }
-                else if (_param.SaveMode == (int)SaveType.RESULT)
+                switch (saveMode)
                 {
-                    var res_1 = ImageSaver.SaveImage(_cam1LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam1_White_Result");
-                    var res_2 = ImageSaver.SaveImage(_cam2LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam2_White_Result");
-                    var res_3 = ImageSaver.SaveImage(_cam1LastUvResultBitmap, _param.SavePath, timeStamp, "Cam1_UV_Result");
-                    var res_4 = ImageSaver.SaveImage(_cam2LastUvResultBitmap, _param.SavePath, timeStamp, "Cam2_UV_Result");
-
-                    saveResult = res_1 && res_2 && res_3 && res_4;
+                    case SaveType.ORIGINAL:
+                        success = SaveOriginals(timeStamp);
+                        break;
+                    case SaveType.RESULT:
+                        success = SaveResults(timeStamp);
+                        break;
+                    default:
+                        success = SaveOriginals(timeStamp) && SaveResults(timeStamp);
+                        break;
                 }
+
+                if (success)
+                    AppLogger.Instance.Info("Images saved successfully.", "SYSTEM");
                 else
-                {
-                    var res_1 = ImageSaver.SaveImage(_cam1LastWhiteBitmap, _param.SavePath, timeStamp, "Cam1_White_Original");
-                    var res_2 = ImageSaver.SaveImage(_cam2LastWhiteBitmap, _param.SavePath, timeStamp, "Cam2_White_Original");
-                    var res_3 = ImageSaver.SaveImage(_cam1LastUvBitmap, _param.SavePath, timeStamp, "Cam1_UV_Original");
-                    var res_4 = ImageSaver.SaveImage(_cam2LastUvBitmap, _param.SavePath, timeStamp, "Cam2_UV_Original");
-
-                    var res_5 = ImageSaver.SaveImage(_cam1LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam1_White_Result");
-                    var res_6 = ImageSaver.SaveImage(_cam2LastWhiteResultBitmap, _param.SavePath, timeStamp, "Cam2_White_Result");
-                    var res_7 = ImageSaver.SaveImage(_cam1LastUvResultBitmap, _param.SavePath, timeStamp, "Cam1_UV_Result");
-                    var res_8 = ImageSaver.SaveImage(_cam2LastUvResultBitmap, _param.SavePath, timeStamp, "Cam2_UV_Result");
-
-                    saveResult = res_1 && res_2 && res_3 && res_4 && res_5 && res_6 && res_7 && res_8;
-                }
-                if (saveResult)
-                    AppLogger.Instance.Info("Saved images successfuly!", "SYSTEM");
-                else 
-                    AppLogger.Instance.Error("Save images failed!: Images are empty or save path is not valid!", "SYSTEM");
+                    AppLogger.Instance.Error("Some images failed to save (empty or invalid path).", "SYSTEM");
             }
             catch (Exception ex)
             {
-                AppLogger.Instance.Error(@"Save images failed: " + ex.Message, "SYSTEM");
+                AppLogger.Instance.Error($"Failed to save images: {ex.Message}", "SYSTEM");
             }
         }
 
-        #endregion
+        private bool SaveOriginals(DateTime ts) =>
+            ImageSaver.SaveImage(_cam1WhiteOrigin, _param.SavePath, ts, "Cam1_White_Original") &&
+            ImageSaver.SaveImage(_cam2WhiteOrigin, _param.SavePath, ts, "Cam2_White_Original") &&
+            ImageSaver.SaveImage(_cam1UvOrigin, _param.SavePath, ts, "Cam1_UV_Original") &&
+            ImageSaver.SaveImage(_cam2UvOrigin, _param.SavePath, ts, "Cam2_UV_Original");
 
-        #region Status Timer
+        private bool SaveResults(DateTime ts) =>
+            ImageSaver.SaveImage(_cam1WhiteResult, _param.SavePath, ts, "Cam1_White_Result") &&
+            ImageSaver.SaveImage(_cam2WhiteResult, _param.SavePath, ts, "Cam2_White_Result") &&
+            ImageSaver.SaveImage(_cam1UvResult, _param.SavePath, ts, "Cam1_UV_Result") &&
+            ImageSaver.SaveImage(_cam2UvResult, _param.SavePath, ts, "Cam2_UV_Result");
+
+        // ═════════════════════════════════════════════════════════════════════════
+        // 9. STATUS TIMER — kiểm tra trạng thái kết nối định kỳ
+        // ═════════════════════════════════════════════════════════════════════════
+
         public void StartStatusTimer()
         {
             if (_statusTimer != null) return;
-            _statusTimer = new System.Timers.Timer(2000);
-            _statusTimer.Elapsed += StatusTimer_Elapsed;
-            _statusTimer.AutoReset = true;
-            _statusTimer.Enabled = true;
+            _statusTimer = new System.Timers.Timer(StatusPollIntervalMs) { AutoReset = false };
+            _statusTimer.Elapsed += OnStatusTimerElapsed;
+            _statusTimer.Start();
         }
 
-        private void StatusTimer_Elapsed(object sender, EventArgs e)
+        private void OnStatusTimerElapsed(object sender, EventArgs e)
         {
-            lock (_statusLock)
-            {
-                StopStatusTimer();
-                var resAI = APICommunication.CheckAPIStatus(_param.ApiUrlAi, timeout: 100);
-                var resPLC = PlcController.CheckPlcConnection(_param.ApiUrlCom, timeout: 100);
-                var resCamera1 = _camera1 != null && _camera1.IsOpen();
-                var resCamera2 = _camera2 != null && _camera2.IsOpen();
-                _mainWindow.SetStatusService(resAI, resPLC, resCamera1, resCamera2);
-                StartStatusTimer();
-            }
+            bool aiOk = APICommunication.CheckAPIStatus(_param.ApiUrlAi, timeout: 100);
+            bool plcOk = PlcController.CheckPlcConnection(_param.ApiUrlCom, timeout: 100);
+            bool cam1Ok = _camera1?.IsOpen() == true;
+            bool cam2Ok = _camera2?.IsOpen() == true;
+
+            _mainWindow.SetStatusService(aiOk, plcOk, cam1Ok, cam2Ok);
+
+            // Restart timer sau khi xử lý xong (tránh overlap)
+            _statusTimer?.Start();
         }
+
         public void StopStatusTimer()
         {
-            if (_statusTimer != null)
-            {
-                _statusTimer.Stop();
-                _statusTimer.Elapsed -= StatusTimer_Elapsed;
-                _statusTimer.AutoReset = false;
-                _statusTimer.Dispose();
-                _statusTimer = null;
-            }
+            if (_statusTimer == null) return;
+            _statusTimer.Stop();
+            _statusTimer.Elapsed -= OnStatusTimerElapsed;
+            _statusTimer.Dispose();
+            _statusTimer = null;
         }
-        #endregion
 
-        #region Stop Program
+        // ═════════════════════════════════════════════════════════════════════════
+        // 10. DỪNG VÀ ĐÓNG CHƯƠNG TRÌNH
+        // ═════════════════════════════════════════════════════════════════════════
+
         public void Stop()
         {
-            if (!_isRunning)
-                return;
+            if (!_isRunning) return;
 
-            PlcController._firstTrigger = true;
             _isRunning = false;
+            PlcController._firstTrigger = true;
 
             StopPlcTimer();
             StopStatusTimer();
+            _inspectCts?.Cancel();
 
-            if (_inspectCts != null && !_inspectCts.IsCancellationRequested)
-                _inspectCts.Cancel();
+            ShutdownAllLights();
+            StopAllCameras();
 
-            // đảm bảo tắt hết đèn
-            PlcController.ControlLed1(_param.ApiUrlCom, false, 500);
-            PlcController.ControlLed2(_param.ApiUrlCom, false, 500);
-            PlcController.ControlUv1(_param.ApiUrlCom, false, 500);
-            PlcController.ControlUv2(_param.ApiUrlCom, false, 500);
-            // close hết cameras
-            if (_camera1 != null)
-                _camera1.Stop();
-            if (_camera2 != null)
-                _camera2.Stop();
-
-            _logger.Info("User stopped system.");
-            AppLogger.Instance.Info("User stopped system.", "SYSTEM");
+            _logger.Info("System stopped by user.");
+            AppLogger.Instance.Info("System stopped.", "SYSTEM");
         }
-        #endregion
 
-        #region Close Program
         internal void CloseAIService()
         {
             AIServiceController.CloseProcessExisting();
-            _serviceIsRun = false;
+            ServiceIsRunning = false;
         }
+
         internal void CloseCamera()
         {
-            if (_camera1 != null && _camera1.IsOpen())
-            {
-                _camera1.Stop();
-                _camera1.Close();
-            }
-            if (_camera2 != null && _camera2.IsOpen())
-            {
-                _camera2.Stop();
-                _camera2.Close();
-            }
+            StopAllCameras(andClose: true);
         }
 
         internal void ShutdownLight()
         {
-            PlcController.ControlLed1(_param.ApiUrlCom, false);
-            PlcController.ControlLed2(_param.ApiUrlCom, false);
-            PlcController.ControlUv1(_param.ApiUrlCom, false);
-            PlcController.ControlUv2(_param.ApiUrlCom, false);
-
+            ShutdownAllLights();
         }
+
+        private void StopAllCameras(bool andClose = false)
+        {
+            foreach (var cam in new[] { _camera1, _camera2 })
+            {
+                if (cam == null || !cam.IsOpen()) continue;
+                cam.Stop();
+                if (andClose) cam.Close();
+            }
+        }
+
+        private void ShutdownAllLights()
+        {
+            // Tắt tất cả đèn khi dừng — dùng API mới (gộp 2 đèn)
+            PlcController.ControlWhiteLight(_param.ApiUrlCom, false);
+            PlcController.ControlUvLight(_param.ApiUrlCom, false);
+        }
+
+        // ═════════════════════════════════════════════════════════════════════════
+        // 11. LICENSE
+        // ═════════════════════════════════════════════════════════════════════════
 
         internal bool CheckLicense()
         {
-            string licensePath = @"plugin\license.dat";
-            var error = "License is not valid, contact with vendor to active!\rLicense không hợp lệ, liên hệ với vendor để active!";
-            var info = "Activation key is valid, continue to use!\rActivation key hợp lệ, hãy tiếp tục sử dụng chương trình!";
-            var res = false;
-            if (!File.Exists(licensePath))
-            {
-                _mainWindow.Dispatcher.Invoke(() =>
-                {
-                    var win = new ActivationWindow();
-                    win.Topmost = true;
+            if (!File.Exists(LicensePath))
+                return ShowActivationWindow();
 
-                    if (win.ShowDialog() != true)
-                    {
-                        AppLogger.Instance.Error("License is not valid!", "SYSTEM");
-                        _mainWindow.ShowError(error);
-                    }
-                    else
-                    {
-                        AppLogger.Instance.Info("License is valid!", "SYSTEM");
-                        _mainWindow.ShowInfo(info);
-                        res = true;
-                    }
-                });
+            var (isValid, message) = LicenseManager.ValidateActivationKey(File.ReadAllText(LicensePath));
+
+            if (isValid)
+            {
+                AppLogger.Instance.Info("License is valid.", "SYSTEM");
+                return true;
             }
-            else
+
+            AppLogger.Instance.Error(message, "SYSTEM");
+            _mainWindow.ShowError("License is not valid. Please contact vendor.");
+            return ShowActivationWindow();
+        }
+
+        private bool ShowActivationWindow()
+        {
+            bool activated = false;
+            _mainWindow.Dispatcher.Invoke(() =>
             {
-                string key = File.ReadAllText(licensePath);
-                (bool isValid, string message) = LicenseManager.ValidateActivationKey(key);
-                if (!isValid)
+                var win = new ActivationWindow { Topmost = true };
+                if (win.ShowDialog() == true)
                 {
-                    AppLogger.Instance.Error(message, "SYSTEM");
-                    _mainWindow.ShowError(error);
-
-                    AppLogger.Instance.Info("Processing creating new activation key!", "SYSTEM");
-
-                    _mainWindow.Dispatcher.Invoke(() =>
-                    {
-                        var win = new ActivationWindow();
-                        win.Topmost = true;
-                        if (win.ShowDialog() != true)
-                        {
-                            AppLogger.Instance.Error("License is not valid!", "SYSTEM");
-                            _mainWindow.ShowError(error);
-                        }
-
-                        else
-                        {
-                            AppLogger.Instance.Info("License is valid!", "SYSTEM");
-                            _mainWindow.ShowInfo(info);
-                            res = true;
-                        }
-                    });
+                    AppLogger.Instance.Info("Activation successful.", "SYSTEM");
+                    _mainWindow.ShowInfo("Activation key is valid. Continue using the program.");
+                    activated = true;
                 }
                 else
                 {
-                    AppLogger.Instance.Info("License is valid!", "SYSTEM");
-                    res = true;
+                    AppLogger.Instance.Error("Activation failed or cancelled.", "SYSTEM");
+                    _mainWindow.ShowError("License is not valid. Please contact vendor.");
                 }
-            }
-            return res;
+            });
+            return activated;
         }
-        #endregion
+
+        // ═════════════════════════════════════════════════════════════════════════
+        // HELPERS
+        // ═════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Log lỗi vào cả NLog lẫn AppLogger và hiển thị lên UI cùng 1 lúc.
+        /// </summary>
+        private void ShowAndLogError(string message, string tag)
+        {
+            _logger.Error(message);
+            AppLogger.Instance.Error(message, tag);
+            _mainWindow.ShowError(message);
+        }
     }
 }

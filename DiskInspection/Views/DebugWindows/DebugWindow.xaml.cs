@@ -350,7 +350,7 @@ namespace DiskInspection.Views.DebugWindows
 
             if (_selectedCameraName == CameraName.CAM_1)
             {
-                if (!await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, true, 1000)))
+                if (!await Task.Run(() => PlcController.ControlWhiteLight(_param.ApiUrlCom, true, 1000)))
                 {
                     ShowError(
                         "Cannot turn on LED 1! Please check the PLC connection\r" +
@@ -361,7 +361,7 @@ namespace DiskInspection.Views.DebugWindows
             }
             else if (_selectedCameraName == CameraName.CAM_2)
             {
-                if (!await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, true, 1000)))
+                if (!await Task.Run(() => PlcController.ControlWhiteLight(_param.ApiUrlCom, true, 1000)))
                 {
                     ShowError(
                         "Cannot turn on LED 2! Please check the PLC connection\r" +
@@ -373,8 +373,7 @@ namespace DiskInspection.Views.DebugWindows
 
             //Bitmap bitmapImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white_ok.bmp");
             Bitmap bitmapImage = _selectedCamera.GetBitmap();
-            await Task.Run(() => PlcController.ControlLed1(_param.ApiUrlCom, false, 1000));
-            await Task.Run(() => PlcController.ControlLed2(_param.ApiUrlCom, false, 1000));
+            await Task.Run(() => PlcController.ControlWhiteLight(_param.ApiUrlCom, false, 1000));
             Image<Bgr, byte> img = new Image<Bgr, byte>(bitmapImage);
             UpdateImage(bitmapImage);
 
@@ -410,7 +409,7 @@ namespace DiskInspection.Views.DebugWindows
             // Capture UV Light
             if (_selectedCameraName == CameraName.CAM_1)
             {
-                if (!await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, true, 1000)))
+                if (!await Task.Run(() => PlcController.ControlUvLight(_param.ApiUrlCom, true, 1000)))
                 {
                     ShowError(
                         "Cannot turn on LED 1! Please check the PLC connection\r" +
@@ -421,7 +420,7 @@ namespace DiskInspection.Views.DebugWindows
             }
             else if (_selectedCameraName == CameraName.CAM_2)
             {
-                if (!await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, true, 1000)))
+                if (!await Task.Run(() => PlcController.ControlUvLight(_param.ApiUrlCom, true, 1000)))
                 {
                     ShowError(
                         "Cannot turn on LED 2! Please check the PLC connection\r" +
@@ -432,8 +431,7 @@ namespace DiskInspection.Views.DebugWindows
             }
             Bitmap bitmapUvImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv.bmp");
             //Bitmap bitmapUVImage = _selectedCamera.GetBitmap();
-            await Task.Run(() => PlcController.ControlUv1(_param.ApiUrlCom, false, 1000));
-            await Task.Run(() => PlcController.ControlUv2(_param.ApiUrlCom, false, 1000));
+            await Task.Run(() => PlcController.ControlUvLight(_param.ApiUrlCom, false, 1000));
             Image<Bgr, byte> imgUv = new Image<Bgr, byte>(bitmapUvImage);
             UpdateImage(bitmapUvImage);
 
@@ -614,10 +612,8 @@ namespace DiskInspection.Views.DebugWindows
                 // Cứ tắt led, uv, nếu chưa có kết nối cũng không sao
                 new Task(() =>
                 {
-                    PlcController.ControlLed1(_param.ApiUrlCom, status: false);
-                    PlcController.ControlLed2(_param.ApiUrlCom, status: false);
-                    PlcController.ControlUv1(_param.ApiUrlCom, status: false);
-                    PlcController.ControlUv2(_param.ApiUrlCom, status: false);
+                    PlcController.ControlWhiteLight(_param.ApiUrlCom, status: false);
+                    PlcController.ControlUvLight(_param.ApiUrlCom, status: false);
                 }).Start();
             }
             else

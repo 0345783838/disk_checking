@@ -131,7 +131,7 @@ namespace DiskInspection.Controllers.PLC
                 return false;
             }
         }
-        public static bool ControlUv1(string url, bool status, int timeout = 1500)
+        public static bool ControlUvLight(string url, bool status, int timeout = 1500)
         {
             // test debug
             return true;
@@ -140,7 +140,7 @@ namespace DiskInspection.Controllers.PLC
                 Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointControlUv1, Method.Get);
+            var request = new RestRequest(_param.EndpointControlUvLight, Method.Get);
             request.AddQueryParameter("status", status);
 
             var response = client.Execute(request);
@@ -154,7 +154,7 @@ namespace DiskInspection.Controllers.PLC
                 return false;
             }
         }
-        public static bool ControlUv2(string url, bool status, int timeout = 1500)
+        public static bool ControlWhiteLight(string url, bool status, int timeout = 1500)
         {
             // test debug
             return true;
@@ -163,53 +163,7 @@ namespace DiskInspection.Controllers.PLC
                 Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointControlUv2, Method.Get);
-            request.AddQueryParameter("status", status);
-
-            var response = client.Execute(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                dynamic obj = JsonConvert.DeserializeObject(response.Content);
-                return obj.Success;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public static bool ControlLed1(string url, bool status, int timeout = 1500)
-        {
-            // test debug
-            return true;
-            var options = new RestClientOptions(url)
-            {
-                Timeout = TimeSpan.FromMilliseconds(timeout)
-            };
-            var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointControlLed1, Method.Get);
-            request.AddQueryParameter("status", status);
-
-            var response = client.Execute(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                dynamic obj = JsonConvert.DeserializeObject(response.Content);
-                return obj.Success;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public static bool ControlLed2(string url, bool status, int timeout = 1500)
-        {
-            // test debug
-            return true;
-            var options = new RestClientOptions(url)
-            {
-                Timeout = TimeSpan.FromMilliseconds(timeout)
-            };
-            var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointControlLed2, Method.Get);
+            var request = new RestRequest(_param.EndpointControlWhiteLight, Method.Get);
             request.AddQueryParameter("status", status);
 
             var response = client.Execute(request);

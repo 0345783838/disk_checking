@@ -204,7 +204,7 @@ namespace DiskInspection
                 bool res = false;
                 new Task(new Action(() =>
                 {
-                    res = _mainController.RunServiceAsync(20000, "Loading program...");
+                    res = _mainController.StartAIService(20000, "Loading program...");
                 })).Start();
             }
             else
@@ -227,13 +227,13 @@ namespace DiskInspection
                         for (int i = 0; i < timestep; i++)
                         {
                             Thread.Sleep(500);
-                            if (_mainController._serviceIsRun)
+                            if (_mainController.ServiceIsRunning)
                             {
                                 break;
                             }
                         }
                         wait.KillMe = true;
-                        if (!_mainController._serviceIsRun)
+                        if (!_mainController.ServiceIsRunning)
                         {
                             this.Dispatcher.Invoke(new Action(() =>
                             {
@@ -541,6 +541,7 @@ namespace DiskInspection
             {
                 _okSeries.Values[0] = (double)okCount;
                 _ngSeries.Values[0] = (double)ngCount;
+                OnPropertyChanged(nameof(PieSeriesCollection));
             });
         }
 

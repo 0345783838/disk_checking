@@ -12,7 +12,7 @@ namespace DiskInspection.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.10.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.12.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -193,25 +193,25 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("control_uv_1")]
-        public string EndpointControlUv1 {
+        [global::System.Configuration.DefaultSettingValueAttribute("control_uv_light")]
+        public string EndpointControlUvLight {
             get {
-                return ((string)(this["EndpointControlUv1"]));
+                return ((string)(this["EndpointControlUvLight"]));
             }
             set {
-                this["EndpointControlUv1"] = value;
+                this["EndpointControlUvLight"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("control_led_1")]
-        public string EndpointControlLed1 {
+        [global::System.Configuration.DefaultSettingValueAttribute("control_white_light")]
+        public string EndpointControlWhiteLight {
             get {
-                return ((string)(this["EndpointControlLed1"]));
+                return ((string)(this["EndpointControlWhiteLight"]));
             }
             set {
-                this["EndpointControlLed1"] = value;
+                this["EndpointControlWhiteLight"] = value;
             }
         }
         
@@ -289,18 +289,6 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("control_led_2")]
-        public string EndpointControlLed2 {
-            get {
-                return ((string)(this["EndpointControlLed2"]));
-            }
-            set {
-                this["EndpointControlLed2"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("check_disk_white")]
         public string EndpointInspectWhiteLight {
             get {
@@ -361,13 +349,49 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("control_uv_2")]
-        public string EndpointControlUv2 {
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
+        public int WaitWhiteLightOn {
             get {
-                return ((string)(this["EndpointControlUv2"]));
+                return ((int)(this["WaitWhiteLightOn"]));
             }
             set {
-                this["EndpointControlUv2"] = value;
+                this["WaitWhiteLightOn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
+        public int WaitWhiteLightOff {
+            get {
+                return ((int)(this["WaitWhiteLightOff"]));
+            }
+            set {
+                this["WaitWhiteLightOff"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2000")]
+        public int WaitUvLightOn {
+            get {
+                return ((int)(this["WaitUvLightOn"]));
+            }
+            set {
+                this["WaitUvLightOn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5000")]
+        public int WaitUvLightOff {
+            get {
+                return ((int)(this["WaitUvLightOff"]));
+            }
+            set {
+                this["WaitUvLightOff"] = value;
             }
         }
     }

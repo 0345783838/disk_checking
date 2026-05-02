@@ -1,11 +1,14 @@
-0. Chỉnh lại size phần mềm
+--ok--0. Chỉnh lại size phần mềm
 
 1. Train lại các models AI với dữ liệu ảnh mới.
 
-2. Chia luồng logic bật 2 đèn trắng -> Delay đợi đèn sáng 
+--doing--2. Chia luồng logic bật 2 đèn trắng -> Delay đợi đèn sáng 
                   -> chụp ảnh trắng -> delay -> tắt đèn
                   -> Bật 2 UV -> Delay đợi đèn sáng 
                   -> Chụp 2 UV xong -> delay -> tắt đèn.
+
+(CẦN CHIA LẠI LUỒNG UPDATE HÌNH ẢNH RESULT WHITE + UPDATE THỜI GIAN XỬ LÝ)
+
 
 3. Logic lỗi thiếu chỉ warning
    
