@@ -15,7 +15,6 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace DiskInspection.Controllers
@@ -145,7 +144,6 @@ namespace DiskInspection.Controllers
 
         private bool CheckAndStartCamera()
         {
-            return true;
             _cameraManager = CameraManager.GetInstance();
             _camera1 = _cameraManager.GetCamera1();
             _camera2 = _cameraManager.GetCamera2();
@@ -170,7 +168,6 @@ namespace DiskInspection.Controllers
 
         private bool CheckAndStartPLC()
         {
-            return true;
             if (PlcController.CheckPlcConnection(_param.ApiUrlCom))
                 return true;
 
@@ -267,15 +264,20 @@ namespace DiskInspection.Controllers
                 if (whiteFrame1 == null) return;
 
                 // ── Bước 2: AI White + delay tắt đèn chạy song song ─────────────
-                // Có ảnh rồi → AI chạy ngay, đồng thời đèn vẫn giữ sáng đủ thời gian
-                // Cả 2 task phải xong hết thì mới được bật đèn UV
+                // Bắt đầu tính thời gian AI từ lúc có ảnh
+                var aiStopwatch = Stopwatch.StartNew();
                 var whiteAiTask = RunWhiteAIAsync(whiteFrame1, whiteFrame2, token);
                 var whiteLightOffTask = TurnOffWhiteLightAsync(token);
 
-                await Task.WhenAll(whiteAiTask, whiteLightOffTask);
-
-                var (whiteResult1, whiteResult2) = whiteAiTask.Result;
+                // Đợi AI White xong trước — không cần đợi đèn tắt để update UI ngay
+                var (whiteResult1, whiteResult2) = await whiteAiTask;
                 if (whiteResult1 == null || whiteResult2 == null) return;
+
+                // Update UI White ngay khi có kết quả, không phải đợi đến cuối chu kỳ
+                UpdateUIWithWhiteResults(whiteResult1, whiteResult2);
+
+                // Đảm bảo đèn trắng đã tắt hẳn trước khi bật UV
+                await whiteLightOffTask;
 
                 // ── Bước 3: Bật đèn UV → đợi ổn định → chụp ảnh ─────────────────
                 var (uvFrame1, uvFrame2) = await CaptureUvFramesAsync(token);
@@ -285,14 +287,21 @@ namespace DiskInspection.Controllers
                 var uvAiTask = RunUVAIAsync(uvFrame1, uvFrame2, whiteResult1, whiteResult2, token);
                 var uvLightOffTask = TurnOffUvLightAsync(token);
 
-                await Task.WhenAll(uvAiTask, uvLightOffTask);
+                // Đợi AI UV xong → dừng đồng hồ → đây là tổng thời gian AI thuần
+                var (cam1Result, cam2Result) = await uvAiTask;
+                aiStopwatch.Stop();
 
-                var (cam1Result, cam2Result) = uvAiTask.Result;
+                // Duration = tổng thời gian AI xử lý (White + UV), không tính delay đèn
+                cam1Result.Duration = aiStopwatch.Elapsed;
+                cam2Result.Duration = aiStopwatch.Elapsed;
+
+                // Đợi đèn UV tắt hẳn (thường đã xong vì AI UV mất nhiều thời gian hơn)
+                await uvLightOffTask;
 
                 if (token.IsCancellationRequested) return;
 
-                // ── Bước 5: Cập nhật UI ──────────────────────────────────────────
-                UpdateUIWithResults(cam1Result, cam2Result);
+                // ── Bước 5: Cập nhật UI kết quả UV + thông tin tổng ─────────────
+                UpdateUIWithUvResults(cam1Result, cam2Result);
 
                 // ── Bước 6: Xử lý kết quả tổng ──────────────────────────────────
                 bool passed = cam1Result.Passed && cam2Result.Passed;
@@ -307,7 +316,7 @@ namespace DiskInspection.Controllers
                     AppLogger.Instance.Info("Inspection NG — sent NG signal to PLC.", "PLC");
                 }
 
-                AppLogger.Instance.Info("Inspection complete. Waiting for next trigger.", "SYSTEM");
+                AppLogger.Instance.Info($"Inspection complete in {aiStopwatch.ElapsedMilliseconds}ms AI time. Waiting for next trigger.", "SYSTEM");
 
                 // ── Bước 7: Lưu ảnh (fire-and-forget, không block chu kỳ) ────────
                 if (_param.SaveEnable)
@@ -400,13 +409,9 @@ namespace DiskInspection.Controllers
         {
             token.ThrowIfCancellationRequested();
 
-            //var results = await Task.WhenAll(
-            //    Task.Run(() => _camera1.GetBitmap(), token),
-            //    Task.Run(() => _camera2.GetBitmap(), token));
-
             var results = await Task.WhenAll(
-                Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260416115305956_White.bmp"), token),
-                Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260414164713482_White.bmp"), token));
+                Task.Run(() => _camera1.GetBitmap(), token),
+                Task.Run(() => _camera2.GetBitmap(), token));
 
             return (results[0], results[1]);
         }
@@ -483,8 +488,6 @@ namespace DiskInspection.Controllers
                 return (null, null);
             }
 
-
-
             AppLogger.Instance.Info("White AI complete for both cameras.", "AI");
             return (results[0], results[1]);
         }
@@ -538,7 +541,6 @@ namespace DiskInspection.Controllers
             return new CameraInspectionResult
             {
                 Passed = white.Result && uv.Result,
-                //Duration = 
                 WhiteResultBitmap = Converter.Base64ToBitmapSource(white.ResImg),
                 UvResultBitmap = Converter.Base64ToBitmapSource(uv.ResImg),
                 MinDiskDistance = white.MinDiskDistance,
@@ -593,91 +595,57 @@ namespace DiskInspection.Controllers
         }
 
         /// <summary>
-        /// Cập nhật UI kết quả AI sau khi xử lý xong.
+        /// Cập nhật UI ảnh kết quả White ngay sau khi AI White xong.
+        /// Dùng InspectionResponse trực tiếp vì chưa có CameraInspectionResult đầy đủ.
         /// </summary>
-        private void UpdateUIWithWhiteResults(CameraInspectionResult cam1, CameraInspectionResult cam2)
+        private void UpdateUIWithWhiteResults(InspectionResponse white1, InspectionResponse white2)
         {
-            // Camera 1
-            if (cam1.WhiteResultBitmap != null)
+            if (white1?.ResImg != null)
             {
-                lock (_cam1Lock)
-                {
-                    _cam1WhiteResult = cam1.WhiteResultBitmap;
-                    _cam1UvResult = cam1.UvResultBitmap;
-                }
+                var bitmap = Converter.Base64ToBitmapSource(white1.ResImg);
+                lock (_cam1Lock) { _cam1WhiteResult = bitmap; }
                 _mainWindow.UpdateCam1WhiteResult(_cam1WhiteResult);
-                _mainWindow.UpdateCam1UvResult(_cam1UvResult);
-                _mainWindow.UpdateCam1MinMaxDis(cam1.MinDiskDistance, cam1.MaxDiskDistance);
-                _mainWindow.UpdateCam1DiskUv(cam1.UvDiskCount);
-                _mainWindow.UpdateInspectionStatusCam1(cam1.Passed);
-                _mainWindow.UpdateCam1ProcessedTime(cam1.Duration);
-
-                var status1 = cam1.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
-                App.ImageViewer.AddImage(_cam1WhiteResult, "1-White-Result", status1, $"CAM1 White: {cam1.WhiteErrorDesc}");
-                App.ImageViewer.AddImage(_cam1UvResult, "1-UV-Result", cam1.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM1 UV: {cam1.UvErrorDesc}");
+                _mainWindow.UpdateCam1MinMaxDis(white1.MinDiskDistance, white1.MaxDiskDistance);
+                var status = white1.Result ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam1WhiteResult, "1-White-Result", status, $"CAM1 White: {white1.ErrorDesc}");
             }
 
-            // Camera 2
-            if (cam2.WhiteResultBitmap != null)
+            if (white2?.ResImg != null)
             {
-                lock (_cam2Lock)
-                {
-                    _cam2WhiteResult = cam2.WhiteResultBitmap;
-                    _cam2UvResult = cam2.UvResultBitmap;
-                }
+                var bitmap = Converter.Base64ToBitmapSource(white2.ResImg);
+                lock (_cam2Lock) { _cam2WhiteResult = bitmap; }
                 _mainWindow.UpdateCam2WhiteResult(_cam2WhiteResult);
-                _mainWindow.UpdateCam2UvResult(_cam2UvResult);
-                _mainWindow.UpdateCam2MinMaxDis(cam2.MinDiskDistance, cam2.MaxDiskDistance);
-                _mainWindow.UpdateCam2DiskUv(cam2.UvDiskCount);
-                _mainWindow.UpdateInspectionStatusCam2(cam2.Passed);
-                _mainWindow.UpdateCam2ProcessedTime(cam2.Duration);
-
-                var status2 = cam2.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
-                App.ImageViewer.AddImage(_cam2WhiteResult, "2-White-Result", status2, $"CAM2 White: {cam2.WhiteErrorDesc}");
-                App.ImageViewer.AddImage(_cam2UvResult, "2-UV-Result", cam2.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM2 UV: {cam2.UvErrorDesc}");
+                _mainWindow.UpdateCam2MinMaxDis(white2.MinDiskDistance, white2.MaxDiskDistance);
+                var status = white2.Result ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam2WhiteResult, "2-White-Result", status, $"CAM2 White: {white2.ErrorDesc}");
             }
         }
 
-        private void UpdateUIWithResults(CameraInspectionResult cam1, CameraInspectionResult cam2)
+        /// <summary>
+        /// Cập nhật UI ảnh kết quả UV + tất cả thông tin tổng hợp sau khi AI UV xong.
+        /// </summary>
+        private void UpdateUIWithUvResults(CameraInspectionResult cam1, CameraInspectionResult cam2)
         {
-            // Camera 1
-            if (cam1.WhiteResultBitmap != null)
+            if (cam1.UvResultBitmap != null)
             {
-                lock (_cam1Lock)
-                {
-                    _cam1WhiteResult = cam1.WhiteResultBitmap;
-                    _cam1UvResult = cam1.UvResultBitmap;
-                }
-                _mainWindow.UpdateCam1WhiteResult(_cam1WhiteResult);
+                lock (_cam1Lock) { _cam1UvResult = cam1.UvResultBitmap; }
                 _mainWindow.UpdateCam1UvResult(_cam1UvResult);
-                _mainWindow.UpdateCam1MinMaxDis(cam1.MinDiskDistance, cam1.MaxDiskDistance);
                 _mainWindow.UpdateCam1DiskUv(cam1.UvDiskCount);
                 _mainWindow.UpdateInspectionStatusCam1(cam1.Passed);
                 _mainWindow.UpdateCam1ProcessedTime(cam1.Duration);
-
-                var status1 = cam1.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
-                App.ImageViewer.AddImage(_cam1WhiteResult, "1-White-Result", status1, $"CAM1 White: {cam1.WhiteErrorDesc}");
-                App.ImageViewer.AddImage(_cam1UvResult, "1-UV-Result", cam1.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM1 UV: {cam1.UvErrorDesc}");
+                var status = cam1.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam1UvResult, "1-UV-Result", status, $"CAM1 UV: {cam1.UvErrorDesc}");
             }
 
-            // Camera 2
-            if (cam2.WhiteResultBitmap != null)
+            if (cam2.UvResultBitmap != null)
             {
-                lock (_cam2Lock)
-                {
-                    _cam2WhiteResult = cam2.WhiteResultBitmap;
-                    _cam2UvResult = cam2.UvResultBitmap;
-                }
-                _mainWindow.UpdateCam2WhiteResult(_cam2WhiteResult);
+                lock (_cam2Lock) { _cam2UvResult = cam2.UvResultBitmap; }
                 _mainWindow.UpdateCam2UvResult(_cam2UvResult);
-                _mainWindow.UpdateCam2MinMaxDis(cam2.MinDiskDistance, cam2.MaxDiskDistance);
                 _mainWindow.UpdateCam2DiskUv(cam2.UvDiskCount);
                 _mainWindow.UpdateInspectionStatusCam2(cam2.Passed);
                 _mainWindow.UpdateCam2ProcessedTime(cam2.Duration);
-
-                var status2 = cam2.WhitePassed ? ThumbStatus.Ok : ThumbStatus.Ng;
-                App.ImageViewer.AddImage(_cam2WhiteResult, "2-White-Result", status2, $"CAM2 White: {cam2.WhiteErrorDesc}");
-                App.ImageViewer.AddImage(_cam2UvResult, "2-UV-Result", cam2.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng, $"CAM2 UV: {cam2.UvErrorDesc}");
+                var status = cam2.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng;
+                App.ImageViewer.AddImage(_cam2UvResult, "2-UV-Result", status, $"CAM2 UV: {cam2.UvErrorDesc}");
             }
         }
 
@@ -694,8 +662,8 @@ namespace DiskInspection.Controllers
             try
             {
                 var saveMode = (SaveType)_param.SaveMode;
-                bool success;
 
+                bool success;
                 switch (saveMode)
                 {
                     case SaveType.ORIGINAL:
@@ -708,6 +676,7 @@ namespace DiskInspection.Controllers
                         success = SaveOriginals(timeStamp) && SaveResults(timeStamp);
                         break;
                 }
+
 
                 if (success)
                     AppLogger.Instance.Info("Images saved successfully.", "SYSTEM");
