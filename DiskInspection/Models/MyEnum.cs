@@ -13,7 +13,8 @@ namespace DiskInspection.Models
         Ng = 1,
         Inspecting = 3,
         Unknown = 2,
-        Stopped = 4
+        Stopped = 4,
+        Warning = 5
     }
     enum TriggerState
     {
@@ -31,7 +32,8 @@ namespace DiskInspection.Models
     {
         Origin,
         Ok,
-        Ng
+        Ng,
+        Warning
     }
     public enum SaveType
     {
@@ -39,9 +41,25 @@ namespace DiskInspection.Models
         RESULT = 1,
         ORIGINAL = 2
     }
+    public enum SaveOption
+    {
+        OK = 0,
+        NG = 1,
+        BOTH = 2
+    }
+    public enum InspectionResult { Passed, Failed, Warning }
     public static class CameraName
     {
         public static readonly string CAM_1 = "Camera 1";
         public static readonly string CAM_2 = "Camera 2";
+    }
+    public static class ErrorCode
+    {
+        public static readonly string PASS = "PASS";
+        public static readonly string ERROR_001 = "ERROR_001";
+        public static readonly string ERROR_002 = "ERROR_002";
+        public static readonly string ERROR_003 = "ERROR_003";
+        public static readonly string WARNING_001 = "WARNING_001";
+        
     }
 }

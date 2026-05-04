@@ -541,7 +541,7 @@
                                     <TextBox
                                         Name="tbOKCount"
                                         Width="50"
-                                        Margin="5,0,0,0"
+                                        Margin="2,0,0,0"
                                         HorizontalContentAlignment="Center"
                                         VerticalContentAlignment="Center"
                                         BorderBrush="DarkGray"
@@ -550,7 +550,7 @@
                                         Foreground="Green"
                                         IsReadOnly="True" />
                                     <Label
-                                        Margin="30,0,0,0"
+                                        Margin="10,0,0,0"
                                         Content="NG"
                                         FontSize="14"
                                         FontWeight="Bold"
@@ -558,13 +558,30 @@
                                     <TextBox
                                         Name="tbNGCount"
                                         Width="50"
-                                        Margin="5,0,0,0"
+                                        Margin="2,0,0,0"
                                         HorizontalContentAlignment="Center"
                                         VerticalContentAlignment="Center"
                                         BorderBrush="DarkGray"
                                         FontSize="14"
                                         FontWeight="Bold"
                                         Foreground="Red"
+                                        IsReadOnly="True" />
+                                    <Label
+                                        Margin="10,0,0,0"
+                                        Content="WARNING"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="Orange" />
+                                    <TextBox
+                                        Name="tbWarningCount"
+                                        Width="50"
+                                        Margin="2,0,0,0"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        BorderBrush="DarkGray"
+                                        FontSize="14"
+                                        FontWeight="Bold"
+                                        Foreground="Green"
                                         IsReadOnly="True" />
                                 </StackPanel>
                             </Grid>

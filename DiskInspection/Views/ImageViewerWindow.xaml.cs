@@ -103,6 +103,11 @@ namespace DiskInspection.Views
             Activate();
             WindowState = WindowState.Normal;
         }
+        public void HideViewer()
+        {
+            if (IsVisible)
+                InvokeUI(() => Hide());
+        }
         public void ShowByImage(BitmapSource img)
         {
             if (img == null) return;

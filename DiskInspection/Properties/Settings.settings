@@ -53,8 +53,8 @@
     <Setting Name="EndpointCheckConnection" Type="System.String" Scope="User">
       <Value Profile="(Default)">check_connection</Value>
     </Setting>
-    <Setting Name="EndpointOnError" Type="System.String" Scope="User">
-      <Value Profile="(Default)">on_error</Value>
+    <Setting Name="EndpointOnErrorAbnormal" Type="System.String" Scope="User">
+      <Value Profile="(Default)">on_error_abnormal</Value>
     </Setting>
     <Setting Name="ApiUrlCom" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://127.0.0.1:8386/communication</Value>
@@ -94,6 +94,15 @@
     </Setting>
     <Setting Name="WaitUvLightOff" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">5000</Value>
+    </Setting>
+    <Setting Name="SaveOption" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="EndpointOnErrorMixing" Type="System.String" Scope="User">
+      <Value Profile="(Default)">on_error_mixing</Value>
+    </Setting>
+    <Setting Name="CurrentWarning" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

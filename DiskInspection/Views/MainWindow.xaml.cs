@@ -55,6 +55,7 @@ namespace DiskInspection
         public AppLogger Logger => AppLogger.Instance;
 
         private PieSeries _okSeries;
+        private PieSeries _warningSeries;
         private PieSeries _ngSeries;
         public SeriesCollection PieSeriesCollection { get; set; }
 
@@ -383,11 +384,18 @@ namespace DiskInspection
         #endregion
 
         #region Update Result CAM 1
-        internal void UpdateInspectionStatusCam1(bool status)
+        internal void UpdateInspectionStatusCam1(InspectionResult status)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                InspectionStatusCam1 = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                int statusInt;
+                if (status == InspectionResult.Passed)
+                    statusInt = (int)StatusState.Ok;
+                else if (status == InspectionResult.Failed)
+                    statusInt = (int)StatusState.Ng;
+                else
+                    statusInt = (int)StatusState.Warning;
+                InspectionStatusCam1 = statusInt;
                 OnPropertyChanged(nameof(InspectionStatusCam1));
             }));
         }
@@ -417,11 +425,18 @@ namespace DiskInspection
         #endregion
 
         #region Update Result CAM 2
-        internal void UpdateInspectionStatusCam2(bool status)
+        internal void UpdateInspectionStatusCam2(InspectionResult status)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                InspectionStatusCam2 = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                int statusInt;
+                if (status == InspectionResult.Passed)
+                    statusInt = (int)StatusState.Ok;
+                else if (status == InspectionResult.Failed)
+                    statusInt = (int)StatusState.Ng;
+                else
+                    statusInt = (int)StatusState.Warning;
+                InspectionStatusCam2 = statusInt;
                 OnPropertyChanged(nameof(InspectionStatusCam2));
             }));
         }
@@ -474,7 +489,7 @@ namespace DiskInspection
                 lbWorkingShift.Content = $"{dt.ToString("HH:mm")} - {dt.AddHours(12).ToString("HH:mm")}";
             }));
         }
-        internal void UpdateStatistics(bool status, bool firstTime=false)
+        internal void UpdateStatistics(InspectionResult status, bool firstTime=false)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -485,6 +500,7 @@ namespace DiskInspection
                     _param.StartShiftTime = curShiftTime;
                     _param.CurrentOK = 0;
                     _param.CurrentNG = 0;
+                    _param.CurrentWarning = 0;
                     _param.Save();
                     UpdateCurrentShiftTime(_param.StartShiftTime);
                 }
@@ -492,23 +508,29 @@ namespace DiskInspection
                 if (firstTime)
                 {
                     tbOKCount.Text = _param.CurrentOK.ToString();
+                    tbWarningCount.Text = _param.CurrentWarning.ToString();
                     tbNGCount.Text = _param.CurrentNG.ToString();
-                    UpdateStatistics(_param.CurrentOK, _param.CurrentNG);
+                    UpdateStatistics(_param.CurrentOK, _param.CurrentWarning, _param.CurrentNG);
                     UpdateCurrentShiftTime(_param.StartShiftTime);
                 }
                 else
                 {
-                    if (status)
+                    if (status == InspectionResult.Passed)
                     {
                         _param.CurrentOK += 1;
                         tbOKCount.Text = _param.CurrentOK.ToString();
                     }
-                    else
+                    else if (status == InspectionResult.Failed)
                     {
                         _param.CurrentNG += 1;
                         tbNGCount.Text = _param.CurrentNG.ToString();
                     }
-                    UpdateStatistics(_param.CurrentOK, _param.CurrentNG);
+                    else
+                    {
+                        _param.CurrentWarning += 1;
+                        tbWarningCount.Text = _param.CurrentWarning.ToString();
+                    }
+                    UpdateStatistics(_param.CurrentOK, _param.CurrentWarning, _param.CurrentNG);
                     _param.Save();
                 }
             }));
@@ -524,6 +546,15 @@ namespace DiskInspection
                 Fill = new SolidColorBrush(System.Windows.Media.Colors.Green)
             };
 
+            _warningSeries = new PieSeries
+            {
+                Title = "Warning",
+                Values = new ChartValues<double> { 0 },
+                DataLabels = true,
+                LabelPoint = chartPoint => $"{chartPoint.Participation:P2}", // <-- thêm %
+                Fill = new SolidColorBrush(System.Windows.Media.Colors.Orange)
+            };
+
             _ngSeries = new PieSeries
             {
                 Title = "NG",
@@ -532,14 +563,15 @@ namespace DiskInspection
                 LabelPoint = chartPoint => $"{chartPoint.Participation:P2}",
                 Fill = new SolidColorBrush(System.Windows.Media.Color.FromRgb(249, 68, 73))
             };
-            PieSeriesCollection = new SeriesCollection { _okSeries, _ngSeries };
-            UpdateStatistics(true, firstTime: true);
+            PieSeriesCollection = new SeriesCollection { _okSeries, _warningSeries, _ngSeries };
+            UpdateStatistics(InspectionResult.Passed, firstTime: true);
         }
-        public void UpdateStatistics(int okCount, int ngCount)
+        public void UpdateStatistics(int okCount, int warningCount, int ngCount)
         {
             this.Dispatcher.Invoke(() =>
             {
                 _okSeries.Values[0] = (double)okCount;
+                _warningSeries.Values[0] = (double)warningCount;
                 _ngSeries.Values[0] = (double)ngCount;
                 OnPropertyChanged(nameof(PieSeriesCollection));
             });
@@ -547,11 +579,18 @@ namespace DiskInspection
 
         #endregion
         #region Update Inspection Status
-        internal void UpdateInspectionStatus(bool status)
+        internal void UpdateInspectionStatus(InspectionResult status)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                InspectionStatus = status ? (int)(StatusState.Ok) : (int)(StatusState.Ng);
+                int statusInt;
+                if (status == InspectionResult.Passed)
+                    statusInt = (int)StatusState.Ok;
+                else if (status == InspectionResult.Failed)
+                    statusInt = (int)StatusState.Ng;
+                else
+                    statusInt = (int)StatusState.Warning;
+                InspectionStatus = statusInt;
                 OnPropertyChanged(nameof(InspectionStatus));
             }));
         }

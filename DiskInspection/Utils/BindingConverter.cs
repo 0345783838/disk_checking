@@ -82,6 +82,7 @@ namespace DiskInspection.Utils
                 else if (status == (int)(StatusState.Ng))  return "#F94449";
                 else if (status == (int)(StatusState.Inspecting)) return "#E6B400";
                 else if (status == (int)(StatusState.Stopped)) return "#C30010";
+                else if (status == (int)(StatusState.Warning)) return "#FF6600";
                 return "Gray";
             }
             return value;
@@ -101,6 +102,8 @@ namespace DiskInspection.Utils
                 if (status == (int)(StatusState.Ok)) return "White";
                 else if (status == (int)(StatusState.Ng)) return "White";
                 else if (status == (int)(StatusState.Inspecting)) return "White";
+                else if (status == (int)(StatusState.Stopped)) return "White";
+                else if (status == (int)(StatusState.Warning)) return "White";
                 return "White";
             }
             return value;
@@ -121,6 +124,7 @@ namespace DiskInspection.Utils
                 if (status == (int)(StatusState.Ok)) return "OK";
                 else if (status == (int)(StatusState.Ng)) return "NG";
                 else if (status == (int)(StatusState.Inspecting)) return "...";
+                else if (status == (int)(StatusState.Warning)) return "⚠️";
                 else if (status == (int)(StatusState.Stopped)) return "X";
                 return "N/A";
             }
@@ -142,6 +146,7 @@ namespace DiskInspection.Utils
                 else if (status == (int)(StatusState.Ng)) return "NOT GOOD";
                 else if (status == (int)(StatusState.Inspecting)) return "INSPECTING";
                 else if (status == (int)(StatusState.Stopped)) return "STOPPED";
+                else if (status == (int)(StatusState.Warning)) return "WARNING";
                 return "N/A";
             }
             return value;
@@ -226,7 +231,8 @@ namespace DiskInspection.Utils
             {
                 if (status == ThumbStatus.Ok) return "#0F5132";
                 else if (status == ThumbStatus.Origin) return "#1F2937";
-                else return "#7A0000";
+                else if (status == ThumbStatus.Ng) return "#7A0000";
+                else return "#FF6600";
             }
             return value;
         }

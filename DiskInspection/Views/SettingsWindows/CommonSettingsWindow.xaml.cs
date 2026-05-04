@@ -46,12 +46,6 @@ namespace DiskInspection.Views.SettingsWindows
             // Get cameras list
             List<CamInfo> camInfoList = LincolnCamera.GetListCamInfo();
 
-            // Test to debug
-            cbbCam1Sn.Items.Add("Test1");
-            cbbCam2Sn.Items.Add("Test1");
-            cbbCam1Sn.Items.Add("Test2");
-            cbbCam2Sn.Items.Add("Test2");
-            //
             for (int i = 0; i < camInfoList.Count; i++)
             {
                 cbbCam1Sn.Items.Add(camInfoList[i].SN);
@@ -66,6 +60,11 @@ namespace DiskInspection.Views.SettingsWindows
             tbPlcIp.Text = _param.PlcIp;
             tbPlcPort.Text = _param.PlcPort.ToString();
 
+            tbWhiteLightOnDelay.Text = _param.WaitWhiteLightOn.ToString();
+            tbWhiteLightOffDelay.Text = _param.WaitWhiteLightOff.ToString();
+            tbUvLightOnDelay.Text = _param.WaitUvLightOn.ToString();
+            tbUvLightOffDelay.Text = _param.WaitUvLightOff.ToString();
+
             // Saving Settings
             if (_param.SaveEnable == true)
             {
@@ -77,6 +76,13 @@ namespace DiskInspection.Views.SettingsWindows
                 else if (_param.SaveMode == (int)SaveType.ORIGINAL)
                     rbSaveOptionOrigin.IsChecked = true;
                 tbSavePath.Text = _param.SavePath;
+
+                if (_param.SaveOption == (int)SaveOption.OK)
+                    rbSaveOK.IsChecked = true;
+                else if (_param.SaveOption == (int)SaveOption.NG)
+                    rbSaveNG.IsChecked = true;
+                else if (_param.SaveOption == (int)SaveOption.BOTH)
+                    rbSaveBoth.IsChecked = true;
             }
             else
             {
@@ -84,6 +90,9 @@ namespace DiskInspection.Views.SettingsWindows
                 rbSaveOptionResultOrigin.IsChecked = false;
                 rbSaveOptionResult.IsChecked = false;
                 rbSaveOptionOrigin.IsChecked = false;
+                rbSaveOK.IsChecked = false;
+                rbSaveNG.IsChecked = false;
+                rbSaveBoth.IsChecked = false;
             }
         }
 
@@ -154,6 +163,12 @@ namespace DiskInspection.Views.SettingsWindows
                 error.ShowDialog();
                 return;
             }
+            if (tbWhiteLightOnDelay.Text == string.Empty || tbWhiteLightOffDelay.Text == string.Empty || tbUvLightOnDelay.Text == string.Empty || tbUvLightOffDelay.Text == string.Empty)
+            {
+                var error = new ErrorWindow("Please input light delay time!\rHãy nhập thời gian delay đèn!");
+                error.ShowDialog();
+                return;
+            }
             else
             {
                 PlcController.DisConnectPlc(_param.ApiUrlCom);
@@ -165,6 +180,10 @@ namespace DiskInspection.Views.SettingsWindows
             _param.Cam2Exposure = int.Parse(tbCam2Exposure.Text);
             _param.PlcIp = tbPlcIp.Text;
             _param.PlcPort = int.Parse(tbPlcPort.Text);
+            _param.WaitWhiteLightOn = int.Parse(tbWhiteLightOnDelay.Text);
+            _param.WaitWhiteLightOff = int.Parse(tbWhiteLightOffDelay.Text);
+            _param.WaitUvLightOn = int.Parse(tbUvLightOnDelay.Text);
+            _param.WaitUvLightOff = int.Parse(tbUvLightOffDelay.Text);
 
             // Saving Settings
             if (cbSaveEnable.IsChecked == true)
@@ -193,12 +212,23 @@ namespace DiskInspection.Views.SettingsWindows
                 _param.SaveEnable = true;
                 _param.SavePath = tbSavePath.Text;
                 _param.SaveMode = saveMode;
+                
+                // Save Options
+                int saveOption = 1;
+                if (rbSaveOK.IsChecked == true)
+                    saveOption = (int)SaveOption.OK;
+                else if (rbSaveNG.IsChecked == true)
+                    saveOption = (int)SaveOption.NG;
+                else if (rbSaveBoth.IsChecked == true)
+                    saveOption = (int)SaveOption.BOTH;
+                _param.SaveOption = saveOption;
             }
             else
             {
                 _param.SaveEnable = false;
                 _param.SavePath = string.Empty;
                 _param.SaveMode = 1;
+                _param.SaveOption = 1;
             }
             _param.Save();
         }

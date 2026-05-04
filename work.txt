@@ -1,25 +1,25 @@
 --ok--0. Chỉnh lại size phần mềm
-
-1. Train lại các models AI với dữ liệu ảnh mới.
-
---doing--2. Chia luồng logic bật 2 đèn trắng -> Delay đợi đèn sáng 
+--ok--2. Chia luồng logic bật 2 đèn trắng -> Delay đợi đèn sáng 
                   -> chụp ảnh trắng -> delay -> tắt đèn
                   -> Bật 2 UV -> Delay đợi đèn sáng 
                   -> Chụp 2 UV xong -> delay -> tắt đèn.
 
-(CẦN CHIA LẠI LUỒNG UPDATE HÌNH ẢNH RESULT WHITE + UPDATE THỜI GIAN XỬ LÝ)
+--ok--(CẦN CHIA LẠI LUỒNG UPDATE HÌNH ẢNH RESULT WHITE + UPDATE THỜI GIAN XỬ LÝ)
 
-
-3. Logic lỗi thiếu chỉ warning
+--ok--3. Logic lỗi thiếu chỉ warning
    
  -> phân loại rõ 3 TH là (ko có đĩa, > 2 đĩa, ok)
     -> Nếu phân loại chỉ có "ko có đĩa" -> Warning  (Vẽ màu box sang màu warning)
     -> Nếu phân loại chỉ có có cả "> 2 đĩa" -> Error
 
-4. Với khoảng cách đĩa thì bỏ cận trên chỉ lấy < hơn min distance giữa 2 đĩa 
+
+--ok--4. Với khoảng cách đĩa thì bỏ cận trên chỉ lấy < hơn min distance giữa 2 đĩa 
                                                  (để phân biệt TH đúng rãnh 2 bên nhưng lệch rãnh ở dưới)
 
-5. Logic check lẫn đĩa
+
+--ok--5. Logic check lẫn đĩa
  -> count các đĩa ở đèn white -> ở đèn UV count đĩa UV -> Nếu = nhau -> Full đĩa UV -> OK.
                                                        -> Nếu thiếu -> Nếu ko có đĩa UV nào -> Full đĩa thường -> OK.
                                                                     -> Nếu đĩa UV < hơn -> Lẫn UV và thường.
+
+1. Train lại các models AI với dữ liệu ảnh mới.

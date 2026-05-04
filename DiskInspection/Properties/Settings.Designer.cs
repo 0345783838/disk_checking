@@ -229,13 +229,13 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("on_error")]
-        public string EndpointOnError {
+        [global::System.Configuration.DefaultSettingValueAttribute("on_error_abnormal")]
+        public string EndpointOnErrorAbnormal {
             get {
-                return ((string)(this["EndpointOnError"]));
+                return ((string)(this["EndpointOnErrorAbnormal"]));
             }
             set {
-                this["EndpointOnError"] = value;
+                this["EndpointOnErrorAbnormal"] = value;
             }
         }
         
@@ -392,6 +392,42 @@ namespace DiskInspection.Properties {
             }
             set {
                 this["WaitUvLightOff"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int SaveOption {
+            get {
+                return ((int)(this["SaveOption"]));
+            }
+            set {
+                this["SaveOption"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("on_error_mixing")]
+        public string EndpointOnErrorMixing {
+            get {
+                return ((string)(this["EndpointOnErrorMixing"]));
+            }
+            set {
+                this["EndpointOnErrorMixing"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int CurrentWarning {
+            get {
+                return ((int)(this["CurrentWarning"]));
+            }
+            set {
+                this["CurrentWarning"] = value;
             }
         }
     }

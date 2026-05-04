@@ -177,14 +177,34 @@ namespace DiskInspection.Controllers.PLC
                 return false;
             }
         }
-        internal static bool OnError(string url, int timeout = 1500)
+        internal static bool OnErrorAbnormal(string url, int timeout = 1500)
         {
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
             };
             var client = new RestClient(options);
-            var request = new RestRequest(_param.EndpointOnError, Method.Get);
+            var request = new RestRequest(_param.EndpointOnErrorAbnormal, Method.Get);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        internal static bool OnErrorMixing(string url, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointOnErrorMixing, Method.Get);
 
             var response = client.Execute(request);
             if (response.StatusCode == System.Net.HttpStatusCode.OK)

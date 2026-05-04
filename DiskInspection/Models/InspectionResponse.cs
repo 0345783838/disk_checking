@@ -9,7 +9,7 @@ namespace DiskInspection.Models
     
     public class InspectionResponse
     {
-        public bool Result { get; set; }
+        public int Result { get; set; }
         public string ErrorCode { get; set; }
         public string ErrorDesc { get; set; }
         public string ResImg { get; set; }

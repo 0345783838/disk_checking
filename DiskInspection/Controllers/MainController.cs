@@ -144,6 +144,7 @@ namespace DiskInspection.Controllers
 
         private bool CheckAndStartCamera()
         {
+            return true;
             _cameraManager = CameraManager.GetInstance();
             _camera1 = _cameraManager.GetCamera1();
             _camera2 = _cameraManager.GetCamera2();
@@ -168,6 +169,7 @@ namespace DiskInspection.Controllers
 
         private bool CheckAndStartPLC()
         {
+            return true;
             if (PlcController.CheckPlcConnection(_param.ApiUrlCom))
                 return true;
 
@@ -259,13 +261,17 @@ namespace DiskInspection.Controllers
 
             try
             {
-                // ── Bước 1: Bật đèn White → đợi ổn định → chụp ảnh ──────────────
+                // -- Ẩn Image Viewer đi -- 
+                App.ImageViewer.HideViewer();
+
+                // ── Bước 1: Start Stopwatch + Bật đèn White → đợi ổn định → chụp ảnh ──────────────
+                var aiStopwatch = Stopwatch.StartNew();
                 var (whiteFrame1, whiteFrame2) = await CaptureWhiteFramesAsync(token);
                 if (whiteFrame1 == null) return;
 
                 // ── Bước 2: AI White + delay tắt đèn chạy song song ─────────────
                 // Bắt đầu tính thời gian AI từ lúc có ảnh
-                var aiStopwatch = Stopwatch.StartNew();
+                
                 var whiteAiTask = RunWhiteAIAsync(whiteFrame1, whiteFrame2, token);
                 var whiteLightOffTask = TurnOffWhiteLightAsync(token);
 
@@ -289,29 +295,38 @@ namespace DiskInspection.Controllers
 
                 // Đợi AI UV xong → dừng đồng hồ → đây là tổng thời gian AI thuần
                 var (cam1Result, cam2Result) = await uvAiTask;
+                // ── Bước 5: Cập nhật UI kết quả UV + thông tin tổng ─────────────
                 aiStopwatch.Stop();
-
                 // Duration = tổng thời gian AI xử lý (White + UV), không tính delay đèn
                 cam1Result.Duration = aiStopwatch.Elapsed;
                 cam2Result.Duration = aiStopwatch.Elapsed;
+                UpdateUIWithUvResults(cam1Result, cam2Result);
 
-                // Đợi đèn UV tắt hẳn (thường đã xong vì AI UV mất nhiều thời gian hơn)
+                // Đợi đèn UV tắt hẳn
                 await uvLightOffTask;
 
                 if (token.IsCancellationRequested) return;
 
-                // ── Bước 5: Cập nhật UI kết quả UV + thông tin tổng ─────────────
-                UpdateUIWithUvResults(cam1Result, cam2Result);
 
                 // ── Bước 6: Xử lý kết quả tổng ──────────────────────────────────
-                bool passed = cam1Result.Passed && cam2Result.Passed;
-                _mainWindow.UpdateInspectionStatus(passed);
-                _mainWindow.UpdateStatistics(passed);
+                InspectionResult finalStatus;
+                if (cam1Result.Result == InspectionResult.Passed && cam2Result.Result == InspectionResult.Passed)
+                    finalStatus = InspectionResult.Passed;
+                else if (cam1Result.Result == InspectionResult.Failed || cam2Result.Result == InspectionResult.Failed)
+                    finalStatus = InspectionResult.Failed;
+                else
+                    finalStatus = InspectionResult.Warning;
+
+                _mainWindow.UpdateInspectionStatus(finalStatus);
+                _mainWindow.UpdateStatistics(finalStatus);
                 var timeStamp = _mainWindow.UpdateTimeStamp();
 
-                if (!passed)
+                if (finalStatus == InspectionResult.Failed)
                 {
-                    PlcController.OnError(_param.ApiUrlCom);
+                    if (cam1Result.UvErrorCode == ErrorCode.ERROR_003 || cam2Result.UvErrorCode == ErrorCode.ERROR_003)
+                        PlcController.OnErrorMixing(_param.ApiUrlCom);
+                    else 
+                        PlcController.OnErrorAbnormal(_param.ApiUrlCom);
                     App.ImageViewer.ShowFirstErrorImage();
                     AppLogger.Instance.Info("Inspection NG — sent NG signal to PLC.", "PLC");
                 }
@@ -320,7 +335,7 @@ namespace DiskInspection.Controllers
 
                 // ── Bước 7: Lưu ảnh (fire-and-forget, không block chu kỳ) ────────
                 if (_param.SaveEnable)
-                    _ = Task.Run(() => SaveImages(timeStamp));
+                    _ = Task.Run(() => SaveImages(timeStamp, finalStatus==InspectionResult.Passed));
             }
             catch (OperationCanceledException)
             {
@@ -409,9 +424,13 @@ namespace DiskInspection.Controllers
         {
             token.ThrowIfCancellationRequested();
 
+            //var results = await Task.WhenAll(
+            //    Task.Run(() => _camera1.GetBitmap(), token),
+            //    Task.Run(() => _camera2.GetBitmap(), token));
+
             var results = await Task.WhenAll(
-                Task.Run(() => _camera1.GetBitmap(), token),
-                Task.Run(() => _camera2.GetBitmap(), token));
+                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260414164713482_White.bmp"), token),
+                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260416115305956_White.bmp"), token));
 
             return (results[0], results[1]);
         }
@@ -436,9 +455,10 @@ namespace DiskInspection.Controllers
         /// <summary>
         /// Kết quả kiểm tra của 1 camera (gộp White + UV).
         /// </summary>
+
         private class CameraInspectionResult
         {
-            public bool Passed { get; set; }
+            public InspectionResult Result { get; set; }
             public TimeSpan Duration { get; set; }
 
             public BitmapSource WhiteResultBitmap { get; set; }
@@ -449,8 +469,10 @@ namespace DiskInspection.Controllers
             public int UvDiskCount { get; set; }
 
             public string WhiteErrorDesc { get; set; }
+            public string WhiteErrorCode { get; set; }
             public string UvErrorDesc { get; set; }
-            public bool WhitePassed { get; set; }
+            public string UvErrorCode { get; set; }
+            public int WhitePassed { get; set; }
             public bool UvPassed { get; set; }
         }
 
@@ -536,20 +558,30 @@ namespace DiskInspection.Controllers
             InspectionResponse white, InspectionUvResponse uv)
         {
             if (uv == null)
-                return new CameraInspectionResult { Passed = false };
+                return new CameraInspectionResult { Result = InspectionResult.Failed };
+
+            InspectionResult res;
+            if (white.Result == (int)InspectionResult.Failed || !uv.Result )
+                res = InspectionResult.Failed;
+            else if (white.Result == (int)InspectionResult.Warning && uv.Result)
+                res = InspectionResult.Warning;
+            else
+                res = InspectionResult.Passed;
 
             return new CameraInspectionResult
             {
-                Passed = white.Result && uv.Result,
+                Result = res,
                 WhiteResultBitmap = Converter.Base64ToBitmapSource(white.ResImg),
                 UvResultBitmap = Converter.Base64ToBitmapSource(uv.ResImg),
                 MinDiskDistance = white.MinDiskDistance,
                 MaxDiskDistance = white.MaxDiskDistance,
                 UvDiskCount = uv.CountUvDisk,
                 WhitePassed = white.Result,
+                WhiteErrorCode = white.ErrorCode,
                 WhiteErrorDesc = white.ErrorDesc,
                 UvPassed = uv.Result,
                 UvErrorDesc = uv.ErrorDesc,
+                UvErrorCode = uv.ErrorCode
             };
         }
 
@@ -606,8 +638,22 @@ namespace DiskInspection.Controllers
                 lock (_cam1Lock) { _cam1WhiteResult = bitmap; }
                 _mainWindow.UpdateCam1WhiteResult(_cam1WhiteResult);
                 _mainWindow.UpdateCam1MinMaxDis(white1.MinDiskDistance, white1.MaxDiskDistance);
-                var status = white1.Result ? ThumbStatus.Ok : ThumbStatus.Ng;
+
+                ThumbStatus status;
+                if (white1.Result == (int)InspectionResult.Failed)
+                {
+                    status = ThumbStatus.Ng;
+                }
+                else if (white1.Result == (int)InspectionResult.Warning)
+                {
+                    status = ThumbStatus.Warning;
+                }
+                else
+                {
+                    status = ThumbStatus.Ok;
+                }
                 App.ImageViewer.AddImage(_cam1WhiteResult, "1-White-Result", status, $"CAM1 White: {white1.ErrorDesc}");
+
             }
 
             if (white2?.ResImg != null)
@@ -616,7 +662,21 @@ namespace DiskInspection.Controllers
                 lock (_cam2Lock) { _cam2WhiteResult = bitmap; }
                 _mainWindow.UpdateCam2WhiteResult(_cam2WhiteResult);
                 _mainWindow.UpdateCam2MinMaxDis(white2.MinDiskDistance, white2.MaxDiskDistance);
-                var status = white2.Result ? ThumbStatus.Ok : ThumbStatus.Ng;
+
+                ThumbStatus status;
+                if (white2.Result == (int)InspectionResult.Failed)
+                {
+                    status = ThumbStatus.Ng;
+                }
+                else if (white2.Result == (int)InspectionResult.Warning)
+                {
+                    status = ThumbStatus.Warning;
+                }
+                else
+                {
+                    status = ThumbStatus.Ok;
+                }
+
                 App.ImageViewer.AddImage(_cam2WhiteResult, "2-White-Result", status, $"CAM2 White: {white2.ErrorDesc}");
             }
         }
@@ -631,7 +691,7 @@ namespace DiskInspection.Controllers
                 lock (_cam1Lock) { _cam1UvResult = cam1.UvResultBitmap; }
                 _mainWindow.UpdateCam1UvResult(_cam1UvResult);
                 _mainWindow.UpdateCam1DiskUv(cam1.UvDiskCount);
-                _mainWindow.UpdateInspectionStatusCam1(cam1.Passed);
+                _mainWindow.UpdateInspectionStatusCam1(cam1.Result);
                 _mainWindow.UpdateCam1ProcessedTime(cam1.Duration);
                 var status = cam1.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng;
                 App.ImageViewer.AddImage(_cam1UvResult, "1-UV-Result", status, $"CAM1 UV: {cam1.UvErrorDesc}");
@@ -642,7 +702,7 @@ namespace DiskInspection.Controllers
                 lock (_cam2Lock) { _cam2UvResult = cam2.UvResultBitmap; }
                 _mainWindow.UpdateCam2UvResult(_cam2UvResult);
                 _mainWindow.UpdateCam2DiskUv(cam2.UvDiskCount);
-                _mainWindow.UpdateInspectionStatusCam2(cam2.Passed);
+                _mainWindow.UpdateInspectionStatusCam2(cam2.Result);
                 _mainWindow.UpdateCam2ProcessedTime(cam2.Duration);
                 var status = cam2.UvPassed ? ThumbStatus.Ok : ThumbStatus.Ng;
                 App.ImageViewer.AddImage(_cam2UvResult, "2-UV-Result", status, $"CAM2 UV: {cam2.UvErrorDesc}");
@@ -656,14 +716,18 @@ namespace DiskInspection.Controllers
         /// <summary>
         /// Lưu ảnh theo SaveMode. Chạy trong background thread, không block UI.
         /// </summary>
-        private void SaveImages(DateTime timeStamp)
+        private void SaveImages(DateTime timeStamp, bool inspectionStatus)
         {
             AppLogger.Instance.Info("Saving images...", "SYSTEM");
             try
             {
-                var saveMode = (SaveType)_param.SaveMode;
+                var saveOption = (SaveOption)_param.SaveOption;
+                if (saveOption == SaveOption.OK && !inspectionStatus) return;
+                if (saveOption == SaveOption.NG && inspectionStatus) return;
 
+                var saveMode = (SaveType)_param.SaveMode;
                 bool success;
+
                 switch (saveMode)
                 {
                     case SaveType.ORIGINAL:
