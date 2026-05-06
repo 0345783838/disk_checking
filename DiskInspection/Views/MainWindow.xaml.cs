@@ -149,8 +149,7 @@ namespace DiskInspection
             if (warning.ShowDialog() == true)
             {
                 _mainController.Stop();
-                btnStart.IsEnabled = true;
-                btnStop.IsEnabled = false;
+                EnableWindows();
 
                 UpdateStoppedUI();
             }

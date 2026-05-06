@@ -571,7 +571,7 @@
                                         Content="WARNING"
                                         FontSize="14"
                                         FontWeight="Bold"
-                                        Foreground="Orange" />
+                                        Foreground="DarkOrange" />
                                     <TextBox
                                         Name="tbWarningCount"
                                         Width="50"
@@ -581,7 +581,7 @@
                                         BorderBrush="DarkGray"
                                         FontSize="14"
                                         FontWeight="Bold"
-                                        Foreground="Green"
+                                        Foreground="DarkOrange"
                                         IsReadOnly="True" />
                                 </StackPanel>
                             </Grid>

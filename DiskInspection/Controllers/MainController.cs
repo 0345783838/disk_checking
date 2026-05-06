@@ -429,8 +429,8 @@ namespace DiskInspection.Controllers
             //    Task.Run(() => _camera2.GetBitmap(), token));
 
             var results = await Task.WhenAll(
-                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260414164713482_White.bmp"), token),
-                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\test\Image_20260416115305956_White.bmp"), token));
+                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\datasets\dataset_cls\working_5_5\images\Image_20260423141719525.bmp"), token),
+                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\datasets\dataset_cls\working_5_5\images\Image_20260423141601978.bmp"), token));
 
             return (results[0], results[1]);
         }
