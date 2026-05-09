@@ -14,9 +14,9 @@
     Height="768"
     MinWidth="1300"
     MinHeight="768"
+    Closing="Window_Closing"
     Icon="/Resources/Icons/testing.png"
     Loaded="Window_Loaded"
-    Closing="Window_Closing"
     Style="{StaticResource WindowStyle}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -88,8 +88,8 @@
                                     FontStyle="Italic"
                                     Foreground="DarkRed" />
                                 <Label
-                                    HorizontalAlignment="Center"
                                     Margin="0,-10,0,0"
+                                    HorizontalAlignment="Center"
                                     Content="Mọi ảnh UV không có ảnh White đi kèm sẽ bị bỏ qua!"
                                     FontStyle="Italic"
                                     Foreground="DarkRed" />

@@ -290,7 +290,7 @@ namespace DiskInspection.Views.DebugWindows
                     current.Images.Add(new ImageList(1, "Detect Image", dctectImg));
                     current.Images.Add(new ImageList(2, "Segment Image", segmentImg));
                     current.Images.Add(new ImageList(3, "Final Image", finalImg));
-                    current.Status = resWhite.Result ? (int)FileStatus.OK : (int)FileStatus.NG;
+                    current.Status = resWhite.Result;
                     
                     OnPropertyChanged(nameof(ProcessingCount));
                     OnPropertyChanged(nameof(ProcessingRatio));
@@ -381,7 +381,7 @@ namespace DiskInspection.Views.DebugWindows
             ImagesInfoList.Add(imageInfo);
 
             var imageList = new List<ImageList>();
-            var checkingRes = false;
+            var checkingRes = 1;
             DebugImageResponse resWhite = new DebugImageResponse();
             var waiting = new WaitingWindow("Waiting for oringinal image processing...\rĐang xử lý hình ảnh gốc...");
             new Task(() =>
@@ -403,7 +403,7 @@ namespace DiskInspection.Views.DebugWindows
             waiting.ShowDialog();
 
             imageInfo.Images = imageList;
-            imageInfo.Status = checkingRes ? (int)FileStatus.OK : (int)FileStatus.NG;
+            imageInfo.Status = checkingRes;
             SelectedImageInfo = imageInfo;
 
             // Capture UV Light

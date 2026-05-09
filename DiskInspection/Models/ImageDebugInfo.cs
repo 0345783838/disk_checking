@@ -12,7 +12,8 @@ namespace DiskInspection.Models
     {
         OK = 0,
         NG = 1,
-        NOT_DONE = 2
+        NOT_DONE = 3,
+        WARNING = 2
     }
     public class ImageDebugInfo :INotifyPropertyChanged
     {

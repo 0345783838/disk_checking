@@ -43,7 +43,8 @@ namespace DiskInspection.Utils
             {
                 if (status == 0) return "DarkGreen";
                 else if (status == 1) return "Red";
-                else if (status == 2) return "Black";
+                else if (status == 2) return "DarkOrange";
+                else if (status == 3) return "Black";
             }
             return value;
         }
