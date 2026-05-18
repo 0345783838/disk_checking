@@ -349,6 +349,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\Icons\warning.png" />
     <Resource Include="Resources\Icons\screenshot.png" />
     <Resource Include="Resources\Icons\user.png" />
     <Resource Include="Resources\Icons\check.png" />

@@ -178,6 +178,7 @@ namespace DiskInspection.Utils
             {
                 if (status == ThumbStatus.Ok) return "#88E788";
                 else if (status == ThumbStatus.Origin) return "#787276";
+                else if (status == ThumbStatus.Warning) return "#F96209";
                 else return "#ee6b6e";
             }
             return value;
@@ -196,6 +197,7 @@ namespace DiskInspection.Utils
             {
                 if (status == ThumbStatus.Ok) return "#cce7c9";
                 else if (status == ThumbStatus.Origin) return "#d9dddc";
+                else if (status == ThumbStatus.Warning) return "#ed9d0B";
                 else return "#ffcbd1";
             }
             return value;
@@ -214,6 +216,7 @@ namespace DiskInspection.Utils
             {
                 if (status == ThumbStatus.Ok) return "/Resources/Icons/check.png";
                 else if (status == ThumbStatus.Origin) return "/Resources/Icons/camera_ic.png";
+                else if (status == ThumbStatus.Warning) return "/Resources/Icons/warning.png";
                 else return "/Resources/Icons/bad.png";
             }
             return value;
@@ -233,6 +236,7 @@ namespace DiskInspection.Utils
                 if (status == ThumbStatus.Ok) return "#0F5132";
                 else if (status == ThumbStatus.Origin) return "#1F2937";
                 else if (status == ThumbStatus.Ng) return "#7A0000";
+                else if (status == ThumbStatus.Warning) return "Yellow";
                 else return "#FF6600";
             }
             return value;

@@ -16,6 +16,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 
 namespace DiskInspection.Controllers
 {
@@ -151,11 +152,13 @@ namespace DiskInspection.Controllers
 
             if (!_camera1.IsOpen())
             {
+                _camera1 = null;
                 _mainWindow.ShowError($"Cannot open Camera 1 (SN: {_param.Cam1Sn})");
                 return false;
             }
             if (!_camera2.IsOpen())
             {
+                _camera2 = null;
                 _mainWindow.ShowError($"Cannot open Camera 2 (SN: {_param.Cam2Sn})");
                 return false;
             }
