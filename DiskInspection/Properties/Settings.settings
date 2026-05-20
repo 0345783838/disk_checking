@@ -104,5 +104,11 @@
     <Setting Name="CurrentWarning" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="EndpointOnOkSignal" Type="System.String" Scope="User">
+      <Value Profile="(Default)">on_ok_signal</Value>
+    </Setting>
+    <Setting Name="DeleteDays" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

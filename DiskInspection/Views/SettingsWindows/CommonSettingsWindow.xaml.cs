@@ -83,10 +83,13 @@ namespace DiskInspection.Views.SettingsWindows
                     rbSaveNG.IsChecked = true;
                 else if (_param.SaveOption == (int)SaveOption.BOTH)
                     rbSaveBoth.IsChecked = true;
+
+                udtbDeleteDay.Value = _param.DeleteDays;
             }
             else
             {
                 tbSavePath.Text = string.Empty;
+                udtbDeleteDay.Value = 0;
                 rbSaveOptionResultOrigin.IsChecked = false;
                 rbSaveOptionResult.IsChecked = false;
                 rbSaveOptionOrigin.IsChecked = false;
@@ -211,6 +214,7 @@ namespace DiskInspection.Views.SettingsWindows
                     saveMode = (int)SaveType.ORIGINAL_RESULT;
                 _param.SaveEnable = true;
                 _param.SavePath = tbSavePath.Text;
+                _param.DeleteDays = int.Parse(udtbDeleteDay.Text);
                 _param.SaveMode = saveMode;
                 
                 // Save Options

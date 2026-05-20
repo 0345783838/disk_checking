@@ -430,5 +430,29 @@ namespace DiskInspection.Properties {
                 this["CurrentWarning"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("on_ok_signal")]
+        public string EndpointOnOkSignal {
+            get {
+                return ((string)(this["EndpointOnOkSignal"]));
+            }
+            set {
+                this["EndpointOnOkSignal"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int DeleteDays {
+            get {
+                return ((int)(this["DeleteDays"]));
+            }
+            set {
+                this["DeleteDays"] = value;
+            }
+        }
     }
 }

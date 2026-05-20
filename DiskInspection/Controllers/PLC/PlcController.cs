@@ -217,5 +217,25 @@ namespace DiskInspection.Controllers.PLC
                 return false;
             }
         }
+        internal static bool OnOkSignal(string url, int timeout = 1500)
+        {
+            var options = new RestClientOptions(url)
+            {
+                Timeout = TimeSpan.FromMilliseconds(timeout)
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest(_param.EndpointOnOkSignal, Method.Get);
+
+            var response = client.Execute(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                dynamic obj = JsonConvert.DeserializeObject(response.Content);
+                return obj.Success;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

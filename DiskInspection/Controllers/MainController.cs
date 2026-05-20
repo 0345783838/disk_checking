@@ -333,6 +333,11 @@ namespace DiskInspection.Controllers
                     App.ImageViewer.ShowFirstErrorImage();
                     AppLogger.Instance.Info("Inspection NG — sent NG signal to PLC.", "PLC");
                 }
+                else
+                {
+                    AppLogger.Instance.Info("Inspection OK.", "PLC");
+                    PlcController.OnOkSignal(_param.ApiUrlCom);
+                }
 
                 AppLogger.Instance.Info($"Inspection complete in {aiStopwatch.ElapsedMilliseconds}ms AI time. Waiting for next trigger.", "SYSTEM");
 

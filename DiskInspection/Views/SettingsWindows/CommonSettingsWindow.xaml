@@ -5,9 +5,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DiskInspection.Views.SettingsWindows"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
     Title="Settings"
     Width="549"
-    Height="550"
+    Height="640"
     Icon="/Resources/Icons/settings.png"
     ResizeMode="NoResize"
     Style="{DynamicResource WindowStyle}"
@@ -37,9 +38,9 @@
             </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
+            <RowDefinition Height="321" />
+            <RowDefinition Height="230" />
             <RowDefinition />
-            <RowDefinition Height="159.014" />
-            <RowDefinition Height="54.005" />
         </Grid.RowDefinitions>
         <GroupBox
             Grid.Row="0"
@@ -247,10 +248,11 @@
             Margin="5,5,5,5"
             BorderBrush="Gray"
             BorderThickness="2"
-            Header="Software Setting">
+            Header="Image Saving Settings">
             <Grid>
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
                         <RowDefinition Height="1*" />
                         <RowDefinition Height="1*" />
                         <RowDefinition Height="1*" />
@@ -361,7 +363,32 @@
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
-
+                    <StackPanel
+                        Grid.Row="3"
+                        Margin="0,0,0,0"
+                        Style="{StaticResource stPanel}">
+                        <Label
+                            Width="185"
+                            Content="Delete After:"
+                            Style="{StaticResource labelName}" />
+                        <xctk:DoubleUpDown
+                            Name="udtbDeleteDay"
+                            Width="50"
+                            Height="30"
+                            FontSize="16"
+                            FormatString="F0"
+                            Increment="1"
+                            IsEnabled="{Binding IsChecked, ElementName=cbSaveEnable}"
+                            Maximum="60"
+                            Minimum="0"
+                            PreviewTextInput="NumberValidationTextBox"
+                            Value="0" />
+                        <Label
+                            Margin="5,5,5,5"
+                            Content="(days)"
+                            FontSize="12"
+                            Style="{StaticResource labelName}" />
+                    </StackPanel>
                 </Grid>
             </Grid>
         </GroupBox>
