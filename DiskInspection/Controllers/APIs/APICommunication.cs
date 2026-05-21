@@ -149,10 +149,8 @@ namespace DiskInspection.Controllers.APIs
             {
                 try
                 {
-
                     obj = JsonConvert.DeserializeObject<InspectionResponse>(response.Content);
                     return obj;
-
                 }
                 catch (Exception ex)
                 {

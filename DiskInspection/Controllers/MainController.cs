@@ -64,6 +64,7 @@ namespace DiskInspection.Controllers
         public MainController(MainWindow window)
         {
             _mainWindow = window;
+            PlcController.ControlWhiteLight(_param.ApiUrlCom, true, 1000);
         }
 
         // ═════════════════════════════════════════════════════════════════════════
@@ -602,15 +603,29 @@ namespace DiskInspection.Controllers
         /// </summary>
         private void UpdateCapturedFrameUI(Bitmap frame1, Bitmap frame2, LightType light)
         {
-            if (light == LightType.White)
+            if (frame1 == null)
             {
+                ShowAndLogError("Captured frame 1 null", "CAM1");
+                return;
+            }
+            if (frame2 == null)
+            {
+                ShowAndLogError("Captured frame 2 null", "CAM2");
+                return;
+            }
+            if (light == LightType.White)
+            {  
                 lock (_cam1Lock)
                 {
+                   
+                        
                     _cam1WhiteOrigin = Converter.BitmapToBitmapSource((Bitmap)frame1.Clone());
                     App.ImageViewer.AddImage(_cam1WhiteOrigin, "1-White-Origin", ThumbStatus.Origin, "Camera 1 - White - Original");
                 }
                 lock (_cam2Lock)
                 {
+                    
+                        
                     _cam2WhiteOrigin = Converter.BitmapToBitmapSource((Bitmap)frame2.Clone());
                     App.ImageViewer.AddImage(_cam2WhiteOrigin, "2-White-Origin", ThumbStatus.Origin, "Camera 2 - White - Original");
                 }

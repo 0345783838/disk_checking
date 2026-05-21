@@ -34,6 +34,16 @@ namespace DiskInspection.Controllers.Camera
             }
             return _camera1;
         }
+        public LincolnCamera GetCamera1(string sn)
+        {
+            if (((_camera1 != null) && (_camera1.SN != sn)) || (_camera1 == null))
+            {
+                if (_camera1 != null)
+                    _camera1.Close();
+                _camera1 = new LincolnCamera(sn);
+            }
+            return _camera1;
+        }
 
         public LincolnCamera GetCamera2() 
         {
@@ -45,9 +55,28 @@ namespace DiskInspection.Controllers.Camera
             }
             return _camera2;
         }
-        public bool CheckCameraConnection(string SN)
+        public LincolnCamera GetCamera2(string sn)
         {
-            var cam = new LincolnCamera(SN);
+            if (((_camera2 != null) && (_camera2.SN != sn)) || (_camera2 == null))
+            {
+                if (_camera2 != null)
+                    _camera2.Close();
+                _camera2 = new LincolnCamera(sn);
+            }
+            return _camera2;
+        }
+        public bool CheckCamera1Connection(string SN)
+        {
+            var cam = GetCamera1(SN);
+            if (cam.IsOpen())
+            {
+                return cam.IsOpen();
+            }
+            return false;
+        }
+        public bool CheckCamera2Connection(string SN)
+        {
+            var cam = GetCamera2(SN);
             if (cam.IsOpen())
             {
                 return cam.IsOpen();

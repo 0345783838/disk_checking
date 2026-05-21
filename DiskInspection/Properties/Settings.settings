@@ -110,5 +110,8 @@
     <Setting Name="DeleteDays" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
+    <Setting Name="EndpointOffOkSignal" Type="System.String" Scope="User">
+      <Value Profile="(Default)">off_ok_signal</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

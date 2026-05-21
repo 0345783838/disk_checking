@@ -148,13 +148,13 @@ namespace DiskInspection.Views.SettingsWindows
                 return;
             }
             // Check connection
-            if (!_cameraManager.CheckCameraConnection(cbbCam1Sn.Text))
+            if (!_cameraManager.CheckCamera1Connection(cbbCam1Sn.Text))
             {
                 var error = new ErrorWindow($"Camera {cbbCam1Sn.Text} is not connected!\rKhông có kết nối camera {cbbCam1Sn.Text}!");
                 error.ShowDialog();
                 return;
             }
-            if (!_cameraManager.CheckCameraConnection(cbbCam2Sn.Text))
+            if (!_cameraManager.CheckCamera2Connection(cbbCam2Sn.Text))
             {
                 var error = new ErrorWindow($"Camera {cbbCam2Sn.Text} is not connected!\rKhông có kết nối camera {cbbCam2Sn.Text}!");
                 error.ShowDialog();
@@ -255,7 +255,7 @@ namespace DiskInspection.Views.SettingsWindows
             bool resConnection = false;
             new Task(() =>
             {
-                resConnection = _cameraManager.CheckCameraConnection(cam1Sn);
+                resConnection = _cameraManager.CheckCamera1Connection(cam1Sn);
                 waiting.KillMe = true;
             }).Start();
 
@@ -286,7 +286,7 @@ namespace DiskInspection.Views.SettingsWindows
             bool resConnection = false;
             new Task(() =>
             {
-                resConnection = _cameraManager.CheckCameraConnection(cam2Sn);
+                resConnection = _cameraManager.CheckCamera2Connection(cam2Sn);
                 waiting.KillMe = true;
             }).Start();
 

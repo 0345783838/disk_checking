@@ -454,5 +454,17 @@ namespace DiskInspection.Properties {
                 this["DeleteDays"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("off_ok_signal")]
+        public string EndpointOffOkSignal {
+            get {
+                return ((string)(this["EndpointOffOkSignal"]));
+            }
+            set {
+                this["EndpointOffOkSignal"] = value;
+            }
+        }
     }
 }

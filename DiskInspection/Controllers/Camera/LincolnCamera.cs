@@ -358,7 +358,7 @@ namespace DiskInspection.Controllers.Camera
 
                 IntPtr pData = Marshal.UnsafeAddrOfPinnedArrayElement(_pBufForDriver, 0);
                 MyCamera.MV_FRAME_OUT_INFO_EX stFrameInfo = new MyCamera.MV_FRAME_OUT_INFO_EX();
-                nRet = _cam.MV_CC_GetOneFrameTimeout_NET(pData, _nBufSizeForDriver, ref stFrameInfo, 1000);
+                nRet = _cam.MV_CC_GetOneFrameTimeout_NET(pData, _nBufSizeForDriver, ref stFrameInfo, 3000);
                 if (MyCamera.MV_OK != nRet)
                 {
                     _logger.Error("No Data!");
