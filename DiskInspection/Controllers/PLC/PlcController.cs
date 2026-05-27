@@ -62,15 +62,15 @@ namespace DiskInspection.Controllers.PLC
         internal static (TriggerState, bool) CheckTrigger(string url, int timeout = 1500)
         {
             //return (TriggerState.Ok, true);
-            //if (_firstTrigger)
-            //{
-            //    _firstTrigger = false;
-            //    return (TriggerState.Ok, true);
-            //}
-            //else
-            //{
-            //    return (TriggerState.Ok, false);
-            //}
+            if (_firstTrigger)
+            {
+                _firstTrigger = false;
+                return (TriggerState.Ok, true);
+            }
+            else
+            {
+                return (TriggerState.Ok, false);
+            }
 
             var options = new RestClientOptions(url)
             {
@@ -91,7 +91,7 @@ namespace DiskInspection.Controllers.PLC
         internal static bool ResetTrigger(string url, int timeout = 1500)
         {
 
-            //return true;
+            return true;
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
@@ -134,7 +134,7 @@ namespace DiskInspection.Controllers.PLC
         public static bool ControlUvLight(string url, bool status, int timeout = 1500)
         {
             // test debug
-            //return true;
+            return true;
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)
@@ -157,7 +157,7 @@ namespace DiskInspection.Controllers.PLC
         public static bool ControlWhiteLight(string url, bool status, int timeout = 1500)
         {
             // test debug
-            //return true;
+            return true;
             var options = new RestClientOptions(url)
             {
                 Timeout = TimeSpan.FromMilliseconds(timeout)

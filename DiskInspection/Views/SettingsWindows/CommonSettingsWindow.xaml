@@ -150,7 +150,7 @@
                     <Label
                         Width="35"
                         Margin="0,5,5,5"
-                        Content="(ms)"
+                        Content="(µs)"
                         FontSize="12"
                         Style="{StaticResource labelName}" />
                     <Button
@@ -187,7 +187,7 @@
                     <Label
                         Width="35"
                         Margin="0,5,5,5"
-                        Content="(ms)"
+                        Content="(µs)"
                         FontSize="12"
                         Style="{StaticResource labelName}" />
                     <Button

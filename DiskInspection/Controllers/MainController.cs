@@ -109,6 +109,7 @@ namespace DiskInspection.Controllers
         /// </summary>
         public bool Start()
         {
+            Thread.Sleep(500);
             _logger.Info("Starting inspection system...");
 
             if (!CheckAndStartCamera() || !CheckAndStartPLC() || !CheckAndStartAI())
@@ -173,7 +174,7 @@ namespace DiskInspection.Controllers
 
         private bool CheckAndStartPLC()
         {
-            //return true;
+            return true;
             if (PlcController.CheckPlcConnection(_param.ApiUrlCom))
                 return true;
 
@@ -433,13 +434,13 @@ namespace DiskInspection.Controllers
         {
             token.ThrowIfCancellationRequested();
 
-            var results = await Task.WhenAll(
-                Task.Run(() => _camera1.GetBitmap(), token),
-                Task.Run(() => _camera2.GetBitmap(), token));
-
             //var results = await Task.WhenAll(
-            //       Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\datasets\dataset_cls\working_5_5\images\Image_20260423141719525.bmp"), token),
-            //       Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\datasets\dataset_cls\working_5_5\images\Image_20260423141601978.bmp"), token));
+            //    Task.Run(() => _camera1.GetBitmap(), token),
+            //    Task.Run(() => _camera2.GetBitmap(), token));
+
+            var results = await Task.WhenAll(
+                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\empty_disk\Image_20260521165012713.bmp"), token),
+                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\empty_disk\Image_20260521165035713.bmp"), token));
 
             return (results[0], results[1]);
         }
