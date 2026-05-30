@@ -194,6 +194,7 @@
     <Compile Include="Controllers\APIs\AIServiceController.cs" />
     <Compile Include="Controllers\APIs\APICommunication.cs" />
     <Compile Include="Controllers\AppLogger.cs" />
+    <Compile Include="Controllers\Camera\LincolnCamera.cs" />
     <Compile Include="Controllers\ImageCleanupService.cs" />
     <Compile Include="Controllers\ImageSaver.cs" />
     <Compile Include="Controllers\MainController.cs" />
@@ -291,7 +292,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controllers\Camera\CameraManager.cs" />
-    <Compile Include="Controllers\Camera\LincolnCamera.cs" />
     <Compile Include="Resources\Styles\CustomButton.xaml.cs">
       <DependentUpon>CustomButton.xaml</DependentUpon>
     </Compile>

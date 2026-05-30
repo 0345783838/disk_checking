@@ -1,446 +1,416 @@
 ﻿using System;
-using System.Collections;
-using MvCamCtrl.NET;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Dynamic;
-using System.Windows.Media.Media3D;
-using System.Windows.Media;
-using System.Windows;
-using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using MvCamCtrl.NET;
+using NLog;
 
 namespace DiskInspection.Controllers.Camera
 {
-    class LincolnCamera
+    public enum CameraWorkMode
     {
-        private static Object _synLock = new Object();
-        private static NLog.Logger _logger = NLog.LogManager.GetLogger("debug");
-        private static List<CamInfo> _listCamInfo;
+        LiveStream,       // Chụp liên tục, tự động đẩy ảnh lên UI
+        SoftwareTrigger   // Nằm chờ lệnh, gọi hàm mới chụp 1 tấm
+    }
+
+    public class LincolnCamera : IDisposable
+    {
+        private readonly object _synLock = new object();
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetLogger("debug");
+
         private MyCamera _cam;
-        public string SN = "";
-        private static MyCamera.MV_CC_DEVICE_INFO_LIST _pDeviceList;
-        private UInt32 _nBufSizeForDriver = 3072 * 2048 * 3;
-        private byte[] _pBufForDriver = new byte[3072 * 2048 * 3];
-        private UInt32 _nBufSizeForSaveImage = 3072 * 2048 * 3 * 3 + 2048;
-        private byte[] _pBufForSaveImage = new byte[3072 * 2048 * 3 * 3 + 2048];
-        public LincolnCamera(string SN)
-        {
+        public string SN { get; private set; } = "";
 
-            ListDevices();
-            this.SN = SN;
-            GetDeviceBySN(SN);
-        }
-        public LincolnCamera(int idx)
+        // Buffer dùng chung
+        private uint _nBufSizeForDriver = 0;
+        private byte[] _pBufForDriver = new byte[0];
+        private uint _nBufSizeForSaveImage = 0;
+        private byte[] _pBufForSaveImage = new byte[0];
+
+        // --- CÁC SỰ KIỆN CHO UI ---
+        public event EventHandler<string> OnCameraError;
+        public event EventHandler<Bitmap> OnLiveFrameReceived; // Sự kiện nhả ảnh khi ở chế độ Live Stream
+
+        // Quan trọng: Phải giữ biến này ở cấp class để Garbage Collector không xoá mất callback
+        private MyCamera.cbOutputExdelegate _imageCallbackDelegate;
+        public bool IsGrabbing { get; private set; }
+
+        public LincolnCamera(string serialNumber)
         {
-            ListDevices();
-            GetDeviceByIdx(idx);
-            if (idx < _listCamInfo.Count)
+            this.SN = serialNumber;
+            _imageCallbackDelegate = new MyCamera.cbOutputExdelegate(ImageCallbackProcess);
+            GetDeviceBySN(serialNumber);
+        }
+
+        public LincolnCamera(int index)
+        {
+            _imageCallbackDelegate = new MyCamera.cbOutputExdelegate(ImageCallbackProcess);
+            var list = GetListCamInfo();
+            if (index < list.Count)
             {
-                CamInfo info = (CamInfo)_listCamInfo[idx];
-                SN = info.SN;
+                this.SN = list[index].SN;
+                GetDeviceByIdx(index, list);
             }
-
+            else
+            {
+                NotifyError("Camera index out of range", 0);
+            }
         }
-        public bool IsOpen()
-        {
-            return _cam == null ? false : true;
-        }
 
+        public bool IsOpen() => _cam != null;
+
+        /// <summary>
+        /// Liệt kê tất cả thiết bị camera trong mạng và USB
+        /// </summary>
         public static List<CamInfo> GetListCamInfo()
         {
-            ListDevices();
-            return _listCamInfo;
+            List<CamInfo> listCamInfo = new List<CamInfo>();
+            MyCamera.MV_CC_DEVICE_INFO_LIST pDeviceList = new MyCamera.MV_CC_DEVICE_INFO_LIST();
+
+            int ret = MyCamera.MV_CC_EnumDevices_NET(MyCamera.MV_GIGE_DEVICE | MyCamera.MV_USB_DEVICE, ref pDeviceList);
+
+            if (ret != MyCamera.MV_OK)
+            {
+                _logger.Warn($"Enumerate devices failed! Error code: {ret:X8}");
+                return listCamInfo;
+            }
+
+            for (int i = 0; i < pDeviceList.nDeviceNum; i++)
+            {
+                MyCamera.MV_CC_DEVICE_INFO device = (MyCamera.MV_CC_DEVICE_INFO)Marshal.PtrToStructure(pDeviceList.pDeviceInfo[i], typeof(MyCamera.MV_CC_DEVICE_INFO));
+                CamInfo camInfo = new CamInfo();
+
+                if (device.nTLayerType == MyCamera.MV_GIGE_DEVICE)
+                {
+                    IntPtr buffer = Marshal.UnsafeAddrOfPinnedArrayElement(device.SpecialInfo.stGigEInfo, 0);
+                    MyCamera.MV_GIGE_DEVICE_INFO gigeInfo = (MyCamera.MV_GIGE_DEVICE_INFO)Marshal.PtrToStructure(buffer, typeof(MyCamera.MV_GIGE_DEVICE_INFO));
+                    camInfo.Name = !string.IsNullOrEmpty(gigeInfo.chUserDefinedName) ? gigeInfo.chUserDefinedName : gigeInfo.chManufacturerName;
+                    camInfo.SN = gigeInfo.chSerialNumber;
+                }
+                else if (device.nTLayerType == MyCamera.MV_USB_DEVICE)
+                {
+                    IntPtr buffer = Marshal.UnsafeAddrOfPinnedArrayElement(device.SpecialInfo.stUsb3VInfo, 0);
+                    MyCamera.MV_USB3_DEVICE_INFO usbInfo = (MyCamera.MV_USB3_DEVICE_INFO)Marshal.PtrToStructure(buffer, typeof(MyCamera.MV_USB3_DEVICE_INFO));
+                    camInfo.Name = !string.IsNullOrEmpty(usbInfo.chUserDefinedName) ? usbInfo.chUserDefinedName : usbInfo.chManufacturerName;
+                    camInfo.SN = usbInfo.chSerialNumber;
+                }
+
+                camInfo.DeviceIndex = i;
+                camInfo.DeviceInfo = device;
+                listCamInfo.Add(camInfo);
+            }
+
+            return listCamInfo;
         }
-        public void SetExposureTime(long value)
+
+        private void GetDeviceBySN(string sn)
         {
-            int ret = _cam.MV_CC_SetFloatValue_NET("ExposureTime", (float)value);
+            var list = GetListCamInfo();
+            foreach (var info in list)
+            {
+                if (info.SN == sn)
+                {
+                    GetDeviceByIdx(info.DeviceIndex, list);
+                    return;
+                }
+            }
+            NotifyError($"Cannot find camera with SN: {sn}", 0);
+        }
+
+        private void GetDeviceByIdx(int idx, List<CamInfo> currentList)
+        {
+            try
+            {
+                if (idx >= currentList.Count) return;
+
+                _cam = new MyCamera();
+                MyCamera.MV_CC_DEVICE_INFO device = currentList[idx].DeviceInfo;
+
+                int nRet = _cam.MV_CC_CreateDevice_NET(ref device);
+                if (nRet != MyCamera.MV_OK)
+                {
+                    _cam = null;
+                    NotifyError("Create device failed", nRet);
+                    return;
+                }
+
+                nRet = _cam.MV_CC_OpenDevice_NET();
+                if (nRet != MyCamera.MV_OK)
+                {
+                    _cam.MV_CC_DestroyDevice_NET();
+                    _cam = null;
+                    NotifyError("Device open fail. Might be used by another app.", nRet);
+                    return;
+                }
+
+                // Chạy thiết lập mặc định ngay sau khi Open
+                SetupDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Exception in GetDeviceByIdx");
+            }
+        }
+
+        // Đoạn thiết lập khởi tạo mặc định:
+        private void SetupDefault()
+        {
+            if (_cam == null) return;
+
+            // Tối ưu mạng GigE
+            int nPacketSize = _cam.MV_CC_GetOptimalPacketSize_NET();
+            if (nPacketSize > 0) _cam.MV_CC_SetIntValue_NET("GevSCPSPacketSize", (uint)nPacketSize);
+
+            // Cài đặt mặc định ban đầu là chế độ Continuous (Live) để sẵn sàng
+            _cam.MV_CC_SetEnumValue_NET("AcquisitionMode", 2); // 2 = Continuous
+            _cam.MV_CC_SetEnumValue_NET("TriggerMode", 0);     // 0 = Off
+
+            // Đăng ký Callback hứng ảnh tự động
+            _cam.MV_CC_RegisterImageCallBackEx_NET(_imageCallbackDelegate, IntPtr.Zero);
+        }
+
+        /// <summary>
+        /// Hàm cốt lõi: Chuyển đổi linh hoạt giữa Live Stream và Trigger
+        /// </summary>
+        public bool SetWorkMode(CameraWorkMode mode)
+        {
+            if (_cam == null) return false;
+
+            bool wasGrabbing = false;
+            if (IsGrabbing)
+            {
+                Stop();
+                wasGrabbing = true;
+            }
+
+            int nRet;
+            if (mode == CameraWorkMode.LiveStream)
+            {
+                nRet = _cam.MV_CC_SetEnumValue_NET("TriggerMode", 0);
+                // BẬT LẠI CALLBACK khi xem Live
+                _cam.MV_CC_RegisterImageCallBackEx_NET(_imageCallbackDelegate, IntPtr.Zero);
+            }
+            else
+            {
+                nRet = _cam.MV_CC_SetEnumValue_NET("TriggerMode", 1);
+                _cam.MV_CC_SetEnumValue_NET("TriggerSource", 7);
+
+                // CỰC KỲ QUAN TRỌNG: HUỶ CALLBACK ĐỂ TRÁNH CRASH KHI GỌI TRIGGER!
+                _cam.MV_CC_RegisterImageCallBackEx_NET(null, IntPtr.Zero);
+            }
+
+            if (nRet != MyCamera.MV_OK)
+            {
+                NotifyError("Lỗi khi chuyển chế độ Camera", nRet);
+                return false;
+            }
+
+            if (wasGrabbing) Start();
+            return true;
+        }
+
+        public void SetExposureTime(float value)
+        {
+            if (_cam != null) _cam.MV_CC_SetFloatValue_NET("ExposureTime", value);
         }
 
         public bool Start()
         {
-            int nRet;
-            nRet = _cam.MV_CC_StartGrabbing_NET();
-            if (MyCamera.MV_OK != nRet)
+            if (_cam == null || IsGrabbing) return false;
+            int nRet = _cam.MV_CC_StartGrabbing_NET();
+            if (nRet == MyCamera.MV_OK)
             {
-                ShowErrorMsg("Trigger Fail!", nRet);
-                return false;
+                IsGrabbing = true;
+                return true;
             }
-            return true;
+            NotifyError("Lỗi Start Grabbing", nRet);
+            return false;
         }
 
         public bool Stop()
         {
-            int nRet = -1;
-            nRet = _cam.MV_CC_StopGrabbing_NET();
-            if (nRet != MyCamera.MV_OK)
-            {
-                _logger.Error("Stop Grabbing Fail!");
-                return false;
-            }
+            if (_cam == null || !IsGrabbing) return false;
+            _cam.MV_CC_StopGrabbing_NET();
+            IsGrabbing = false;
             return true;
         }
-        private void GetDeviceByIdx(int idx)
+
+        /// <summary>
+        /// Dùng riêng cho chế độ Software Trigger (Pick & Place Auto)
+        /// Bóp cò và lấy 1 ảnh trả về ngay lập tức.
+        /// </summary>
+        public Bitmap TriggerAndGetFrame(int timeoutMs = 1000)
         {
-            try
-            {
-                _cam = null;
-                MyCamera.MV_CC_DEVICE_INFO device = (MyCamera.MV_CC_DEVICE_INFO)Marshal.PtrToStructure(_pDeviceList.pDeviceInfo[idx],
-                                                        typeof(MyCamera.MV_CC_DEVICE_INFO));
-                if (null == _cam)
-                {
-                    _cam = new MyCamera();
-                    if (null == _cam)
-                    {
-                        return;
-                    }
-                }
-                int nRet = -1;
-                nRet = _cam.MV_CC_CreateDevice_NET(ref device);
-                if (MyCamera.MV_OK != nRet)
-                {
-                    _cam = null;
-                    return;
-                }
+            if (_cam == null || !IsGrabbing) return null;
 
-
-                nRet = _cam.MV_CC_OpenDevice_NET();
-                if (MyCamera.MV_OK != nRet)
-                {
-                    _cam.MV_CC_DestroyDevice_NET();
-                    _logger.Info("Devie open fail");
-                    _cam = null;
-                    return;
-                }
-
-                if (device.nTLayerType == MyCamera.MV_GIGE_DEVICE)
-                {
-                    int nPacketSize = _cam.MV_CC_GetOptimalPacketSize_NET();
-                    if (nPacketSize > 0)
-                    {
-                        nRet = _cam.MV_CC_SetIntValue_NET("GevSCPSPacketSize", (uint)nPacketSize);
-                        if (nRet != MyCamera.MV_OK)
-                        {
-                            //Console.WriteLine("Warning: Set Packet Size failed {0:x8}", nRet);
-                            _logger.Warn("Warning: Set Packet Size failed {0:x8}");
-                        }
-                    }
-                    else
-                    {
-                        //Console.WriteLine("Warning: Get Packet Size failed {0:x8}", nPacketSize);
-                        _logger.Warn("Warning: Get Packet Size failed {0:x8}");
-                    }
-                }
-
-                _cam.MV_CC_SetEnumValue_NET("AcquisitionMode", 2);
-                _cam.MV_CC_SetEnumValue_NET("TriggerMode", 0);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.ToString());
-                return;
-            }
-        }
-
-        public bool Close()
-        {
-            int nRet;
-
-            nRet = _cam.MV_CC_CloseDevice_NET();
-            if (MyCamera.MV_OK != nRet)
-            {
-                return false;
-            }
-
-            nRet = _cam.MV_CC_DestroyDevice_NET();
-            if (MyCamera.MV_OK != nRet)
-            {
-                return false;
-            }
-            return true;
-        }
-        private void GetDeviceBySN(string SN)
-        {
-            int? idx = null;
-            int i = 0;
-            foreach (CamInfo info in _listCamInfo)
-            {
-                if (info.SN == SN)
-                {
-                    idx = i;
-                    break;
-                }
-                i++;
-            }
-            if (idx == null)
-                return;
-
-            GetDeviceByIdx((int)idx);
-        }
-
-        public static bool ListDevices()
-        {
-            try
-            {
-                _listCamInfo = new List<CamInfo>();
-                System.GC.Collect();
-                int ret;
-                ret = MyCamera.MV_CC_EnumDevices_NET(MyCamera.MV_GIGE_DEVICE | MyCamera.MV_USB_DEVICE, ref _pDeviceList);
-                if (ret != 0)
-                {
-                    //ShowErrorMsg("Enumerate devices fail!", 0);
-                    return false;
-                }
-
-                for (int i = 0; i < _pDeviceList.nDeviceNum; i++)
-                {
-                    MyCamera.MV_CC_DEVICE_INFO device = (MyCamera.MV_CC_DEVICE_INFO)Marshal.PtrToStructure(_pDeviceList.pDeviceInfo[i], typeof(MyCamera.MV_CC_DEVICE_INFO));
-                    if (device.nTLayerType == MyCamera.MV_GIGE_DEVICE)
-                    {
-                        IntPtr buffer = Marshal.UnsafeAddrOfPinnedArrayElement(device.SpecialInfo.stGigEInfo, 0);
-                        MyCamera.MV_GIGE_DEVICE_INFO gigeInfo = (MyCamera.MV_GIGE_DEVICE_INFO)Marshal.PtrToStructure(buffer, typeof(MyCamera.MV_GIGE_DEVICE_INFO));
-                        CamInfo camInfo = new CamInfo();
-                        if (gigeInfo.chUserDefinedName != "")
-                        {
-                            camInfo.Name = gigeInfo.chUserDefinedName;
-                            camInfo.SN = gigeInfo.chSerialNumber;
-                        }
-                        else
-                        {
-
-                            camInfo.Name = gigeInfo.chManufacturerName;
-                            camInfo.SN = gigeInfo.chSerialNumber;
-                        }
-                        _listCamInfo.Add(camInfo);
-                    }
-                    else if (device.nTLayerType == MyCamera.MV_USB_DEVICE)
-                    {
-                        IntPtr buffer = Marshal.UnsafeAddrOfPinnedArrayElement(device.SpecialInfo.stUsb3VInfo, 0);
-                        MyCamera.MV_USB3_DEVICE_INFO usbInfo = (MyCamera.MV_USB3_DEVICE_INFO)Marshal.PtrToStructure(buffer, typeof(MyCamera.MV_USB3_DEVICE_INFO));
-                        CamInfo camInfo = new CamInfo();
-                        if (usbInfo.chUserDefinedName != "")
-                        {
-
-                            camInfo.Name = usbInfo.chUserDefinedName;
-                            camInfo.SN = usbInfo.chSerialNumber;
-                        }
-                        else
-                        {
-                            camInfo.Name = usbInfo.chManufacturerName;
-                            camInfo.SN = usbInfo.chSerialNumber;
-
-                        }
-                        _listCamInfo.Add(camInfo);
-                    }
-                }
-                if (_listCamInfo.Count > 0)
-                    return true;
-                return false;
-            }
-            catch (Exception)
-            {
-                _logger.Warn("Cant load list camera");
-                return false;
-            }
-
-
-        }
-        private void ShowErrorMsg(string csMessage, int nErrorNum)
-        {
-            string errorMsg;
-            if (nErrorNum == 0)
-            {
-                errorMsg = csMessage;
-            }
-            else
-            {
-                errorMsg = csMessage + ": Error =" + String.Format("{0:X}", nErrorNum);
-            }
-
-            switch (nErrorNum)
-            {
-                case MyCamera.MV_E_HANDLE: errorMsg += " Error or invalid handle "; break;
-                case MyCamera.MV_E_SUPPORT: errorMsg += " Not supported function "; break;
-                case MyCamera.MV_E_BUFOVER: errorMsg += " Cache is full "; break;
-                case MyCamera.MV_E_CALLORDER: errorMsg += " Function calling order error "; break;
-                case MyCamera.MV_E_PARAMETER: errorMsg += " Incorrect parameter "; break;
-                case MyCamera.MV_E_RESOURCE: errorMsg += " Applying resource failed "; break;
-                case MyCamera.MV_E_NODATA: errorMsg += " No data "; break;
-                case MyCamera.MV_E_PRECONDITION: errorMsg += " Precondition error, or running environment changed "; break;
-                case MyCamera.MV_E_VERSION: errorMsg += " Version mismatches "; break;
-                case MyCamera.MV_E_NOENOUGH_BUF: errorMsg += " Insufficient memory "; break;
-                case MyCamera.MV_E_UNKNOW: errorMsg += " Unknown error "; break;
-                case MyCamera.MV_E_GC_GENERIC: errorMsg += " General error "; break;
-                case MyCamera.MV_E_GC_ACCESS: errorMsg += " Node accessing condition error "; break;
-                case MyCamera.MV_E_ACCESS_DENIED: errorMsg += " No permission "; break;
-                case MyCamera.MV_E_BUSY: errorMsg += " Device is busy, or network disconnected "; break;
-                case MyCamera.MV_E_NETER: errorMsg += " Network error "; break;
-            }
-
-            System.Windows.Forms.MessageBox.Show(errorMsg, "PROMPT");
-        }
-
-        private Boolean IsMonoData(MyCamera.MvGvspPixelType enGvspPixelType)
-        {
-            switch (enGvspPixelType)
-            {
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono8:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono10:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono10_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono12:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono12_Packed:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        private Boolean IsColorData(MyCamera.MvGvspPixelType enGvspPixelType)
-        {
-            switch (enGvspPixelType)
-            {
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGR8:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerRG8:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGB8:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerBG8:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGR10:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerRG10:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGB10:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerBG10:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGR12:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerRG12:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGB12:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerBG12:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGR10_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerRG10_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGB10_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerBG10_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGR12_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerRG12_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerGB12_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_BayerBG12_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_RGB8_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_YUV422_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_YUV422_YUYV_Packed:
-                case MyCamera.MvGvspPixelType.PixelType_Gvsp_YCBCR411_8_CBYYCRYY:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        public Bitmap GetBitmap()
-        {
             lock (_synLock)
             {
+                // 1. Phát lệnh chụp
+                int nRet = _cam.MV_CC_SetCommandValue_NET("TriggerSoftware");
+                if (nRet != MyCamera.MV_OK) return null;
 
-                int nRet;
-                UInt32 nPayloadSize = 0;
-                MyCamera.MVCC_INTVALUE stParam = new MyCamera.MVCC_INTVALUE();
-                nRet = _cam.MV_CC_GetIntValue_NET("PayloadSize", ref stParam);
-                if (MyCamera.MV_OK != nRet)
-                {
-                    _logger.Error("Get PayloadSize failed");
-                    return null;
-                }
-                nPayloadSize = stParam.nCurValue;
-                if (nPayloadSize > _nBufSizeForDriver)
-                {
-                    _nBufSizeForDriver = nPayloadSize;
-                    _pBufForDriver = new byte[_nBufSizeForDriver];
-                    _nBufSizeForSaveImage = _nBufSizeForDriver * 3 + 2048;
-                    _pBufForSaveImage = new byte[_nBufSizeForSaveImage];
-                }
+                // 2. Chờ lấy ảnh
+                return GrabFrameInternal(timeoutMs);
+            }
+        }
 
-                IntPtr pData = Marshal.UnsafeAddrOfPinnedArrayElement(_pBufForDriver, 0);
-                MyCamera.MV_FRAME_OUT_INFO_EX stFrameInfo = new MyCamera.MV_FRAME_OUT_INFO_EX();
-                nRet = _cam.MV_CC_GetOneFrameTimeout_NET(pData, _nBufSizeForDriver, ref stFrameInfo, 3000);
-                if (MyCamera.MV_OK != nRet)
+        /// <summary>
+        /// Hàm này chạy ngầm dưới Background Thread do SDK tự gọi khi có ảnh (Chế độ Live Stream)
+        /// </summary>
+        private void ImageCallbackProcess(IntPtr pData, ref MyCamera.MV_FRAME_OUT_INFO_EX pFrameInfo, IntPtr pUser)
+        {
+            // Chỉ xử lý event nếu UI có đăng ký lắng nghe (để tiết kiệm CPU)
+            if (OnLiveFrameReceived != null)
+            {
+                lock (_synLock) // Đảm bảo an toàn bộ nhớ chung
                 {
-                    _logger.Error("No Data!");
-                    return null;
-                }
-
-                MyCamera.MvGvspPixelType enDstPixelType;
-                if (IsMonoData(stFrameInfo.enPixelType))
-                {
-                    enDstPixelType = MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono8;
-                }
-                else if (IsColorData(stFrameInfo.enPixelType))
-                {
-                    enDstPixelType = MyCamera.MvGvspPixelType.PixelType_Gvsp_RGB8_Packed;
-                }
-                else
-                {
-                    _logger.Error("No such pixel type!");
-                    return null;
-                }
-
-                IntPtr pImage = Marshal.UnsafeAddrOfPinnedArrayElement(_pBufForSaveImage, 0);
-                //MyCamera.MV_SAVE_IMAGE_PARAM_EX stSaveParam = new MyCamera.MV_SAVE_IMAGE_PARAM_EX();
-                MyCamera.MV_PIXEL_CONVERT_PARAM stConverPixelParam = new MyCamera.MV_PIXEL_CONVERT_PARAM();
-                stConverPixelParam.nWidth = stFrameInfo.nWidth;
-                stConverPixelParam.nHeight = stFrameInfo.nHeight;
-                stConverPixelParam.pSrcData = pData;
-                stConverPixelParam.nSrcDataLen = stFrameInfo.nFrameLen;
-                stConverPixelParam.enSrcPixelType = stFrameInfo.enPixelType;
-                stConverPixelParam.enDstPixelType = enDstPixelType;
-                stConverPixelParam.pDstBuffer = pImage;
-                stConverPixelParam.nDstBufferSize = _nBufSizeForSaveImage;
-                nRet = _cam.MV_CC_ConvertPixelType_NET(ref stConverPixelParam);
-                if (MyCamera.MV_OK != nRet)
-                {
-                    return null;
-                }
-
-
-                if (enDstPixelType == MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono8)
-                {
-
-                    Bitmap bmp = new Bitmap(stFrameInfo.nWidth, stFrameInfo.nHeight, stFrameInfo.nWidth * 1, System.Drawing.Imaging.PixelFormat.Format8bppIndexed, pImage);
-
-                    ColorPalette cp = bmp.Palette;
-                    // init palette
-                    for (int i = 0; i < 256; i++)
+                    Bitmap bmp = ConvertToBitmap(pData, ref pFrameInfo);
+                    if (bmp != null)
                     {
-                        cp.Entries[i] = System.Drawing.Color.FromArgb(i, i, i);
+                        OnLiveFrameReceived.Invoke(this, bmp);
                     }
-                    // set palette back
-                    bmp.Palette = cp;
-
-                    return bmp;
-                }
-                else
-                {
-                    //*********************RGB8  Bitmap**************************
-                    for (int i = 0; i < stFrameInfo.nHeight; i++)
-                    {
-                        for (int j = 0; j < stFrameInfo.nWidth; j++)
-                        {
-                            byte chRed = _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3];
-                            _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3] = _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3 + 2];
-                            _pBufForSaveImage[i * stFrameInfo.nWidth * 3 + j * 3 + 2] = chRed;
-                        }
-                    }
-
-                    Bitmap bmp = new Bitmap(stFrameInfo.nWidth, stFrameInfo.nHeight, stFrameInfo.nWidth * 3, System.Drawing.Imaging.PixelFormat.Format24bppRgb, pImage);
-                    return bmp;
-
                 }
             }
+        }
 
+        // Hàm helper gom chung logic lấy ảnh từ bộ nhớ đệm
+        private Bitmap GrabFrameInternal(int timeoutMs)
+        {
+            MyCamera.MVCC_INTVALUE stParam = new MyCamera.MVCC_INTVALUE();
+            int nRet = _cam.MV_CC_GetIntValue_NET("PayloadSize", ref stParam);
 
+            // Validate an toàn, tránh mảng rỗng
+            if (nRet != MyCamera.MV_OK || stParam.nCurValue == 0)
+            {
+                _logger.Error("Lỗi: Không lấy được PayloadSize từ Camera.");
+                return null;
+            }
+
+            EnsureBufferCapacity(stParam.nCurValue);
+
+            MyCamera.MV_FRAME_OUT_INFO_EX stFrameInfo = new MyCamera.MV_FRAME_OUT_INFO_EX();
+
+            // SỬ DỤNG GCHandle ĐỂ KHÓA CHẶT MẢNG BYTE TRONG RAM (Chống GC di chuyển)
+            GCHandle handle = GCHandle.Alloc(_pBufForDriver, GCHandleType.Pinned);
+            try
+            {
+                IntPtr pData = handle.AddrOfPinnedObject();
+                nRet = _cam.MV_CC_GetOneFrameTimeout_NET(pData, _nBufSizeForDriver, ref stFrameInfo, timeoutMs);
+
+                if (nRet != MyCamera.MV_OK)
+                {
+                    _logger.Warn($"Trigger rỗng hoặc Timeout. Mã lỗi: {nRet:X8}");
+                    return null;
+                }
+
+                return ConvertToBitmap(pData, ref stFrameInfo);
+            }
+            finally
+            {
+                // Luôn luôn phải giải phóng Handle dù có lỗi hay không
+                if (handle.IsAllocated) handle.Free();
+            }
+        }
+
+        // Logic convert Pixel -> Bitmap tối ưu
+        private Bitmap ConvertToBitmap(IntPtr pSrcData, ref MyCamera.MV_FRAME_OUT_INFO_EX stFrameInfo)
+        {
+            if (stFrameInfo.nFrameLen == 0) return null;
+            EnsureBufferCapacity(stFrameInfo.nFrameLen);
+
+            // Khóa RAM mảng nhận ảnh
+            GCHandle handleDst = GCHandle.Alloc(_pBufForSaveImage, GCHandleType.Pinned);
+            try
+            {
+                IntPtr pDstData = handleDst.AddrOfPinnedObject();
+
+                MyCamera.MV_PIXEL_CONVERT_PARAM stConvertParam = new MyCamera.MV_PIXEL_CONVERT_PARAM
+                {
+                    nWidth = stFrameInfo.nWidth,
+                    nHeight = stFrameInfo.nHeight,
+                    pSrcData = pSrcData,
+                    nSrcDataLen = stFrameInfo.nFrameLen,
+                    enSrcPixelType = stFrameInfo.enPixelType,
+                    pDstBuffer = pDstData,
+                    nDstBufferSize = _nBufSizeForSaveImage
+                };
+
+                bool isMono = stFrameInfo.enPixelType.ToString().Contains("Mono");
+                stConvertParam.enDstPixelType = isMono ? MyCamera.MvGvspPixelType.PixelType_Gvsp_Mono8 : MyCamera.MvGvspPixelType.PixelType_Gvsp_BGR8_Packed;
+
+                if (_cam.MV_CC_ConvertPixelType_NET(ref stConvertParam) != MyCamera.MV_OK) return null;
+
+                Bitmap bmp;
+                if (isMono)
+                {
+                    bmp = new Bitmap(stFrameInfo.nWidth, stFrameInfo.nHeight, stFrameInfo.nWidth, PixelFormat.Format8bppIndexed, pDstData);
+                    ColorPalette cp = bmp.Palette;
+                    for (int i = 0; i < 256; i++) cp.Entries[i] = Color.FromArgb(i, i, i);
+                    bmp.Palette = cp;
+                }
+                else
+                {
+                    bmp = new Bitmap(stFrameInfo.nWidth, stFrameInfo.nHeight, stFrameInfo.nWidth * 3, PixelFormat.Format24bppRgb, pDstData);
+                }
+
+                return CloneBitmap(bmp);
+            }
+            finally
+            {
+                if (handleDst.IsAllocated) handleDst.Free();
+            }
+        }
+
+        private void EnsureBufferCapacity(uint payloadSize)
+        {
+            if (payloadSize > _nBufSizeForDriver)
+            {
+                _nBufSizeForDriver = payloadSize;
+                _pBufForDriver = new byte[_nBufSizeForDriver];
+                _nBufSizeForSaveImage = _nBufSizeForDriver * 3 + 2048;
+                _pBufForSaveImage = new byte[_nBufSizeForSaveImage];
+            }
+        }
+
+        private Bitmap CloneBitmap(Bitmap src)
+        {
+            Bitmap dest = new Bitmap(src.Width, src.Height, src.PixelFormat);
+            dest.SetResolution(src.HorizontalResolution, src.VerticalResolution);
+            using (Graphics g = Graphics.FromImage(dest)) g.DrawImageUnscaled(src, 0, 0);
+            return dest;
+        }
+
+        private void NotifyError(string message, int errorCode)
+        {
+            string fullMsg = errorCode == 0 ? message : $"{message} (Code: {errorCode:X8})";
+            _logger.Error(fullMsg);
+            OnCameraError?.Invoke(this, fullMsg);
+        }
+
+        public void Close()
+        {
+            if (_cam != null)
+            {
+                Stop();
+                _cam.MV_CC_CloseDevice_NET();
+                _cam.MV_CC_DestroyDevice_NET();
+                _cam = null;
+            }
+        }
+
+        public void Dispose()
+        {
+            Close();
+            GC.SuppressFinalize(this);
         }
     }
 
-    class CamInfo
+    public class CamInfo
     {
         public string Name { get; set; }
         public string SN { get; set; }
+        public int DeviceIndex { get; set; }
+        public MyCamera.MV_CC_DEVICE_INFO DeviceInfo { get; set; } // Giữ lại object device để khởi tạo nhanh
     }
-
 }

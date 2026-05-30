@@ -85,7 +85,7 @@ namespace DiskInspection.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.0.211")]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
         public string PlcIp {
             get {
                 return ((string)(this["PlcIp"]));

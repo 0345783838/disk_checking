@@ -174,7 +174,7 @@ namespace DiskInspection.Controllers
 
         private bool CheckAndStartPLC()
         {
-            return true;
+            //return true;
             if (PlcController.CheckPlcConnection(_param.ApiUrlCom))
                 return true;
 
@@ -225,6 +225,7 @@ namespace DiskInspection.Controllers
                 if (triggerState == TriggerState.Error)
                 {
                     ShowAndLogError("Cannot connect to PLC to read trigger!", "PLC");
+                    _isRunning = false;
                     return; // timer sẽ không được restart → hệ thống dừng an toàn
                 }
 
@@ -272,7 +273,7 @@ namespace DiskInspection.Controllers
                 // ── Bước 1: Start Stopwatch + Bật đèn White → đợi ổn định → chụp ảnh ──────────────
                 var aiStopwatch = Stopwatch.StartNew();
                 var (whiteFrame1, whiteFrame2) = await CaptureWhiteFramesAsync(token);
-                if (whiteFrame1 == null) return;
+                if (whiteFrame1 == null || whiteFrame2 == null) return;
 
                 // ── Bước 2: AI White + delay tắt đèn chạy song song ─────────────
                 // Bắt đầu tính thời gian AI từ lúc có ảnh
@@ -292,7 +293,7 @@ namespace DiskInspection.Controllers
 
                 // ── Bước 3: Bật đèn UV → đợi ổn định → chụp ảnh ─────────────────
                 var (uvFrame1, uvFrame2) = await CaptureUvFramesAsync(token);
-                if (uvFrame1 == null) return;
+                if (uvFrame1 == null || uvFrame2 == null) return;
 
                 // ── Bước 4: AI UV + delay tắt đèn chạy song song ────────────────
                 var uvAiTask = RunUVAIAsync(uvFrame1, uvFrame2, whiteResult1, whiteResult2, token);
@@ -434,13 +435,13 @@ namespace DiskInspection.Controllers
         {
             token.ThrowIfCancellationRequested();
 
-            //var results = await Task.WhenAll(
-            //    Task.Run(() => _camera1.GetBitmap(), token),
-            //    Task.Run(() => _camera2.GetBitmap(), token));
-
             var results = await Task.WhenAll(
-                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\empty_disk\Image_20260521165012713.bmp"), token),
-                   Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\empty_disk\Image_20260521165035713.bmp"), token));
+                Task.Run(() => _camera1.TriggerAndGetFrame(), token),
+                Task.Run(() => _camera2.TriggerAndGetFrame(), token));
+
+            //var results = await Task.WhenAll(
+            //       Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\empty_disk\Image_20260521165012713.bmp"), token),
+            //       Task.Run(() => new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\raw_data\real_images\empty_disk\Image_20260521165035713.bmp"), token));
 
             return (results[0], results[1]);
         }
@@ -803,8 +804,8 @@ namespace DiskInspection.Controllers
 
         private void OnStatusTimerElapsed(object sender, EventArgs e)
         {
-            bool aiOk = APICommunication.CheckAPIStatus(_param.ApiUrlAi, timeout: 100);
-            bool plcOk = PlcController.CheckPlcConnection(_param.ApiUrlCom, timeout: 100);
+            bool aiOk = APICommunication.CheckAPIStatus(_param.ApiUrlAi, timeout: 1000);
+            bool plcOk = PlcController.CheckPlcConnection(_param.ApiUrlCom, timeout: 1000);
             bool cam1Ok = _camera1?.IsOpen() == true;
             bool cam2Ok = _camera2?.IsOpen() == true;
 

@@ -68,11 +68,7 @@ namespace DiskInspection.Controllers.Camera
         public bool CheckCamera1Connection(string SN)
         {
             var cam = GetCamera1(SN);
-            if (cam.IsOpen())
-            {
-                return cam.IsOpen();
-            }
-            return false;
+            return cam.IsOpen();
         }
         public bool CheckCamera2Connection(string SN)
         {

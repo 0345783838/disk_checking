@@ -372,7 +372,7 @@ namespace DiskInspection.Views.DebugWindows
             }
 
             //Bitmap bitmapImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_white_ok.bmp");
-            Bitmap bitmapImage = _selectedCamera.GetBitmap();
+            Bitmap bitmapImage = _selectedCamera.TriggerAndGetFrame();
             await Task.Run(() => PlcController.ControlWhiteLight(_param.ApiUrlCom, false, 1000));
             Image<Bgr, byte> img = new Image<Bgr, byte>(bitmapImage);
             UpdateImage(bitmapImage);
@@ -429,8 +429,8 @@ namespace DiskInspection.Views.DebugWindows
                 }
                 await Task.Delay(_param.Cam2Exposure + 10);
             }
-            Bitmap bitmapUvImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv.bmp");
-            //Bitmap bitmapUVImage = _selectedCamera.GetBitmap();
+            //Bitmap bitmapUvImage = new Bitmap(@"D:\huynhvc\OTHERS\disk_checking\disk_checking\APP\test_uv.bmp");
+            Bitmap bitmapUvImage = _selectedCamera.TriggerAndGetFrame();
             await Task.Run(() => PlcController.ControlUvLight(_param.ApiUrlCom, false, 1000));
             Image<Bgr, byte> imgUv = new Image<Bgr, byte>(bitmapUvImage);
             UpdateImage(bitmapUvImage);
