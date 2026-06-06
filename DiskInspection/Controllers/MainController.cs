@@ -255,6 +255,7 @@ namespace DiskInspection.Controllers
         private async Task RunInspectionCycleAsync(CancellationToken token)
         {
             AppLogger.Instance.Info("Trigger received. Starting inspection cycle.", "PLC");
+            _logger.Info("Trigger received. Starting inspection cycle.");
             _mainWindow.UpdateInspectingMode();
             App.ImageViewer.ClearImages();
 
@@ -335,14 +336,17 @@ namespace DiskInspection.Controllers
                         PlcController.OnErrorAbnormal(_param.ApiUrlCom);
                     App.ImageViewer.ShowFirstErrorImage();
                     AppLogger.Instance.Info("Inspection NG — sent NG signal to PLC.", "PLC");
+                    _logger.Info("Inspection NG — sent NG signal to PLC.");
                 }
                 else
                 {
                     AppLogger.Instance.Info("Inspection OK.", "PLC");
+                    _logger.Info("Inspection OK.");
                     PlcController.OnOkSignal(_param.ApiUrlCom);
                 }
 
                 AppLogger.Instance.Info($"Inspection complete in {aiStopwatch.ElapsedMilliseconds}ms AI time. Waiting for next trigger.", "SYSTEM");
+                _logger.Info($"Inspection complete in {aiStopwatch.ElapsedMilliseconds}ms AI time. Waiting for next trigger.");
 
                 // ── Bước 7: Lưu ảnh (fire-and-forget, không block chu kỳ) ────────
                 if (_param.SaveEnable)
@@ -351,6 +355,7 @@ namespace DiskInspection.Controllers
             catch (OperationCanceledException)
             {
                 AppLogger.Instance.Info("Inspection cancelled.", "SYSTEM");
+                _logger.Info("Inspection cancelled.");
             }
         }
 
@@ -376,6 +381,7 @@ namespace DiskInspection.Controllers
             var (frame1, frame2) = await CaptureFromBothCamerasAsync(token);
             UpdateCapturedFrameUI(frame1, frame2, LightType.White);
             AppLogger.Instance.Info("White frames captured.", "CAM");
+            _logger.Info("White frames captured.");
 
             // Trả về ảnh ngay — đèn vẫn còn sáng, sẽ được tắt sau bởi TurnOffWhiteLightAsync
             return (frame1, frame2);
@@ -390,6 +396,7 @@ namespace DiskInspection.Controllers
             await Task.Delay(_param.WaitWhiteLightOff, token);
             await ControlLightAsync(LightType.White, on: false);
             AppLogger.Instance.Info("White light off.", "PLC");
+            _logger.Info("White light off.");
         }
 
         /// <summary>
@@ -412,6 +419,7 @@ namespace DiskInspection.Controllers
             var (frame1, frame2) = await CaptureFromBothCamerasAsync(token);
             UpdateCapturedFrameUI(frame1, frame2, LightType.Uv);
             AppLogger.Instance.Info("UV frames captured.", "CAM");
+            _logger.Info("UV frames captured.");
 
             // Trả về ảnh ngay — đèn vẫn còn sáng, sẽ được tắt sau bởi TurnOffUvLightAsync
             return (frame1, frame2);
@@ -426,6 +434,7 @@ namespace DiskInspection.Controllers
             await Task.Delay(_param.WaitUvLightOff, token);
             await ControlLightAsync(LightType.Uv, on: false);
             AppLogger.Instance.Info("UV light off.", "PLC");
+            _logger.Info("UV light off.");
         }
 
         /// <summary>
@@ -496,6 +505,7 @@ namespace DiskInspection.Controllers
             RunWhiteAIAsync(Bitmap whiteFrame1, Bitmap whiteFrame2, CancellationToken token)
         {
             AppLogger.Instance.Info("Running White AI for both cameras...", "AI");
+            _logger.Info("Running White AI for both cameras...");
 
             var results = await Task.WhenAll(
                 Task.Run(() => APICommunication.InspectWhiteLight(
@@ -522,6 +532,7 @@ namespace DiskInspection.Controllers
             }
 
             AppLogger.Instance.Info("White AI complete for both cameras.", "AI");
+            _logger.Info("White AI complete for both cameras.");
             return (results[0], results[1]);
         }
 
@@ -536,6 +547,7 @@ namespace DiskInspection.Controllers
                 CancellationToken token)
         {
             AppLogger.Instance.Info("Running UV AI for both cameras...", "AI");
+            _logger.Info("Running UV AI for both cameras...");
 
             var results = await Task.WhenAll(
                 Task.Run(() => APICommunication.InspectUvLight(
@@ -555,6 +567,7 @@ namespace DiskInspection.Controllers
             uvFrame2.Dispose();
 
             AppLogger.Instance.Info("UV AI complete for both cameras.", "AI");
+            _logger.Info("UV AI complete for both cameras.");
 
             // Ghép kết quả White + UV thành CameraInspectionResult
             return (
@@ -768,13 +781,22 @@ namespace DiskInspection.Controllers
 
 
                 if (success)
+                {
                     AppLogger.Instance.Info("Images saved successfully.", "SYSTEM");
+                    _logger.Info("Images saved successfully.");
+                }
+                    
                 else
+                {
                     AppLogger.Instance.Error("Some images failed to save (empty or invalid path).", "SYSTEM");
+                    _logger.Error("Some images failed to save (empty or invalid path).");
+                }
+                   
             }
             catch (Exception ex)
             {
                 AppLogger.Instance.Error($"Failed to save images: {ex.Message}", "SYSTEM");
+                _logger.Error($"Failed to save images: {ex.Message}");
             }
         }
 
@@ -893,10 +915,12 @@ namespace DiskInspection.Controllers
             if (isValid)
             {
                 AppLogger.Instance.Info("License is valid.", "SYSTEM");
+                _logger.Info("License is valid.");
                 return true;
             }
 
             AppLogger.Instance.Error(message, "SYSTEM");
+            _logger.Error("License is not valid. Please contact vendor.");
             _mainWindow.ShowError("License is not valid. Please contact vendor.");
             return ShowActivationWindow();
         }
